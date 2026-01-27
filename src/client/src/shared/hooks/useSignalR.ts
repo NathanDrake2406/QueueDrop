@@ -72,22 +72,27 @@ export function useSignalR({ hubUrl, autoConnect = true, onStateChange }: UseSig
     };
   }, [hubUrl, updateState]);
 
+  // Start connection helper
+  const startConnection = useCallback(async () => {
+    const connection = connectionRef.current;
+    if (!connection || connection.state !== HubConnectionState.Disconnected) return;
+
+    updateState("connecting");
+    try {
+      await connection.start();
+      updateState("connected");
+    } catch (err) {
+      console.error("SignalR connection failed:", err);
+      updateState("disconnected");
+    }
+  }, [updateState]);
+
   // Auto-connect
   useEffect(() => {
-    if (autoConnect && connectionRef.current) {
-      const connection = connectionRef.current;
-      if (connection.state === HubConnectionState.Disconnected) {
-        updateState("connecting");
-        connection.start().then(
-          () => updateState("connected"),
-          (err) => {
-            console.error("SignalR connection failed:", err);
-            updateState("disconnected");
-          },
-        );
-      }
+    if (autoConnect) {
+      startConnection();
     }
-  }, [autoConnect, updateState]);
+  }, [autoConnect, startConnection]);
 
   // Invoke method
   const invoke = useCallback(async <T = void>(methodName: string, ...args: unknown[]): Promise<T> => {

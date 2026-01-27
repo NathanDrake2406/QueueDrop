@@ -29,6 +29,16 @@ export function usePushNotifications(customerToken: string | null): UsePushNotif
     error: null,
   });
 
+  const checkExistingSubscription = useCallback(async () => {
+    try {
+      const registration = await navigator.serviceWorker.ready;
+      const subscription = await registration.pushManager.getSubscription();
+      setState((prev) => ({ ...prev, isSubscribed: !!subscription }));
+    } catch {
+      // Silently ignore - not critical
+    }
+  }, []);
+
   // Check browser support and current permission on mount
   useEffect(() => {
     const isSupported = "serviceWorker" in navigator && "PushManager" in window && "Notification" in window;
@@ -43,17 +53,7 @@ export function usePushNotifications(customerToken: string | null): UsePushNotif
       // Check if already subscribed
       checkExistingSubscription();
     }
-  }, []);
-
-  const checkExistingSubscription = useCallback(async () => {
-    try {
-      const registration = await navigator.serviceWorker.ready;
-      const subscription = await registration.pushManager.getSubscription();
-      setState((prev) => ({ ...prev, isSubscribed: !!subscription }));
-    } catch {
-      // Silently ignore - not critical
-    }
-  }, []);
+  }, [checkExistingSubscription]);
 
   const subscribe = useCallback(async (): Promise<boolean> => {
     if (!customerToken) {
