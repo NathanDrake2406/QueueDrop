@@ -82,11 +82,8 @@ GetBusinessQueues.MapEndpoint(app);
 SavePushSubscription.MapEndpoint(app);
 GetVapidPublicKey.MapEndpoint(app);
 
-// Demo endpoints (development only)
-if (app.Environment.IsDevelopment())
-{
-    SeedDemoData.MapEndpoint(app);
-}
+// Demo endpoints (enabled for portfolio demo)
+SeedDemoData.MapEndpoint(app);
 
 // SignalR hub
 app.MapHub<QueueHub>("/hubs/queue");
