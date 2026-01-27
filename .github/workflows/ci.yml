@@ -171,20 +171,11 @@ jobs:
         working-directory: src/client
         run: npm run build
 
-      - name: Start backend server
-        run: |
-          dotnet run --project src/QueueDrop.Api --configuration Release --no-build &
-          sleep 10
-        env:
-          ASPNETCORE_ENVIRONMENT: Development
-          ASPNETCORE_URLS: http://localhost:5000
-          ConnectionStrings__DefaultConnection: "Host=localhost;Port=5432;Database=queuedrop_e2e;Username=postgres;Password=postgres"
-
       - name: Run E2E tests
         working-directory: src/client
         run: npm run test:e2e
         env:
-          API_URL: http://localhost:5000
+          ConnectionStrings__DefaultConnection: "Host=localhost;Port=5432;Database=queuedrop_e2e;Username=postgres;Password=postgres"
 
       - name: Upload Playwright report
         uses: actions/upload-artifact@v4
