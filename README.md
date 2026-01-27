@@ -47,6 +47,8 @@ src/
 - Token-based customer identity — unique URLs, no auth required for customers
 - Vertical slices — each feature self-contained in one file
 
+[Architecture Decision Records →](docs/adr/001-architecture-decisions.md)
+
 ## Quick Start
 
 ```bash
