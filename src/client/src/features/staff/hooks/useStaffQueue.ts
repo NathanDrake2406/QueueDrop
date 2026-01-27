@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useSignalR } from "../../../shared/hooks/useSignalR";
 import { getApiErrorMessage, safeJsonParse } from "../../../shared/utils/api";
 
@@ -99,14 +99,26 @@ export function useStaffQueue(queueId: string): UseStaffQueueResult {
     }
   }, [connectionState, queueId, invoke]);
 
-  // Listen for real-time updates
+  // Listen for real-time updates with debouncing to prevent rapid re-renders
+  const updateTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   useEffect(() => {
     const unsub = on<string>("QueueUpdated", () => {
-      // Refetch when queue is updated
-      fetchCustomers();
+      // Debounce rapid updates (e.g., multiple customers joining at once)
+      if (updateTimeoutRef.current) {
+        clearTimeout(updateTimeoutRef.current);
+      }
+      updateTimeoutRef.current = setTimeout(() => {
+        fetchCustomers();
+      }, 150); // 150ms debounce
     });
 
-    return () => unsub();
+    return () => {
+      unsub();
+      if (updateTimeoutRef.current) {
+        clearTimeout(updateTimeoutRef.current);
+      }
+    };
   }, [on, fetchCustomers]);
 
   // Call next waiting customer
@@ -132,9 +144,18 @@ export function useStaffQueue(queueId: string): UseStaffQueueResult {
     }
   }, [queueId, fetchCustomers]);
 
+  // Optimistic update helper - removes customer from local state immediately
+  const optimisticRemove = useCallback((customerId: string) => {
+    setCustomers((prev) => prev.filter((c) => c.id !== customerId));
+    setQueueInfo((prev) => (prev ? { ...prev, waitingCount: Math.max(0, prev.waitingCount - 1) } : prev));
+  }, []);
+
   // Mark customer as served
   const markServed = useCallback(
     async (customerId: string): Promise<boolean> => {
+      // Optimistic update - remove from UI immediately
+      optimisticRemove(customerId);
+
       try {
         setError(null);
         const response = await fetch(`/api/queues/${queueId}/customers/${customerId}/serve`, {
@@ -146,21 +167,24 @@ export function useStaffQueue(queueId: string): UseStaffQueueResult {
           throw new Error(errorMessage);
         }
 
-        // Refresh immediately
-        await fetchCustomers();
         return true;
       } catch (err) {
         console.error("markServed error:", err);
         setError(err instanceof Error ? err.message : "Unknown error");
+        // Revert on error
+        await fetchCustomers();
         return false;
       }
     },
-    [queueId, fetchCustomers],
+    [queueId, fetchCustomers, optimisticRemove],
   );
 
   // Mark customer as no-show
   const markNoShow = useCallback(
     async (customerId: string): Promise<boolean> => {
+      // Optimistic update - remove from UI immediately
+      optimisticRemove(customerId);
+
       try {
         setError(null);
         const response = await fetch(`/api/queues/${queueId}/customers/${customerId}/no-show`, {
@@ -172,21 +196,24 @@ export function useStaffQueue(queueId: string): UseStaffQueueResult {
           throw new Error(errorMessage);
         }
 
-        // Refresh immediately
-        await fetchCustomers();
         return true;
       } catch (err) {
         console.error("markNoShow error:", err);
         setError(err instanceof Error ? err.message : "Unknown error");
+        // Revert on error
+        await fetchCustomers();
         return false;
       }
     },
-    [queueId, fetchCustomers],
+    [queueId, fetchCustomers, optimisticRemove],
   );
 
   // Remove customer from queue
   const removeCustomer = useCallback(
     async (customerId: string): Promise<boolean> => {
+      // Optimistic update - remove from UI immediately
+      optimisticRemove(customerId);
+
       try {
         setError(null);
         const response = await fetch(`/api/queues/${queueId}/customers/${customerId}`, {
@@ -198,16 +225,16 @@ export function useStaffQueue(queueId: string): UseStaffQueueResult {
           throw new Error(errorMessage);
         }
 
-        // Refresh immediately
-        await fetchCustomers();
         return true;
       } catch (err) {
         console.error("removeCustomer error:", err);
         setError(err instanceof Error ? err.message : "Unknown error");
+        // Revert on error
+        await fetchCustomers();
         return false;
       }
     },
-    [queueId, fetchCustomers],
+    [queueId, fetchCustomers, optimisticRemove],
   );
 
   return {
