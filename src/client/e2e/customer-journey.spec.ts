@@ -24,14 +24,22 @@ test.describe("Customer Queue Journey", () => {
 
     await page.getByRole("link", { name: "Try Demo Queue" }).click();
 
+    // With multi-queue, first see queue selector
     await expect(page).toHaveURL("/join/demo-shop");
+    await expect(page.getByRole("heading", { name: "Choose a queue" })).toBeVisible();
+
+    // Click on Main Queue
+    await page.getByRole("button", { name: /Main Queue/i }).click();
+
+    // Now should see join form
+    await expect(page).toHaveURL("/join/demo-shop/main-queue");
     await expect(page.getByRole("heading", { name: "Join the Queue" })).toBeVisible();
     await expect(page.getByLabel("Your Name")).toBeVisible();
     await expect(page.getByRole("button", { name: "Join Queue" })).toBeVisible();
   });
 
   test("should join queue and see position", async ({ page }) => {
-    await page.goto("/join/demo-shop");
+    await page.goto("/join/demo-shop/main-queue");
 
     // Fill in name and submit
     await page.getByLabel("Your Name").fill("Alice Test");
@@ -47,7 +55,7 @@ test.describe("Customer Queue Journey", () => {
   });
 
   test("should submit form and redirect", async ({ page }) => {
-    await page.goto("/join/demo-shop");
+    await page.goto("/join/demo-shop/main-queue");
 
     await page.getByLabel("Your Name").fill("Bob Test");
 
@@ -61,13 +69,13 @@ test.describe("Customer Queue Journey", () => {
 
   test("should show 'already in queue' when token exists", async ({ page }) => {
     // First join
-    await page.goto("/join/demo-shop");
+    await page.goto("/join/demo-shop/main-queue");
     await page.getByLabel("Your Name").fill("Charlie Test");
     await page.getByRole("button", { name: "Join Queue" }).click();
     await expect(page).toHaveURL(/\/q\/.+/);
 
     // Go back to join page
-    await page.goto("/join/demo-shop");
+    await page.goto("/join/demo-shop/main-queue");
 
     // Should show "already in queue" message
     await expect(page.getByText("You're already in the queue!")).toBeVisible();
@@ -77,7 +85,7 @@ test.describe("Customer Queue Journey", () => {
 
   test("should allow checking position from 'already in queue' screen", async ({ page }) => {
     // First join
-    await page.goto("/join/demo-shop");
+    await page.goto("/join/demo-shop/main-queue");
     await page.getByLabel("Your Name").fill("Diana Test");
     await page.getByRole("button", { name: "Join Queue" }).click();
     await expect(page).toHaveURL(/\/q\/.+/);
@@ -86,7 +94,7 @@ test.describe("Customer Queue Journey", () => {
     const positionUrl = page.url();
 
     // Go back to join page
-    await page.goto("/join/demo-shop");
+    await page.goto("/join/demo-shop/main-queue");
 
     // Click "Check My Position"
     await page.getByRole("button", { name: "Check My Position" }).click();
@@ -97,13 +105,13 @@ test.describe("Customer Queue Journey", () => {
 
   test("should allow joining again from 'already in queue' screen", async ({ page }) => {
     // First join
-    await page.goto("/join/demo-shop");
+    await page.goto("/join/demo-shop/main-queue");
     await page.getByLabel("Your Name").fill("Eve Test");
     await page.getByRole("button", { name: "Join Queue" }).click();
     await expect(page).toHaveURL(/\/q\/.+/);
 
     // Go back to join page
-    await page.goto("/join/demo-shop");
+    await page.goto("/join/demo-shop/main-queue");
 
     // Click "Join Again"
     await page.getByRole("button", { name: "Join Again" }).click();
@@ -133,7 +141,7 @@ test.describe("Customer Queue Journey", () => {
 test.describe("Position Display", () => {
   test("should show position number prominently", async ({ page }) => {
     // Join queue first
-    await page.goto("/join/demo-shop");
+    await page.goto("/join/demo-shop/main-queue");
     await page.getByLabel("Your Name").fill("Frank Test");
     await page.getByRole("button", { name: "Join Queue" }).click();
 
@@ -148,7 +156,7 @@ test.describe("Position Display", () => {
   });
 
   test("should show connection status indicator", async ({ page }) => {
-    await page.goto("/join/demo-shop");
+    await page.goto("/join/demo-shop/main-queue");
     await page.getByLabel("Your Name").fill("Grace Test");
     await page.getByRole("button", { name: "Join Queue" }).click();
 
@@ -159,7 +167,7 @@ test.describe("Position Display", () => {
   });
 
   test("should show estimated wait time", async ({ page }) => {
-    await page.goto("/join/demo-shop");
+    await page.goto("/join/demo-shop/main-queue");
     await page.getByLabel("Your Name").fill("Henry Test");
     await page.getByRole("button", { name: "Join Queue" }).click();
 
@@ -180,13 +188,13 @@ test.describe("Multiple Customers", () => {
 
     try {
       // First customer joins
-      await page1.goto("/join/demo-shop");
+      await page1.goto("/join/demo-shop/main-queue");
       await page1.getByLabel("Your Name").fill("Customer One");
       await page1.getByRole("button", { name: "Join Queue" }).click();
       await expect(page1).toHaveURL(/\/q\/.+/);
 
       // Second customer joins
-      await page2.goto("/join/demo-shop");
+      await page2.goto("/join/demo-shop/main-queue");
       await page2.getByLabel("Your Name").fill("Customer Two");
       await page2.getByRole("button", { name: "Join Queue" }).click();
       await expect(page2).toHaveURL(/\/q\/.+/);
