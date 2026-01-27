@@ -2,8 +2,8 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "vite",
   "routes": [
-    { "src": "/api/(.*)", "dest": "https://queuedrop-api.up.railway.app/api/$1" },
-    { "src": "/hubs/(.*)", "dest": "https://queuedrop-api.up.railway.app/hubs/$1" },
+    { "src": "/api/(.*)", "dest": "https://queuedrop-production.up.railway.app/api/$1" },
+    { "src": "/hubs/(.*)", "dest": "https://queuedrop-production.up.railway.app/hubs/$1" },
     { "handle": "filesystem" },
     { "src": "/(.*)", "dest": "/index.html" }
   ]
