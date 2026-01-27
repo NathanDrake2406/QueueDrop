@@ -50,9 +50,10 @@ QueueDrop provides a modern, mobile-first queue management system:
 ### For Staff
 
 - 📊 **Real-time dashboard** - See all customers at a glance
+- 🗂️ **Multi-queue support** - Manage multiple queues per business (Dine-in, Takeout, Bar)
 - ⚡ **One-click actions** - Call next, mark served, remove
 - 📈 **Queue analytics** - Track wait times and throughput
-- 🔗 **QR code generation** - Easy customer onboarding
+- 🔗 **QR code generation** - Easy customer onboarding per queue
 
 ### Technical Highlights
 
@@ -133,10 +134,17 @@ Open http://localhost:5173 in your browser.
 
 ### Demo Data
 
-The app seeds a demo business (`demo-shop`) on startup. Try these URLs:
+The app seeds a demo business (`demo-shop`) with multiple queues on startup:
+
+- **Main Queue** - General service queue
+- **Takeout** - Pickup orders queue
+- **Bar** - Bar service queue
+
+Try these URLs:
 
 - **Staff Dashboard:** http://localhost:5173/staff/demo-shop
 - **Customer Join:** http://localhost:5173/join/demo-shop
+- **Join Specific Queue:** http://localhost:5173/join/demo-shop/takeout
 
 ## Architecture
 
@@ -177,11 +185,13 @@ src/
 
 ### Customer Endpoints
 
-| Method | Endpoint                           | Description            |
-| ------ | ---------------------------------- | ---------------------- |
-| POST   | `/api/join/{businessSlug}`         | Join a queue           |
-| GET    | `/api/q/{token}`                   | Get position           |
-| POST   | `/api/q/{token}/push-subscription` | Save push subscription |
+| Method | Endpoint                               | Description                        |
+| ------ | -------------------------------------- | ---------------------------------- |
+| POST   | `/api/join/{businessSlug}`             | Join queue (single queue business) |
+| POST   | `/api/join/{businessSlug}/{queueSlug}` | Join specific queue                |
+| GET    | `/api/business/{businessSlug}/queues`  | List all queues for a business     |
+| GET    | `/api/q/{token}`                       | Get position                       |
+| POST   | `/api/q/{token}/push-subscription`     | Save push subscription             |
 
 ### Staff Endpoints
 
@@ -216,7 +226,7 @@ npm run test:e2e
 ## Roadmap
 
 - [ ] Staff authentication (Auth0)
-- [ ] Multi-queue support per business
+- [x] Multi-queue support per business
 - [ ] SMS notifications
 - [ ] Wait time predictions
 - [ ] Analytics dashboard
