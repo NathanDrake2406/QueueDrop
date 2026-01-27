@@ -31,6 +31,7 @@ public static class SeedDemoData
     private static async Task<IResult> Handler(
         AppDbContext db,
         TimeProvider timeProvider,
+        Guid? queueId,
         CancellationToken cancellationToken)
     {
         // Find demo queue
@@ -47,12 +48,16 @@ public static class SeedDemoData
                 statusCode: StatusCodes.Status404NotFound);
         }
 
-        var queue = business.Queues.FirstOrDefault(q => q.IsActive);
+        // If queueId provided, use that queue; otherwise use first active queue
+        var queue = queueId.HasValue
+            ? business.Queues.FirstOrDefault(q => q.Id == queueId.Value && q.IsActive)
+            : business.Queues.FirstOrDefault(q => q.IsActive);
+
         if (queue is null)
         {
             return Results.Problem(
                 title: "No active queue",
-                detail: "Demo shop has no active queue.",
+                detail: queueId.HasValue ? "Specified queue not found or not active." : "Demo shop has no active queue.",
                 statusCode: StatusCodes.Status404NotFound);
         }
 

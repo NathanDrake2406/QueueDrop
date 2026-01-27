@@ -2,6 +2,7 @@ import type { Customer } from "../hooks/useStaffQueue";
 
 interface CustomerCardProps {
   customer: Customer;
+  queueName?: string; // Show queue name badge when in "All" view
   onMarkServed?: (id: string) => void;
   onMarkNoShow?: (id: string) => void;
   onRemove?: (id: string) => void;
@@ -12,7 +13,7 @@ function formatTime(dateString: string): string {
   return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
 
-export function CustomerCard({ customer, onMarkServed, onMarkNoShow, onRemove }: CustomerCardProps) {
+export function CustomerCard({ customer, queueName, onMarkServed, onMarkNoShow, onRemove }: CustomerCardProps) {
   const isCalled = customer.status === "Called";
   const isWaiting = customer.status === "Waiting";
 
@@ -47,8 +48,13 @@ export function CustomerCard({ customer, onMarkServed, onMarkNoShow, onRemove }:
             </p>
 
             {/* Tags */}
-            {(customer.partySize || customer.notes) && (
+            {(queueName || customer.partySize || customer.notes) && (
               <div className="mt-2 flex flex-wrap gap-2">
+                {queueName && (
+                  <span className="inline-flex items-center px-2 py-0.5 bg-violet-500/20 rounded-lg text-xs text-violet-400 font-medium">
+                    {queueName}
+                  </span>
+                )}
                 {customer.partySize && (
                   <span className="inline-flex items-center px-2 py-0.5 bg-zinc-800 rounded-lg text-xs text-zinc-400">
                     Party of {customer.partySize}

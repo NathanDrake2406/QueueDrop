@@ -12,7 +12,7 @@ public class QueueTests
 
     private static Queue CreateQueue(bool isActive = true)
     {
-        var queue = Queue.Create(BusinessId, "Test Queue", Now);
+        var queue = Queue.Create(BusinessId, "Test Queue", "test-queue", Now);
         if (!isActive) queue.Deactivate();
         return queue;
     }
@@ -23,17 +23,28 @@ public class QueueTests
         public void Create_WithValidData_ShouldCreateQueue()
         {
             // Act
-            var queue = Queue.Create(BusinessId, "My Queue", Now);
+            var queue = Queue.Create(BusinessId, "My Queue", "my-queue", Now);
 
             // Assert
             queue.Id.Should().NotBeEmpty();
             queue.Name.Should().Be("My Queue");
+            queue.Slug.Should().Be("my-queue");
             queue.BusinessId.Should().Be(BusinessId);
             queue.IsActive.Should().BeTrue();
             queue.IsPaused.Should().BeFalse();
             queue.CreatedAt.Should().Be(Now);
             queue.Settings.Should().NotBeNull();
             queue.Customers.Should().BeEmpty();
+        }
+
+        [Fact]
+        public void Create_ShouldNormalizeSlug()
+        {
+            // Act
+            var queue = Queue.Create(BusinessId, "My Queue", "  My-QUEUE  ", Now);
+
+            // Assert
+            queue.Slug.Should().Be("my-queue");
         }
 
         [Theory]
@@ -43,7 +54,20 @@ public class QueueTests
         public void Create_WithInvalidName_ShouldThrow(string? name)
         {
             // Act
-            var act = () => Queue.Create(BusinessId, name!, Now);
+            var act = () => Queue.Create(BusinessId, name!, "test-queue", Now);
+
+            // Assert
+            act.Should().Throw<ArgumentException>();
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData("   ")]
+        public void Create_WithInvalidSlug_ShouldThrow(string? slug)
+        {
+            // Act
+            var act = () => Queue.Create(BusinessId, "Test Queue", slug!, Now);
 
             // Assert
             act.Should().Throw<ArgumentException>();
@@ -540,6 +564,48 @@ public class QueueTests
 
             // Act
             var act = () => queue.Rename(name!);
+
+            // Assert
+            act.Should().Throw<ArgumentException>();
+        }
+
+        [Fact]
+        public void UpdateSlug_WithValidSlug_ShouldUpdateSlug()
+        {
+            // Arrange
+            var queue = CreateQueue();
+
+            // Act
+            queue.UpdateSlug("new-slug");
+
+            // Assert
+            queue.Slug.Should().Be("new-slug");
+        }
+
+        [Fact]
+        public void UpdateSlug_ShouldNormalizeSlug()
+        {
+            // Arrange
+            var queue = CreateQueue();
+
+            // Act
+            queue.UpdateSlug("  NEW-SLUG  ");
+
+            // Assert
+            queue.Slug.Should().Be("new-slug");
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData("   ")]
+        public void UpdateSlug_WithInvalidSlug_ShouldThrow(string? slug)
+        {
+            // Arrange
+            var queue = CreateQueue();
+
+            // Act
+            var act = () => queue.UpdateSlug(slug!);
 
             // Assert
             act.Should().Throw<ArgumentException>();

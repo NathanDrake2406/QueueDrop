@@ -81,7 +81,15 @@ public abstract class IntegrationTestBase : IAsyncLifetime
 
         // Seed data manually through the change tracker
         await SeedTestDataAsync(db);
+
+        // Allow derived classes to seed additional data
+        await SeedAdditionalDataAsync(db);
     }
+
+    /// <summary>
+    /// Override to seed additional test data for specific test scenarios.
+    /// </summary>
+    protected virtual Task SeedAdditionalDataAsync(TestAppDbContext db) => Task.CompletedTask;
 
     private static async Task SeedTestDataAsync(TestAppDbContext db)
     {
@@ -100,6 +108,7 @@ public abstract class IntegrationTestBase : IAsyncLifetime
         var queue = Queue.Create(
             TestBusinessId,
             TestQueueName,
+            "test-queue",
             FixedTime);
 
         // Set predictable ID via reflection
@@ -128,7 +137,7 @@ public abstract class IntegrationTestBase : IAsyncLifetime
         return result!.Token;
     }
 
-    protected record JoinQueueResponse(string Token, int Position, string QueueName);
+    protected record JoinQueueResponse(string Token, int Position, string QueueName, string QueueSlug);
 }
 
 /// <summary>

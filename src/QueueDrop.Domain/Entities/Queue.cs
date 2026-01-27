@@ -14,6 +14,9 @@ public sealed class Queue : Entity
     /// <summary>Display name of the queue.</summary>
     public string Name { get; private set; } = null!;
 
+    /// <summary>URL-friendly identifier (e.g., "main-queue", "takeout").</summary>
+    public string Slug { get; private set; } = null!;
+
     /// <summary>Whether the queue is currently accepting customers.</summary>
     public bool IsActive { get; private set; }
 
@@ -41,22 +44,31 @@ public sealed class Queue : Entity
     // EF Core constructor
     private Queue() { }
 
-    public static Queue Create(Guid businessId, string name, DateTimeOffset createdAt)
+    public static Queue Create(Guid businessId, string name, string slug, DateTimeOffset createdAt)
     {
         if (string.IsNullOrWhiteSpace(name))
             throw new ArgumentException("Queue name is required", nameof(name));
+
+        if (string.IsNullOrWhiteSpace(slug))
+            throw new ArgumentException("Queue slug is required", nameof(slug));
 
         return new Queue
         {
             Id = Guid.NewGuid(),
             BusinessId = businessId,
             Name = name,
+            Slug = NormalizeSlug(slug),
             IsActive = true,
             IsPaused = false,
             Settings = QueueSettings.Default,
             CreatedAt = createdAt,
             RowVersion = BitConverter.GetBytes(DateTimeOffset.UtcNow.Ticks)
         };
+    }
+
+    private static string NormalizeSlug(string slug)
+    {
+        return slug.ToLowerInvariant().Trim();
     }
 
     /// <summary>
@@ -216,6 +228,13 @@ public sealed class Queue : Entity
         if (string.IsNullOrWhiteSpace(name))
             throw new ArgumentException("Queue name is required", nameof(name));
         Name = name;
+    }
+
+    public void UpdateSlug(string slug)
+    {
+        if (string.IsNullOrWhiteSpace(slug))
+            throw new ArgumentException("Queue slug is required", nameof(slug));
+        Slug = NormalizeSlug(slug);
     }
 
     /// <summary>

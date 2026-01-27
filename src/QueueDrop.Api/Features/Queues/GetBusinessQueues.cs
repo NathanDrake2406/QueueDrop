@@ -5,22 +5,27 @@ using QueueDrop.Infrastructure.Persistence;
 namespace QueueDrop.Api.Features.Queues;
 
 /// <summary>
-/// Vertical slice: Get active queue for a business (staff dashboard entry point).
-/// GET /api/business/{businessSlug}/queue
+/// Vertical slice: Get all queues for a business.
+/// GET /api/business/{businessSlug}/queues
 /// </summary>
-public static class GetQueueByBusiness
+public static class GetBusinessQueues
 {
-    public sealed record Response(
+    public sealed record QueueDto(
         Guid QueueId,
-        string QueueName,
-        string QueueSlug,
+        string Name,
+        string Slug,
+        int WaitingCount,
+        int EstimatedWaitMinutes);
+
+    public sealed record Response(
         Guid BusinessId,
-        string BusinessName);
+        string BusinessName,
+        IReadOnlyList<QueueDto> Queues);
 
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapGet("/api/business/{businessSlug}/queue", Handler)
-            .WithName("GetQueueByBusiness")
+        app.MapGet("/api/business/{businessSlug}/queues", Handler)
+            .WithName("GetBusinessQueues")
             .WithTags("Queues")
             .Produces<Response>(StatusCodes.Status200OK)
             .Produces<ProblemDetails>(StatusCodes.Status404NotFound);
@@ -33,6 +38,7 @@ public static class GetQueueByBusiness
     {
         var business = await db.Businesses
             .Include(b => b.Queues)
+                .ThenInclude(q => q.Customers)
             .FirstOrDefaultAsync(b => b.Slug == businessSlug.ToLowerInvariant(), cancellationToken);
 
         if (business is null)
@@ -43,20 +49,20 @@ public static class GetQueueByBusiness
                 statusCode: StatusCodes.Status404NotFound);
         }
 
-        var activeQueue = business.Queues.FirstOrDefault(q => q.IsActive);
-        if (activeQueue is null)
-        {
-            return Results.Problem(
-                title: "No active queue",
-                detail: "This business has no active queue.",
-                statusCode: StatusCodes.Status404NotFound);
-        }
+        var activeQueues = business.Queues
+            .Where(q => q.IsActive)
+            .OrderBy(q => q.CreatedAt)
+            .Select(q => new QueueDto(
+                q.Id,
+                q.Name,
+                q.Slug,
+                q.GetWaitingCount(),
+                q.GetWaitingCount() * q.Settings.EstimatedServiceTimeMinutes))
+            .ToList();
 
         return Results.Ok(new Response(
-            activeQueue.Id,
-            activeQueue.Name,
-            activeQueue.Slug,
             business.Id,
-            business.Name));
+            business.Name,
+            activeQueues));
     }
 }

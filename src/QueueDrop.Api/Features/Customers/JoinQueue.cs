@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using QueueDrop.Domain.Abstractions;
-using QueueDrop.Domain.Common;
+using QueueDrop.Domain.Entities;
 using QueueDrop.Domain.Enums;
 using QueueDrop.Infrastructure.Persistence;
 
@@ -9,26 +9,32 @@ namespace QueueDrop.Api.Features.Customers;
 
 /// <summary>
 /// Vertical slice: Customer joins a queue.
-/// POST /api/join/{businessSlug}
+/// POST /api/join/{businessSlug}/{queueSlug?}
 /// </summary>
 public static class JoinQueue
 {
     public sealed record Request(string Name, string? PhoneNumber = null, int? PartySize = null, string? Notes = null);
 
-    public sealed record Response(string Token, int Position, string QueueName);
+    public sealed record Response(string Token, int Position, string QueueName, string QueueSlug);
+
+    public sealed record QueueOptionDto(string Name, string Slug, int WaitingCount, int EstimatedWaitMinutes);
+
+    public sealed record MultipleQueuesResponse(string Message, IReadOnlyList<QueueOptionDto> Queues);
 
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapPost("/api/join/{businessSlug}", Handler)
+        // Route with optional queueSlug
+        app.MapPost("/api/join/{businessSlug}/{queueSlug?}", Handler)
             .WithName("JoinQueue")
             .WithTags("Customers")
             .Produces<Response>(StatusCodes.Status201Created)
-            .Produces<ProblemDetails>(StatusCodes.Status400BadRequest)
+            .Produces<MultipleQueuesResponse>(StatusCodes.Status400BadRequest)
             .Produces<ProblemDetails>(StatusCodes.Status404NotFound);
     }
 
     private static async Task<IResult> Handler(
         string businessSlug,
+        string? queueSlug,
         Request request,
         AppDbContext db,
         IQueueHubNotifier notifier,
@@ -58,14 +64,55 @@ public static class JoinQueue
                 statusCode: StatusCodes.Status404NotFound);
         }
 
-        // Get active queue for business
-        var queue = business.Queues.FirstOrDefault(q => q.IsActive);
-        if (queue is null)
+        // Find the appropriate queue
+        var activeQueues = business.Queues.Where(q => q.IsActive).ToList();
+
+        if (activeQueues.Count == 0)
         {
             return Results.Problem(
                 title: "No active queue",
                 detail: "This business has no active queue.",
                 statusCode: StatusCodes.Status404NotFound);
+        }
+
+        Queue? queue;
+
+        if (!string.IsNullOrWhiteSpace(queueSlug))
+        {
+            // Specific queue requested
+            queue = activeQueues.FirstOrDefault(q =>
+                q.Slug.Equals(queueSlug, StringComparison.OrdinalIgnoreCase));
+
+            if (queue is null)
+            {
+                return Results.Problem(
+                    title: "Queue not found",
+                    detail: $"No active queue found with slug '{queueSlug}'.",
+                    statusCode: StatusCodes.Status404NotFound);
+            }
+        }
+        else if (activeQueues.Count == 1)
+        {
+            // Only one queue, use it
+            queue = activeQueues[0];
+        }
+        else
+        {
+            // Multiple queues, require selection
+            var queueOptions = activeQueues
+                .OrderBy(q => q.CreatedAt)
+                .Select(q => new QueueOptionDto(
+                    q.Name,
+                    q.Slug,
+                    q.GetWaitingCount(),
+                    q.GetWaitingCount() * q.Settings.EstimatedServiceTimeMinutes))
+                .ToList();
+
+            return Results.Json(
+                new MultipleQueuesResponse(
+                    "Multiple queues available. Please select a queue.",
+                    queueOptions),
+                statusCode: StatusCodes.Status400BadRequest);
         }
 
         // Add customer to queue (domain logic)
@@ -89,7 +136,7 @@ public static class JoinQueue
 
         // Explicitly mark the new customer as Added to ensure EF tracks it correctly
         // This is needed because adding to a tracked collection may not always detect new entities
-        db.Entry(customer).State = Microsoft.EntityFrameworkCore.EntityState.Added;
+        db.Entry(customer).State = EntityState.Added;
 
         await db.SaveChangesAsync(cancellationToken);
 
@@ -101,6 +148,6 @@ public static class JoinQueue
 
         return Results.Created(
             $"/api/q/{customer.Token}",
-            new Response(customer.Token, position, queue.Name));
+            new Response(customer.Token, position, queue.Name, queue.Slug));
     }
 }

@@ -77,6 +77,7 @@ MarkServed.MapEndpoint(app);
 MarkNoShow.MapEndpoint(app);
 RemoveCustomer.MapEndpoint(app);
 GetQueueByBusiness.MapEndpoint(app);
+GetBusinessQueues.MapEndpoint(app);
 SavePushSubscription.MapEndpoint(app);
 GetVapidPublicKey.MapEndpoint(app);
 

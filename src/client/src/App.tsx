@@ -331,7 +331,7 @@ export default function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/customer" element={<CustomerJoinPage />} />
         <Route path="/scan" element={<QRScanner />} />
-        <Route path="/join/:businessSlug" element={<JoinQueue />} />
+        <Route path="/join/:businessSlug/:queueSlug?" element={<JoinQueue />} />
         <Route path="/q/:token" element={<QueuePosition />} />
         <Route path="/staff/:businessSlug" element={<StaffDashboard />} />
         <Route path="/404" element={<NotFound />} />

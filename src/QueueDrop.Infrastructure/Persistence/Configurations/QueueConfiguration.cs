@@ -16,6 +16,10 @@ public sealed class QueueConfiguration : IEntityTypeConfiguration<Queue>
             .HasMaxLength(200)
             .IsRequired();
 
+        builder.Property(q => q.Slug)
+            .HasMaxLength(100)
+            .IsRequired();
+
         builder.Property(q => q.IsActive)
             .IsRequired();
 
@@ -73,25 +77,77 @@ public sealed class QueueConfiguration : IEntityTypeConfiguration<Queue>
 
         builder.HasIndex(q => q.BusinessId);
         builder.HasIndex(q => new { q.BusinessId, q.IsActive });
+        builder.HasIndex(q => new { q.BusinessId, q.Slug }).IsUnique();
 
-        // Seed data
+        // Seed data - Main Queue
         builder.HasData(new
         {
             Id = SeedData.DemoQueueId,
             BusinessId = SeedData.DemoBusinessId,
             Name = "Main Queue",
+            Slug = "main-queue",
             IsActive = true,
             IsPaused = false,
             CreatedAt = SeedData.SeedDate,
             RowVersion = new byte[] { 0, 0, 0, 0, 0, 0, 0, 1 }
         });
 
-        // Seed owned entity data (QueueSettings)
+        // Seed data - Takeout Queue
+        builder.HasData(new
+        {
+            Id = SeedData.TakeoutQueueId,
+            BusinessId = SeedData.DemoBusinessId,
+            Name = "Takeout",
+            Slug = "takeout",
+            IsActive = true,
+            IsPaused = false,
+            CreatedAt = SeedData.SeedDate,
+            RowVersion = new byte[] { 0, 0, 0, 0, 0, 0, 0, 1 }
+        });
+
+        // Seed data - Bar Queue
+        builder.HasData(new
+        {
+            Id = SeedData.BarQueueId,
+            BusinessId = SeedData.DemoBusinessId,
+            Name = "Bar",
+            Slug = "bar",
+            IsActive = true,
+            IsPaused = false,
+            CreatedAt = SeedData.SeedDate,
+            RowVersion = new byte[] { 0, 0, 0, 0, 0, 0, 0, 1 }
+        });
+
+        // Seed owned entity data (QueueSettings) - Main Queue
         builder.OwnsOne(q => q.Settings).HasData(new
         {
             QueueId = SeedData.DemoQueueId,
             MaxQueueSize = (int?)null,
             EstimatedServiceTimeMinutes = 5,
+            AllowJoinWhenPaused = false,
+            NoShowTimeoutMinutes = 5,
+            WelcomeMessage = (string?)null,
+            CalledMessage = (string?)null
+        });
+
+        // Seed owned entity data (QueueSettings) - Takeout Queue
+        builder.OwnsOne(q => q.Settings).HasData(new
+        {
+            QueueId = SeedData.TakeoutQueueId,
+            MaxQueueSize = (int?)null,
+            EstimatedServiceTimeMinutes = 3,
+            AllowJoinWhenPaused = false,
+            NoShowTimeoutMinutes = 5,
+            WelcomeMessage = (string?)null,
+            CalledMessage = (string?)null
+        });
+
+        // Seed owned entity data (QueueSettings) - Bar Queue
+        builder.OwnsOne(q => q.Settings).HasData(new
+        {
+            QueueId = SeedData.BarQueueId,
+            MaxQueueSize = 20,
+            EstimatedServiceTimeMinutes = 10,
             AllowJoinWhenPaused = false,
             NoShowTimeoutMinutes = 5,
             WelcomeMessage = (string?)null,

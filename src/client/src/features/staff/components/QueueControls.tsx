@@ -6,9 +6,10 @@ interface QueueControlsProps {
   onOpenSettings?: () => void;
   onOpenQRCode?: () => void;
   isConnected: boolean;
+  showAllControls?: boolean; // When false (All view), hide some controls
 }
 
-export function QueueControls({ queueInfo, onCallNext, onOpenSettings, onOpenQRCode, isConnected }: QueueControlsProps) {
+export function QueueControls({ queueInfo, onCallNext, onOpenSettings, onOpenQRCode, isConnected, showAllControls = true }: QueueControlsProps) {
   const hasWaiting = queueInfo.waitingCount > 0;
 
   return (
@@ -54,14 +55,21 @@ export function QueueControls({ queueInfo, onCallNext, onOpenSettings, onOpenQRC
 
       {/* Actions */}
       <div className="mt-6 flex flex-wrap gap-3">
-        <button
-          onClick={onCallNext}
-          disabled={!hasWaiting}
-          className="flex-1 sm:flex-none px-8 py-4 bg-white text-zinc-900 rounded-2xl font-semibold hover:bg-zinc-100 disabled:bg-zinc-800 disabled:text-zinc-600 disabled:cursor-not-allowed transition-colors"
-        >
-          Call Next
-        </button>
-        {onOpenQRCode && (
+        {showAllControls && (
+          <button
+            onClick={onCallNext}
+            disabled={!hasWaiting}
+            className="flex-1 sm:flex-none px-8 py-4 bg-white text-zinc-900 rounded-2xl font-semibold hover:bg-zinc-100 disabled:bg-zinc-800 disabled:text-zinc-600 disabled:cursor-not-allowed transition-colors"
+          >
+            Call Next
+          </button>
+        )}
+        {!showAllControls && (
+          <div className="flex-1 sm:flex-none px-8 py-4 bg-zinc-800 text-zinc-500 rounded-2xl font-medium text-center">
+            Select a queue to manage
+          </div>
+        )}
+        {showAllControls && onOpenQRCode && (
           <button
             onClick={onOpenQRCode}
             className="px-6 py-4 bg-violet-600 text-white rounded-2xl font-medium hover:bg-violet-500 transition-colors flex items-center gap-2"
@@ -72,7 +80,7 @@ export function QueueControls({ queueInfo, onCallNext, onOpenSettings, onOpenQRC
             QR Code
           </button>
         )}
-        {onOpenSettings && (
+        {showAllControls && onOpenSettings && (
           <button
             onClick={onOpenSettings}
             className="px-6 py-4 bg-zinc-800 text-zinc-300 rounded-2xl font-medium hover:bg-zinc-700 transition-colors"

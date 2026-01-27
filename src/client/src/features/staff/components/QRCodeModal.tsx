@@ -3,16 +3,17 @@ import { QRCodeSVG } from "qrcode.react";
 
 interface QRCodeModalProps {
   businessSlug: string;
+  queueSlug: string;
   queueName: string;
   onClose: () => void;
 }
 
-export function QRCodeModal({ businessSlug, queueName, onClose }: QRCodeModalProps) {
+export function QRCodeModal({ businessSlug, queueSlug, queueName, onClose }: QRCodeModalProps) {
   const qrRef = useRef<HTMLDivElement>(null);
   
   // Use current origin or fallback for dev
   const baseUrl = window.location.origin;
-  const joinUrl = `${baseUrl}/join/${businessSlug}`;
+  const joinUrl = `${baseUrl}/join/${businessSlug}/${queueSlug}`;
 
   const handleDownload = () => {
     const svg = qrRef.current?.querySelector("svg");
