@@ -1,0 +1,43 @@
+# Build outputs
+bin/
+obj/
+dist/
+build/
+
+# Dependencies
+node_modules/
+
+# IDE
+.idea/
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
+.env.*.local
+appsettings.Development.json
+
+# Logs
+*.log
+npm-debug.log*
+
+# Test results
+TestResults/
+coverage/
+
+# Serena MCP config
+.serena/
+
+# Misc
+*.swp
+*.swo
+*~
