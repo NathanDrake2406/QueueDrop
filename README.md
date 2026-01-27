@@ -27,7 +27,7 @@ Real-time queue management system for walk-in businesses. Customers join remotel
 | **Database**  | PostgreSQL 16 with EF Core                      |
 | **Real-time** | SignalR (WebSockets with fallback)              |
 | **Frontend**  | React 19, TypeScript (strict), Tailwind CSS v4  |
-| **Testing**   | xUnit, FluentAssertions, WebApplicationFactory  |
+| **Testing**   | xUnit, Vitest, Testing Library, Playwright E2E  |
 | **CI/CD**     | GitHub Actions, Playwright E2E, Codecov         |
 
 ## Architecture
@@ -99,30 +99,34 @@ DELETE /api/queues/{id}/customers/{id}               # Remove
 
 ### SignalR Events
 
-| Event             | Description               |
-| ----------------- | ------------------------- |
-| `PositionChanged` | Customer position updated |
-| `YouAreCalled`    | Customer has been called  |
-| `QueueUpdated`    | Queue state changed       |
+| Event             | Payload                       | Description               |
+| ----------------- | ----------------------------- | ------------------------- |
+| `PositionChanged` | `int newPosition`             | Customer position updated |
+| `YouAreCalled`    | `string? message`             | Customer has been called  |
+| `QueueUpdated`    | `string queueId, string type` | Queue state changed       |
 
 ## Testing
 
 ```bash
-# Unit + Integration tests (121 tests)
+# Backend tests (121 tests)
 dotnet test src/QueueDrop.sln
 
-# With coverage report
-dotnet test src/QueueDrop.sln --collect:"XPlat Code Coverage"
+# Frontend unit tests (15 tests)
+cd src/client && npm test
 
 # E2E tests (Playwright)
 cd src/client && npm run test:e2e
+
+# With coverage
+dotnet test src/QueueDrop.sln --collect:"XPlat Code Coverage"
+cd src/client && npm run test:coverage
 ```
 
 **Coverage targets:**
 
 - Domain layer: ~84%
 - API layer: ~76%
-- Business logic focus, not infrastructure/migrations
+- Frontend hooks and components: unit tested with Vitest + Testing Library
 
 ## Load Testing
 

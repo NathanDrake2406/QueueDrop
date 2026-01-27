@@ -53,7 +53,7 @@ public sealed class QueueHubNotifier : IQueueHubNotifier
     {
         await _hubContext.Clients
             .Group($"queue:{queueId}")
-            .QueueUpdated(updateType.ToString());
+            .QueueUpdated(queueId.ToString(), updateType.ToString());
     }
 
     public async Task NotifyPositionsChangedAsync(
@@ -79,7 +79,7 @@ public interface IQueueHubClient
     Task PositionChanged(int newPosition);
     Task YouAreCalled(string? message);
     Task StatusChanged(string status);
-    Task QueueUpdated(string updateType);
+    Task QueueUpdated(string queueId, string updateType);
 }
 
 /// <summary>

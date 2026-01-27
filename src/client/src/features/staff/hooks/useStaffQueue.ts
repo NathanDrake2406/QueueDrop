@@ -92,18 +92,41 @@ export function useStaffQueue(queueId: string): UseStaffQueueResult {
     fetchCustomers();
   }, [fetchCustomers]);
 
-  // Join staff room when connected
+  // Track the current room we've joined for cleanup
+  const joinedRoomRef = useRef<string | null>(null);
+
+  // Join staff room when connected, leave when queueId changes or unmount
   useEffect(() => {
     if (connectionState === "connected" && queueId) {
+      // Leave previous room if we were in one
+      if (joinedRoomRef.current && joinedRoomRef.current !== queueId) {
+        invoke("LeaveStaffRoom", joinedRoomRef.current).catch(console.error);
+      }
+      // Join new room
       invoke("JoinStaffRoom", queueId).catch(console.error);
+      joinedRoomRef.current = queueId;
     }
+
+    // Cleanup: leave room on unmount or when dependencies change
+    return () => {
+      if (joinedRoomRef.current) {
+        invoke("LeaveStaffRoom", joinedRoomRef.current).catch(console.error);
+        joinedRoomRef.current = null;
+      }
+    };
   }, [connectionState, queueId, invoke]);
 
   // Listen for real-time updates with debouncing to prevent rapid re-renders
   const updateTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    const unsub = on<string>("QueueUpdated", () => {
+    // Handler receives (queueId, updateType) from SignalR
+    const unsub = on<string>("QueueUpdated", (eventQueueId: string) => {
+      // Only process updates for the current queue
+      if (eventQueueId !== queueId) {
+        return;
+      }
+
       // Debounce rapid updates (e.g., multiple customers joining at once)
       if (updateTimeoutRef.current) {
         clearTimeout(updateTimeoutRef.current);
@@ -119,7 +142,7 @@ export function useStaffQueue(queueId: string): UseStaffQueueResult {
         clearTimeout(updateTimeoutRef.current);
       }
     };
-  }, [on, fetchCustomers]);
+  }, [on, fetchCustomers, queueId]);
 
   // Call next waiting customer
   const callNext = useCallback(async (): Promise<boolean> => {

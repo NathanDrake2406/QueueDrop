@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo, memo } from "react";
+import { useState, useEffect, useCallback, useMemo, memo, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { safeJsonParse } from "../../shared/utils/api";
 import { type Customer, type QueueInfo as HookQueueInfo, useStaffQueue } from "./hooks/useStaffQueue";
@@ -169,6 +169,8 @@ function MultiQueueDashboard({
   // For "All" view, we fetch all customers separately
   const [allViewCustomers, setAllViewCustomers] = useState<(Customer & { queueName: string; queueId: string })[]>([]);
   const [allViewLoading, setAllViewLoading] = useState(false);
+  // Track whether All view data has been fetched (cache invalidated by SignalR or manual refresh)
+  const allViewFetchedRef = useRef(false);
 
   // Get the selected queue info
   const selectedQueue = activeQueueId ? initialQueues.find((q) => q.queueId === activeQueueId) : null;
@@ -180,19 +182,26 @@ function MultiQueueDashboard({
   const { customers, queueInfo, isLoading, error, connectionState, refresh, callNext } = useStaffQueue(primaryQueueId);
 
   // Update queue counts when active queue data changes
+  // Also invalidate All view cache when data changes (SignalR update)
   useEffect(() => {
     if (queueInfo && activeQueueId) {
       const waitingCount = customers.filter((c) => c.status === "Waiting").length;
       setQueueCounts((prev) => {
         if (prev[activeQueueId] === waitingCount) return prev;
+        // Invalidate All view cache since queue data changed
+        allViewFetchedRef.current = false;
         return { ...prev, [activeQueueId]: waitingCount };
       });
     }
   }, [queueInfo, customers, activeQueueId]);
 
-  // Fetch all customers when "All" view is selected
+  // Fetch all customers when "All" view is selected (with caching)
   useEffect(() => {
+    // Skip if not in All view or only one queue
     if (activeQueueId !== null || initialQueues.length <= 1) return;
+
+    // Skip if we already have cached data
+    if (allViewFetchedRef.current && allViewCustomers.length > 0) return;
 
     let cancelled = false;
 
@@ -224,6 +233,7 @@ function MultiQueueDashboard({
 
         setAllViewCustomers(allCustomers);
         setQueueCounts((prev) => ({ ...prev, ...newCounts }));
+        allViewFetchedRef.current = true;
       } catch (err) {
         console.error("Failed to fetch all queues:", err);
       } finally {
@@ -235,7 +245,7 @@ function MultiQueueDashboard({
     return () => {
       cancelled = true;
     };
-  }, [activeQueueId, initialQueues]);
+  }, [activeQueueId, initialQueues, allViewCustomers.length]);
 
   // Build tab data from tracked counts
   const queueTabsData = useMemo(
