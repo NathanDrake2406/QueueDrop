@@ -1,0 +1,15 @@
+{
+  "name": "queuedrop-loadtest",
+  "version": "1.0.0",
+  "description": "Load testing suite for QueueDrop",
+  "scripts": {
+    "test:http": "k6 run http-load-test.js",
+    "test:http:quick": "k6 run --duration 30s --vus 20 http-load-test.js",
+    "test:signalr": "node signalr-load-test.js",
+    "test:signalr:quick": "node signalr-load-test.js --connections=50 --duration=30 --ramp-up=5",
+    "test:all": "npm run test:http && npm run test:signalr"
+  },
+  "dependencies": {
+    "@microsoft/signalr": "^8.0.0"
+  }
+}

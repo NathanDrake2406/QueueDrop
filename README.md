@@ -122,6 +122,28 @@ cd src/client && npm run test:e2e
 - API layer: ~76%
 - Business logic focus, not infrastructure/migrations
 
+## Load Testing
+
+Benchmarked SignalR WebSocket scalability and HTTP API performance.
+
+| Metric                                           | Result |
+| ------------------------------------------------ | ------ |
+| **Concurrent WebSocket Connections**             | 500    |
+| **Connection Success Rate**                      | 100%   |
+| **Avg Connection Latency**                       | 1.28ms |
+| **P95 Latency**                                  | 2ms    |
+| **HTTP Requests/sec**                            | 30+    |
+| **Zero reconnections** during 60s sustained load |
+
+```bash
+# Run load tests
+cd loadtest && npm install
+npm run test:signalr:quick # 50 connections
+npm run test:http:quick    # 20 concurrent users
+```
+
+[Full load test results →](loadtest/results/LOAD_TEST_RESULTS.md)
+
 ## Roadmap
 
 - [x] Multi-queue support per business

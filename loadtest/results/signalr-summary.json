@@ -1,0 +1,27 @@
+{
+  "timestamp": "2026-01-27T14:28:19.276Z",
+  "config": {
+    "connections": 100,
+    "duration": 30,
+    "rampUp": 5,
+    "baseUrl": "http://localhost:5000"
+  },
+  "duration_seconds": "30.17",
+  "connections": {
+    "attempted": 100,
+    "succeeded": 100,
+    "failed": 0,
+    "success_rate": "100.00%"
+  },
+  "latency_ms": {
+    "avg": "2.83",
+    "p50": "2.00",
+    "p95": "3.00",
+    "p99": "25.00",
+    "max": "29.00"
+  },
+  "messages_received": 0,
+  "reconnections": 0,
+  "errors": [],
+  "passed": true
+}
