@@ -1,3 +1,4 @@
+import { memo } from "react";
 import type { Customer } from "../hooks/useStaffQueue";
 
 interface CustomerCardProps {
@@ -13,7 +14,13 @@ function formatTime(dateString: string): string {
   return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
 
-export function CustomerCard({ customer, queueName, onMarkServed, onMarkNoShow, onRemove }: CustomerCardProps) {
+export const CustomerCard = memo(function CustomerCard({
+  customer,
+  queueName,
+  onMarkServed,
+  onMarkNoShow,
+  onRemove,
+}: CustomerCardProps) {
   const isCalled = customer.status === "Called";
   const isWaiting = customer.status === "Waiting";
 
@@ -100,4 +107,4 @@ export function CustomerCard({ customer, queueName, onMarkServed, onMarkNoShow, 
       </div>
     </div>
   );
-}
+});
