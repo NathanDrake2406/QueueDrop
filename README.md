@@ -146,13 +146,28 @@ npm run test:http:quick    # 20 concurrent users
 
 [Full load test results →](loadtest/results/LOAD_TEST_RESULTS.md)
 
+## Deployment
+
+Deploy with Vercel (frontend) + Railway (backend + PostgreSQL).
+
+```bash
+# Backend: Railway auto-deploys from Dockerfile
+# Frontend: Vercel auto-deploys from src/client
+
+# Required env vars on Railway:
+# - ConnectionStrings__DefaultConnection (auto-set by Railway PostgreSQL)
+# - Cors__AllowedOrigins__0=https://your-app.vercel.app
+```
+
+[Full deployment guide →](docs/DEPLOYMENT.md)
+
 ## Roadmap
 
 - [x] Multi-queue support per business
+- [ ] Live demo deployment
 - [ ] Staff authentication (Auth0)
 - [ ] SMS notifications (Twilio)
 - [ ] Wait time predictions (ML-based)
-- [ ] Analytics dashboard
 
 ## License
 

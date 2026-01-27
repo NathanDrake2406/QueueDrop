@@ -33,14 +33,15 @@ builder.Services.AddScoped<IQueueHubNotifier, QueueHubNotifier>();
 // Time provider (injectable for testing)
 builder.Services.AddSingleton(TimeProvider.System);
 
-// CORS for frontend dev server
+// CORS - configurable for production
+var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
+    ?? ["http://localhost:5173", "http://localhost:3000"];
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("Frontend", policy =>
     {
-        policy.WithOrigins(
-                "http://localhost:5173",  // Vite dev server
-                "http://localhost:3000")  // Alternative
+        policy.WithOrigins(allowedOrigins)
             .AllowAnyMethod()
             .AllowAnyHeader()
             .AllowCredentials();
@@ -90,8 +91,9 @@ if (app.Environment.IsDevelopment())
 // SignalR hub
 app.MapHub<QueueHub>("/hubs/queue");
 
-// Apply migrations on startup (development only)
-if (app.Environment.IsDevelopment())
+// Apply migrations on startup
+var runMigrations = app.Configuration.GetValue<bool>("RunMigrationsOnStartup", app.Environment.IsDevelopment());
+if (runMigrations)
 {
     await using var scope = app.Services.CreateAsyncScope();
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
