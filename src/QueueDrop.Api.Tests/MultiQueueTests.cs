@@ -343,14 +343,18 @@ public class MultiQueueTests : IntegrationTestBase
         [Fact]
         public async Task SeedDemoData_WithQueueId_ShouldSeedToSpecificQueue()
         {
-            // Arrange - we need to use demo-shop for seeding, so we'll just test the parameter binding
-            // The actual seeding only works on demo-shop, so we check the 404 response includes the right message
+            // Arrange - test business slug is "demo-shop", so seeding works
             var response = await Client.PostAsync($"/api/demo/seed?queueId={SecondQueueId}", null);
 
-            // The seed endpoint only works for demo-shop business, so we expect 404
-            // But the key is that it doesn't crash with the queueId parameter
-            response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+            // Should successfully seed to the specified queue
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
+
+            var result = await response.Content.ReadFromJsonAsync<SeedResponse>();
+            result.Should().NotBeNull();
+            result!.CustomersAdded.Should().BeGreaterThan(0);
         }
+
+        private record SeedResponse(int CustomersAdded, string Message);
     }
 
     private record CustomersResponse(
