@@ -4,6 +4,7 @@ import { JoinQueue } from "./features/customer/JoinQueue";
 import { QueuePosition } from "./features/customer/QueuePosition";
 import { QRScanner } from "./features/customer/QRScanner";
 import { StaffDashboard } from "./features/staff/StaffDashboard";
+import { AuthProvider } from "./features/auth/AuthContext";
 
 function LandingPage() {
   const navigate = useNavigate();
@@ -327,16 +328,18 @@ function NotFound() {
 export default function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/customer" element={<CustomerJoinPage />} />
-        <Route path="/scan" element={<QRScanner />} />
-        <Route path="/join/:businessSlug/:queueSlug?" element={<JoinQueue />} />
-        <Route path="/q/:token" element={<QueuePosition />} />
-        <Route path="/staff/:businessSlug" element={<StaffDashboard />} />
-        <Route path="/404" element={<NotFound />} />
-        <Route path="*" element={<Navigate to="/404" replace />} />
-      </Routes>
+      <AuthProvider>
+        <Routes>
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/customer" element={<CustomerJoinPage />} />
+          <Route path="/scan" element={<QRScanner />} />
+          <Route path="/join/:businessSlug/:queueSlug?" element={<JoinQueue />} />
+          <Route path="/q/:token" element={<QueuePosition />} />
+          <Route path="/staff/:businessSlug" element={<StaffDashboard />} />
+          <Route path="/404" element={<NotFound />} />
+          <Route path="*" element={<Navigate to="/404" replace />} />
+        </Routes>
+      </AuthProvider>
     </BrowserRouter>
   );
 }
