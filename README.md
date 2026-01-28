@@ -9,7 +9,7 @@
 
 Real-time queue management system for walk-in businesses. Customers join remotely via QR code, track their position live, and get push notifications when called.
 
-## 🎮 [Try the Live Demo →](https://queuedrop.vercel.app/demo)
+## 🎮 [Try the Live Demo →](https://client-ten-indol-52.vercel.app/demo)
 
 Click "Call Next" and watch both panels update in real-time via WebSockets!
 
