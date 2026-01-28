@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
-import { safeJsonParse } from "../../shared/utils/api";
+import { getApiErrorMessage, safeJsonParse } from "../../shared/utils/api";
 
 const API_BASE = import.meta.env.VITE_API_URL || "";
 
@@ -15,6 +15,26 @@ interface QueuesResponse {
   businessId: string;
   businessName: string;
   queues: QueueInfo[];
+}
+
+interface Customer {
+  id: string;
+  name: string;
+  token: string;
+  status: string;
+  position: number | null;
+  joinedAt: string;
+  calledAt: string | null;
+  partySize: number | null;
+  notes: string | null;
+}
+
+interface QueueData {
+  queueId: string;
+  queueName: string;
+  customers: Customer[];
+  waitingCount: number;
+  calledCount: number;
 }
 
 type ConnectionState = "connecting" | "connected" | "reconnecting" | "disconnected";
@@ -94,9 +114,330 @@ function Panel({ title, variant, children }: PanelProps): JSX.Element {
   );
 }
 
+interface StaffPanelProps {
+  queueData: QueueData;
+  onRefresh: () => void;
+  onCustomerSelect: (token: string) => void;
+  selectedCustomerToken: string | null;
+}
+
+function StaffPanel({
+  queueData,
+  onRefresh,
+  onCustomerSelect,
+  selectedCustomerToken,
+}: StaffPanelProps): JSX.Element {
+  const [isCallingNext, setIsCallingNext] = useState(false);
+  const [isSeeding, setIsSeeding] = useState(false);
+  const [actionInProgress, setActionInProgress] = useState<string | null>(null);
+
+  const waitingCustomers = queueData.customers.filter((c) => c.status === "Waiting");
+  const calledCustomers = queueData.customers.filter((c) => c.status === "Called");
+
+  const handleCallNext = useCallback(async () => {
+    setIsCallingNext(true);
+    try {
+      const response = await fetch(`${API_BASE}/api/queues/${queueData.queueId}/call-next`, {
+        method: "POST",
+      });
+      if (!response.ok) {
+        const errorMessage = await getApiErrorMessage(response, "Failed to call next customer");
+        console.error(errorMessage);
+      }
+      onRefresh();
+    } catch (err) {
+      console.error("Failed to call next:", err);
+    } finally {
+      setIsCallingNext(false);
+    }
+  }, [queueData.queueId, onRefresh]);
+
+  const handleSeedCustomers = useCallback(async () => {
+    setIsSeeding(true);
+    try {
+      const response = await fetch(`${API_BASE}/api/demo/seed?queueId=${queueData.queueId}`, {
+        method: "POST",
+      });
+      if (!response.ok) {
+        const errorMessage = await getApiErrorMessage(response, "Failed to seed customers");
+        console.error(errorMessage);
+      }
+      onRefresh();
+    } catch (err) {
+      console.error("Failed to seed:", err);
+    } finally {
+      setIsSeeding(false);
+    }
+  }, [queueData.queueId, onRefresh]);
+
+  const handleMarkServed = useCallback(
+    async (customerId: string) => {
+      setActionInProgress(customerId);
+      try {
+        const response = await fetch(
+          `${API_BASE}/api/queues/${queueData.queueId}/customers/${customerId}/serve`,
+          { method: "POST" }
+        );
+        if (!response.ok) {
+          const errorMessage = await getApiErrorMessage(response, "Failed to mark as served");
+          console.error(errorMessage);
+        }
+        onRefresh();
+      } catch (err) {
+        console.error("Failed to mark served:", err);
+      } finally {
+        setActionInProgress(null);
+      }
+    },
+    [queueData.queueId, onRefresh]
+  );
+
+  const handleMarkNoShow = useCallback(
+    async (customerId: string) => {
+      setActionInProgress(customerId);
+      try {
+        const response = await fetch(
+          `${API_BASE}/api/queues/${queueData.queueId}/customers/${customerId}/no-show`,
+          { method: "POST" }
+        );
+        if (!response.ok) {
+          const errorMessage = await getApiErrorMessage(response, "Failed to mark as no-show");
+          console.error(errorMessage);
+        }
+        onRefresh();
+      } catch (err) {
+        console.error("Failed to mark no-show:", err);
+      } finally {
+        setActionInProgress(null);
+      }
+    },
+    [queueData.queueId, onRefresh]
+  );
+
+  const handleRemoveCustomer = useCallback(
+    async (customerId: string) => {
+      setActionInProgress(customerId);
+      try {
+        const response = await fetch(
+          `${API_BASE}/api/queues/${queueData.queueId}/customers/${customerId}`,
+          { method: "DELETE" }
+        );
+        if (!response.ok) {
+          const errorMessage = await getApiErrorMessage(response, "Failed to remove customer");
+          console.error(errorMessage);
+        }
+        onRefresh();
+      } catch (err) {
+        console.error("Failed to remove customer:", err);
+      } finally {
+        setActionInProgress(null);
+      }
+    },
+    [queueData.queueId, onRefresh]
+  );
+
+  return (
+    <div className="space-y-4">
+      {/* Controls row */}
+      <div className="flex gap-3">
+        <button
+          onClick={handleCallNext}
+          disabled={waitingCustomers.length === 0 || isCallingNext}
+          className="flex-1 px-4 py-3 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white font-semibold rounded-xl hover:from-violet-500 hover:to-fuchsia-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+        >
+          {isCallingNext ? "Calling..." : "Call Next"}
+        </button>
+        <button
+          onClick={handleSeedCustomers}
+          disabled={isSeeding}
+          className="px-4 py-3 bg-zinc-800 text-white font-medium rounded-xl hover:bg-zinc-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        >
+          {isSeeding ? "Adding..." : "+ Add Demo Customers"}
+        </button>
+      </div>
+
+      {/* Stats row */}
+      <div className="flex gap-4 text-sm">
+        <div className="flex items-center gap-2">
+          <span className="text-zinc-500">Waiting:</span>
+          <span className="text-white font-semibold">{queueData.waitingCount}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-zinc-500">Called:</span>
+          <span className="text-amber-400 font-semibold">{queueData.calledCount}</span>
+        </div>
+      </div>
+
+      {/* Called customers section */}
+      {calledCustomers.length > 0 && (
+        <div className="space-y-2">
+          <h3 className="text-sm font-medium text-amber-400 uppercase tracking-wide">Called</h3>
+          <div className="space-y-2">
+            {calledCustomers.map((customer) => {
+              const isSelected = customer.token === selectedCustomerToken;
+              const isProcessing = actionInProgress === customer.id;
+
+              return (
+                <div
+                  key={customer.id}
+                  onClick={() => onCustomerSelect(customer.token)}
+                  className={`bg-amber-500/10 border rounded-xl p-3 cursor-pointer transition-all ${
+                    isSelected
+                      ? "border-violet-500 ring-2 ring-violet-500/20"
+                      : "border-amber-500/20 hover:border-amber-500/40"
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 bg-amber-500/20 rounded-lg flex items-center justify-center">
+                        <div className="w-2 h-2 bg-amber-500 rounded-full animate-pulse" />
+                      </div>
+                      <span className="font-medium text-white">{customer.name}</span>
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleMarkServed(customer.id);
+                        }}
+                        disabled={isProcessing}
+                        className="px-3 py-1.5 bg-emerald-500 text-white text-sm font-medium rounded-lg hover:bg-emerald-400 disabled:opacity-50 transition-colors"
+                      >
+                        {isProcessing ? "..." : "Served"}
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleMarkNoShow(customer.id);
+                        }}
+                        disabled={isProcessing}
+                        className="px-3 py-1.5 bg-red-500/20 text-red-400 text-sm font-medium rounded-lg hover:bg-red-500/30 disabled:opacity-50 transition-colors"
+                      >
+                        {isProcessing ? "..." : "No-show"}
+                      </button>
+                    </div>
+                  </div>
+                  {isSelected && (
+                    <p className="text-xs text-violet-400 mt-2 flex items-center gap-1">
+                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M15 19l-7-7 7-7"
+                        />
+                      </svg>
+                      Viewing this customer's perspective
+                    </p>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Waiting customers section */}
+      <div className="space-y-2">
+        <h3 className="text-sm font-medium text-zinc-400 uppercase tracking-wide">Waiting</h3>
+        {waitingCustomers.length === 0 ? (
+          <div className="text-center py-8 text-zinc-600">
+            <svg
+              className="w-12 h-12 mx-auto mb-3 text-zinc-700"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={1.5}
+                d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"
+              />
+            </svg>
+            <p className="text-sm">No customers waiting</p>
+            <p className="text-xs mt-1">Click "+ Add Demo Customers" to populate the queue</p>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {waitingCustomers.map((customer) => {
+              const isSelected = customer.token === selectedCustomerToken;
+              const isProcessing = actionInProgress === customer.id;
+
+              return (
+                <div
+                  key={customer.id}
+                  onClick={() => onCustomerSelect(customer.token)}
+                  className={`bg-zinc-800 border rounded-xl p-3 cursor-pointer transition-all ${
+                    isSelected
+                      ? "border-violet-500 ring-2 ring-violet-500/20"
+                      : "border-zinc-700 hover:border-zinc-600"
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 bg-zinc-700 rounded-lg flex items-center justify-center font-bold text-sm text-white">
+                        {customer.position}
+                      </div>
+                      <span className="font-medium text-white">{customer.name}</span>
+                    </div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleRemoveCustomer(customer.id);
+                      }}
+                      disabled={isProcessing}
+                      className="p-1.5 text-zinc-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg disabled:opacity-50 transition-colors"
+                    >
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M6 18L18 6M6 6l12 12"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                  {isSelected && (
+                    <p className="text-xs text-violet-400 mt-2 flex items-center gap-1">
+                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M15 19l-7-7 7-7"
+                        />
+                      </svg>
+                      Viewing this customer's perspective
+                    </p>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+interface CustomersResponse {
+  customers: Customer[];
+  queueInfo: {
+    name: string;
+    isActive: boolean;
+    isPaused: boolean;
+    waitingCount: number;
+    calledCount: number;
+  };
+}
+
 export function DemoPage(): JSX.Element {
   const [queues, setQueues] = useState<QueueInfo[]>([]);
   const [businessName, setBusinessName] = useState<string>("");
+  const [queueData, setQueueData] = useState<QueueData | null>(null);
+  const [selectedCustomerToken, setSelectedCustomerToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [connectionState, setConnectionState] = useState<ConnectionState>("connecting");
@@ -132,9 +473,47 @@ export function DemoPage(): JSX.Element {
     }
   }, []);
 
+  const primaryQueueId = queues[0]?.queueId;
+
+  const fetchQueueData = useCallback(async () => {
+    if (!primaryQueueId) return;
+
+    try {
+      const response = await fetch(`${API_BASE}/api/queues/${primaryQueueId}/customers`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch queue customers");
+      }
+
+      const data = await safeJsonParse<CustomersResponse>(response);
+      if (!data) {
+        throw new Error("Invalid customers data");
+      }
+
+      setQueueData({
+        queueId: primaryQueueId,
+        queueName: data.queueInfo.name,
+        customers: data.customers,
+        waitingCount: data.queueInfo.waitingCount,
+        calledCount: data.queueInfo.calledCount,
+      });
+    } catch (err) {
+      console.error("Failed to fetch queue data:", err);
+    }
+  }, [primaryQueueId]);
+
   useEffect(() => {
     fetchQueues();
   }, [fetchQueues]);
+
+  useEffect(() => {
+    if (primaryQueueId) {
+      fetchQueueData();
+    }
+  }, [primaryQueueId, fetchQueueData]);
+
+  const handleCustomerSelect = useCallback((token: string) => {
+    setSelectedCustomerToken((current) => (current === token ? null : token));
+  }, []);
 
   if (isLoading) {
     return <LoadingSpinner />;
@@ -143,8 +522,6 @@ export function DemoPage(): JSX.Element {
   if (error) {
     return <ErrorDisplay message={error} onRetry={fetchQueues} />;
   }
-
-  const primaryQueue = queues[0];
 
   return (
     <div className="min-h-screen bg-zinc-950 text-white">
@@ -185,27 +562,19 @@ export function DemoPage(): JSX.Element {
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Staff Panel */}
           <Panel title="Staff Dashboard" variant="staff">
-            <div className="flex flex-col items-center justify-center h-64 text-zinc-500">
-              <svg
-                className="w-12 h-12 mb-4 text-zinc-700"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={1.5}
-                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-                />
-              </svg>
-              <p className="text-sm">Staff controls will appear here</p>
-              {primaryQueue && (
-                <p className="text-xs text-zinc-600 mt-2">
-                  Queue: {primaryQueue.name} ({primaryQueue.waitingCount} waiting)
-                </p>
-              )}
-            </div>
+            {queueData ? (
+              <StaffPanel
+                queueData={queueData}
+                onRefresh={fetchQueueData}
+                onCustomerSelect={handleCustomerSelect}
+                selectedCustomerToken={selectedCustomerToken}
+              />
+            ) : (
+              <div className="flex flex-col items-center justify-center h-64 text-zinc-500">
+                <div className="w-8 h-8 border-2 border-zinc-700 border-t-white rounded-full animate-spin" />
+                <p className="text-sm mt-4">Loading queue data...</p>
+              </div>
+            )}
           </Panel>
 
           {/* Customer Panel */}
