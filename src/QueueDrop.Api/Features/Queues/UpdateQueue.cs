@@ -30,8 +30,10 @@ public static class UpdateQueue
             .WithTags("Queues")
             .RequireAuthorization()
             .Produces<Response>(StatusCodes.Status200OK)
+            .Produces<ProblemDetails>(StatusCodes.Status400BadRequest)
             .Produces<ProblemDetails>(StatusCodes.Status403Forbidden)
-            .Produces<ProblemDetails>(StatusCodes.Status404NotFound);
+            .Produces<ProblemDetails>(StatusCodes.Status404NotFound)
+            .Produces<ProblemDetails>(StatusCodes.Status409Conflict);
     }
 
     private static async Task<IResult> Handler(
@@ -55,6 +57,23 @@ public static class UpdateQueue
                 statusCode: StatusCodes.Status403Forbidden);
         }
 
+        // Input validation
+        if (request.MaxQueueSize is < 1)
+        {
+            return Results.Problem(
+                title: "Invalid max queue size",
+                detail: "Max queue size must be at least 1 if specified.",
+                statusCode: StatusCodes.Status400BadRequest);
+        }
+
+        if (request.EstimatedServiceTimeMinutes is < 1)
+        {
+            return Results.Problem(
+                title: "Invalid service time",
+                detail: "Estimated service time must be at least 1 minute if specified.",
+                statusCode: StatusCodes.Status400BadRequest);
+        }
+
         var queue = await db.Queues
             .Include(q => q.Business)
             .FirstOrDefaultAsync(q =>
@@ -76,15 +95,25 @@ public static class UpdateQueue
         {
             MaxQueueSize = request.MaxQueueSize ?? currentSettings.MaxQueueSize,
             EstimatedServiceTimeMinutes = request.EstimatedServiceTimeMinutes ?? currentSettings.EstimatedServiceTimeMinutes,
-            WelcomeMessage = request.WelcomeMessage ?? currentSettings.WelcomeMessage,
-            CalledMessage = request.CalledMessage ?? currentSettings.CalledMessage
+            WelcomeMessage = request.WelcomeMessage?.Trim() ?? currentSettings.WelcomeMessage,
+            CalledMessage = request.CalledMessage?.Trim() ?? currentSettings.CalledMessage
         };
 
         // Only update settings if something changed
         if (updatedSettings != currentSettings)
             queue.UpdateSettings(updatedSettings);
 
-        await db.SaveChangesAsync(cancellationToken);
+        try
+        {
+            await db.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            return Results.Problem(
+                title: "Concurrent modification",
+                detail: "The queue was modified by another request. Please retry.",
+                statusCode: StatusCodes.Status409Conflict);
+        }
 
         return Results.Ok(new Response(queue.Id, queue.Name, queue.Slug));
     }
