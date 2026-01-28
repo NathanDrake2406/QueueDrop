@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { BrowserRouter, Routes, Route, Navigate, useNavigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useNavigate, Link } from "react-router-dom";
 import { JoinQueue } from "./features/customer/JoinQueue";
 import { QueuePosition } from "./features/customer/QueuePosition";
 import { QRScanner } from "./features/customer/QRScanner";
@@ -9,9 +9,11 @@ import { LoginPage } from "./features/auth/LoginPage";
 import { VerifyPage } from "./features/auth/VerifyPage";
 import { OnboardingPage } from "./features/auth/OnboardingPage";
 import { ProtectedRoute } from "./features/auth/components/ProtectedRoute";
+import { useAuth } from "./features/auth/hooks/useAuth";
 
 function LandingPage() {
   const navigate = useNavigate();
+  const { isAuthenticated, businesses } = useAuth();
 
   return (
     <div className="min-h-screen bg-zinc-950 text-white">
@@ -36,12 +38,21 @@ function LandingPage() {
             >
               Join Queue
             </button>
-            <button
-              onClick={() => navigate("/staff/demo-shop")}
-              className="px-4 py-2 bg-zinc-800 text-white rounded-xl hover:bg-zinc-700 transition-colors"
-            >
-              Staff Login
-            </button>
+            {isAuthenticated ? (
+              <Link
+                to={businesses.length > 0 ? `/staff/${businesses[0].slug}` : '/onboarding'}
+                className="px-4 py-2 bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white font-medium rounded-xl hover:opacity-90 transition-opacity"
+              >
+                Dashboard
+              </Link>
+            ) : (
+              <Link
+                to="/login"
+                className="px-4 py-2 bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white font-medium rounded-xl hover:opacity-90 transition-opacity"
+              >
+                Get Started
+              </Link>
+            )}
           </div>
         </div>
       </nav>
