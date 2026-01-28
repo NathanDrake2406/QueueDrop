@@ -78,13 +78,13 @@ function LandingPage() {
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <button
-              onClick={() => navigate("/join/demo-shop")}
+              onClick={() => navigate("/demo")}
               className="w-full sm:w-auto px-8 py-4 bg-white text-zinc-900 font-semibold rounded-2xl hover:bg-zinc-100 transition-colors"
             >
-              Try Demo Queue
+              Try Interactive Demo
             </button>
             <button
-              onClick={() => navigate("/staff/demo-shop")}
+              onClick={() => navigate("/demo")}
               className="w-full sm:w-auto px-8 py-4 bg-zinc-800 text-white font-semibold rounded-2xl hover:bg-zinc-700 transition-colors"
             >
               View Staff Dashboard
@@ -190,13 +190,13 @@ function LandingPage() {
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <button
-                onClick={() => navigate("/join/demo-shop")}
+                onClick={() => navigate("/demo")}
                 className="w-full sm:w-auto px-8 py-4 bg-white text-zinc-900 font-semibold rounded-2xl hover:bg-zinc-100 transition-colors"
               >
                 Join as Customer
               </button>
               <button
-                onClick={() => navigate("/staff/demo-shop")}
+                onClick={() => navigate("/demo")}
                 className="w-full sm:w-auto px-8 py-4 bg-zinc-800 text-white font-semibold rounded-2xl hover:bg-zinc-700 transition-colors"
               >
                 Open Staff Dashboard

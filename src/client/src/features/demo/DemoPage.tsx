@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Link } from "react-router-dom";
 import { getApiErrorMessage, safeJsonParse } from "../../shared/utils/api";
-import { useSignalR, ConnectionState } from "../../shared/hooks/useSignalR";
+import { useSignalR, type ConnectionState } from "../../shared/hooks/useSignalR";
 
 const API_BASE = import.meta.env.VITE_API_URL || "";
 const SIGNALR_HUB_URL = `${API_BASE}/hubs/queue`;
@@ -39,7 +39,7 @@ interface QueueData {
   calledCount: number;
 }
 
-function ConnectionIndicator({ state }: { state: ConnectionState }): JSX.Element {
+function ConnectionIndicator({ state }: { state: ConnectionState }) {
   const colors = {
     connected: "bg-emerald-500 animate-pulse",
     connecting: "bg-amber-500 animate-pulse",
@@ -64,7 +64,7 @@ function ConnectionIndicator({ state }: { state: ConnectionState }): JSX.Element
   );
 }
 
-function LoadingSpinner(): JSX.Element {
+function LoadingSpinner() {
   return (
     <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
       <div className="w-8 h-8 border-2 border-zinc-700 border-t-white rounded-full animate-spin" />
@@ -77,7 +77,7 @@ interface ErrorDisplayProps {
   onRetry: () => void;
 }
 
-function ErrorDisplay({ message, onRetry }: ErrorDisplayProps): JSX.Element {
+function ErrorDisplay({ message, onRetry }: ErrorDisplayProps) {
   return (
     <div className="min-h-screen bg-zinc-950 text-white flex items-center justify-center p-4">
       <div className="w-full max-w-md text-center">
@@ -110,7 +110,7 @@ interface PanelProps {
   children: React.ReactNode;
 }
 
-function Panel({ title, variant, children }: PanelProps): JSX.Element {
+function Panel({ title, variant, children }: PanelProps) {
   const bgClass = variant === "staff" ? "bg-zinc-900" : "bg-zinc-900/70";
 
   return (
@@ -133,7 +133,7 @@ function StaffPanel({
   onRefresh,
   onCustomerSelect,
   selectedCustomerToken,
-}: StaffPanelProps): JSX.Element {
+}: StaffPanelProps) {
   const [isCallingNext, setIsCallingNext] = useState(false);
   const [isSeeding, setIsSeeding] = useState(false);
   const [actionInProgress, setActionInProgress] = useState<string | null>(null);
@@ -260,6 +260,14 @@ function StaffPanel({
           className="px-4 py-3 bg-zinc-800 text-white font-medium rounded-xl hover:bg-zinc-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           {isSeeding ? "Adding..." : "+ Add Demo Customers"}
+        </button>
+        <button
+          onClick={handleSeedCustomers}
+          disabled={isSeeding}
+          className="px-4 py-3 bg-zinc-800 text-zinc-300 rounded-xl hover:bg-zinc-700 transition-colors"
+          title="Reset demo to initial state"
+        >
+          ↺ Reset
         </button>
       </div>
 
@@ -463,7 +471,7 @@ interface CustomerPanelProps {
   };
 }
 
-function CustomerPanel({ token, signalR }: CustomerPanelProps): JSX.Element {
+function CustomerPanel({ token, signalR }: CustomerPanelProps) {
   const [data, setData] = useState<CustomerPositionData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -694,7 +702,7 @@ function CustomerPanel({ token, signalR }: CustomerPanelProps): JSX.Element {
   );
 }
 
-export function DemoPage(): JSX.Element {
+export function DemoPage() {
   const [queues, setQueues] = useState<QueueInfo[]>([]);
   const [businessName, setBusinessName] = useState<string>("");
   const [queueData, setQueueData] = useState<QueueData | null>(null);
@@ -833,6 +841,13 @@ export function DemoPage(): JSX.Element {
           <ConnectionIndicator state={signalR.state} />
         </div>
       </header>
+
+      {/* Instructional banner */}
+      <div className="bg-violet-500/10 border-b border-violet-500/20 px-4 py-2">
+        <div className="max-w-7xl mx-auto text-center text-sm text-violet-300">
+          <span className="font-medium">Try it:</span> Click "Call Next" on the left, watch the customer position update on the right in real-time!
+        </div>
+      </div>
 
       {/* Main content */}
       <main className="max-w-7xl mx-auto px-4 py-8">
