@@ -6,6 +6,7 @@ import { QRScanner } from "./features/customer/QRScanner";
 import { StaffDashboard } from "./features/staff/StaffDashboard";
 import { AuthProvider } from "./features/auth/AuthContext";
 import { LoginPage } from "./features/auth/LoginPage";
+import { VerifyPage } from "./features/auth/VerifyPage";
 
 function LandingPage() {
   const navigate = useNavigate();
@@ -333,6 +334,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/auth/verify" element={<VerifyPage />} />
           <Route path="/customer" element={<CustomerJoinPage />} />
           <Route path="/scan" element={<QRScanner />} />
           <Route path="/join/:businessSlug/:queueSlug?" element={<JoinQueue />} />
