@@ -3,8 +3,10 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using QueueDrop.Api.Auth;
 using QueueDrop.Domain.Common;
 using QueueDrop.Domain.Entities;
 using QueueDrop.Infrastructure.Persistence;
@@ -63,6 +65,20 @@ public abstract class IntegrationTestBase : IAsyncLifetime
                     // Use fake TimeProvider for deterministic tests
                     services.RemoveAll<TimeProvider>();
                     services.AddSingleton<TimeProvider>(new FakeTimeProvider(FixedTime));
+
+                    // JWT service for auth tests - use in-memory configuration
+                    var jwtConfig = new Dictionary<string, string?>
+                    {
+                        ["Jwt:SecretKey"] = "test-secret-key-that-is-at-least-32-characters-long",
+                        ["Jwt:Issuer"] = "TestIssuer",
+                        ["Jwt:Audience"] = "TestAudience",
+                        ["Jwt:ExpirationMinutes"] = "60"
+                    };
+                    var configuration = new ConfigurationBuilder()
+                        .AddInMemoryCollection(jwtConfig)
+                        .Build();
+                    services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
+                    services.AddSingleton<IJwtTokenService, JwtTokenService>();
                 });
 
                 builder.UseEnvironment("Testing");

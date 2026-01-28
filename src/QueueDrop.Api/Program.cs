@@ -1,8 +1,9 @@
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
+using QueueDrop.Api.Auth;
 using QueueDrop.Api.BackgroundServices;
-using QueueDrop.Api.Features.Customers;
 using QueueDrop.Api.Features.Auth;
+using QueueDrop.Api.Features.Customers;
 using QueueDrop.Api.Features.Demo;
 using QueueDrop.Api.Features.Push;
 using QueueDrop.Api.Features.Queues;
@@ -33,6 +34,10 @@ builder.Services.AddScoped<IQueueHubNotifier, QueueHubNotifier>();
 
 // Time provider (injectable for testing)
 builder.Services.AddSingleton(TimeProvider.System);
+
+// JWT Authentication
+builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection(JwtOptions.SectionName));
+builder.Services.AddSingleton<IJwtTokenService, JwtTokenService>();
 
 // CORS - configurable for production
 var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
@@ -85,6 +90,7 @@ GetVapidPublicKey.MapEndpoint(app);
 
 // Auth endpoints
 SendMagicLink.MapEndpoint(app);
+VerifyMagicLink.MapEndpoint(app);
 
 // Demo endpoints (enabled for portfolio demo)
 SeedDemoData.MapEndpoint(app);
