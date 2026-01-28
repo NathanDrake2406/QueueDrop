@@ -5,6 +5,7 @@ import { QueuePosition } from "./features/customer/QueuePosition";
 import { QRScanner } from "./features/customer/QRScanner";
 import { StaffDashboard } from "./features/staff/StaffDashboard";
 import { AuthProvider } from "./features/auth/AuthContext";
+import { LoginPage } from "./features/auth/LoginPage";
 
 function LandingPage() {
   const navigate = useNavigate();
@@ -331,6 +332,7 @@ export default function App() {
       <AuthProvider>
         <Routes>
           <Route path="/" element={<LandingPage />} />
+          <Route path="/login" element={<LoginPage />} />
           <Route path="/customer" element={<CustomerJoinPage />} />
           <Route path="/scan" element={<QRScanner />} />
           <Route path="/join/:businessSlug/:queueSlug?" element={<JoinQueue />} />
