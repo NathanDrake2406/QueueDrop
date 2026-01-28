@@ -45,6 +45,11 @@ public sealed class QueueCustomer : Entity
     /// <summary>Serialized Web Push subscription (JSON) for notifications.</summary>
     public string? PushSubscription { get; private set; }
 
+    /// <summary>When the customer was notified they're near the front. Null if not yet notified.</summary>
+    public DateTimeOffset? NearFrontNotifiedAt { get; private set; }
+
+    internal void MarkNearFrontNotified(DateTimeOffset timestamp) => NearFrontNotifiedAt = timestamp;
+
     // EF Core constructor
     private QueueCustomer() { }
 
