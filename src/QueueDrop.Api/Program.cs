@@ -46,6 +46,9 @@ builder.Services.AddAuthentication("Bearer")
 builder.Services.ConfigureOptions<ConfigureJwtBearerOptions>();
 builder.Services.AddAuthorization();
 
+// Business authorization
+builder.Services.AddScoped<IBusinessAuthorizationService, BusinessAuthorizationService>();
+
 // CORS - configurable for production
 var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
     ?? ["http://localhost:5173", "http://localhost:3000"];
