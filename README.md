@@ -25,7 +25,7 @@ Click "Call Next" and watch both panels update in real-time via WebSockets!
 - **Near-front alerts** — Notify customers when they're almost up
 - **Mobile-first PWA** — Installable, works offline, no app store needed
 - **Staff dashboard** — One-click actions: call next, mark served, remove, no-show
-- **Magic link auth** — Passwordless authentication for staff
+- **Magic link auth** — Passwordless email authentication for staff (via Resend)
 
 ## Tech Stack
 
@@ -34,6 +34,7 @@ Click "Call Next" and watch both panels update in real-time via WebSockets!
 | **Backend**   | .NET 8 Minimal API, Vertical Slice Architecture |
 | **Database**  | PostgreSQL 16 with EF Core                      |
 | **Real-time** | SignalR (WebSockets with fallback)              |
+| **Email**     | Resend (transactional emails for magic links)   |
 | **Frontend**  | React 19, TypeScript (strict), Tailwind CSS v4  |
 | **Testing**   | xUnit, Vitest, Testing Library, Playwright E2E  |
 | **CI/CD**     | GitHub Actions, Playwright E2E, Codecov         |
@@ -162,6 +163,7 @@ Deploy with Vercel (frontend) + Railway (backend + PostgreSQL).
 # Required env vars on Railway:
 # - ConnectionStrings__DefaultConnection (auto-set by Railway PostgreSQL)
 # - Cors__AllowedOrigins__0=https://your-app.vercel.app
+# - Resend__ApiKey=re_xxxxx (for magic link emails)
 ```
 
 [Full deployment guide →](docs/DEPLOYMENT.md)
@@ -174,6 +176,7 @@ Deploy with Vercel (frontend) + Railway (backend + PostgreSQL).
 - [x] Near-front alerts
 - [x] QR code generation
 - [x] Interactive split-screen demo
+- [x] Email notifications (Resend)
 - [ ] SMS notifications (Twilio)
 - [ ] Wait time predictions (ML-based)
 
