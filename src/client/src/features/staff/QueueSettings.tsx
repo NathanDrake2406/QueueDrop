@@ -105,6 +105,24 @@ export function QueueSettings({ queueId, onClose }: QueueSettingsProps) {
           <p className="mt-1 text-xs text-zinc-600">Auto-mark called customers as no-show after this time</p>
         </div>
 
+        {/* Near-Front Threshold */}
+        <div>
+          <label htmlFor="nearFrontThreshold" className="block text-sm font-medium text-zinc-400 mb-2">
+            Near-front alert position
+          </label>
+          <input
+            type="number"
+            id="nearFrontThreshold"
+            value={formData.nearFrontThreshold ?? ""}
+            onChange={(e) => handleChange("nearFrontThreshold", e.target.value ? parseInt(e.target.value, 10) : null)}
+            min={1}
+            max={10}
+            placeholder="Disabled"
+            className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:border-violet-500"
+          />
+          <p className="text-xs text-zinc-500 mt-1">Notify customers when they reach this position (1-10)</p>
+        </div>
+
         {/* Allow Join When Paused */}
         <div className="flex items-center justify-between p-4 bg-zinc-800 rounded-xl">
           <div>

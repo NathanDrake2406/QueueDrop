@@ -5,6 +5,7 @@ export interface QueueSettings {
   maxQueueSize: number | null;
   estimatedServiceTimeMinutes: number;
   noShowTimeoutMinutes: number;
+  nearFrontThreshold: number | null;
   allowJoinWhenPaused: boolean;
   welcomeMessage: string | null;
   calledMessage: string | null;
