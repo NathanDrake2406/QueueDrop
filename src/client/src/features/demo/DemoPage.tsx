@@ -771,6 +771,32 @@ export function DemoPage(): JSX.Element {
     }
   }, [primaryQueueId, fetchQueueData]);
 
+  // Staff room SignalR: join room and listen for QueueUpdated
+  useEffect(() => {
+    if (signalR.state !== "connected" || !queueData) {
+      return;
+    }
+
+    const DEMO_BUSINESS_ID = "11111111-1111-1111-1111-111111111111";
+
+    signalR.invoke("JoinStaffRoom", DEMO_BUSINESS_ID).catch((err) => {
+      console.error("Failed to join staff room:", err);
+    });
+
+    function handleQueueUpdated(): void {
+      fetchQueueData();
+    }
+
+    const unsubscribe = signalR.on("QueueUpdated", handleQueueUpdated);
+
+    return () => {
+      unsubscribe();
+      signalR.invoke("LeaveStaffRoom", DEMO_BUSINESS_ID).catch((err) => {
+        console.error("Failed to leave staff room:", err);
+      });
+    };
+  }, [signalR.state, queueData, signalR, fetchQueueData]);
+
   const handleCustomerSelect = useCallback((token: string) => {
     setSelectedCustomerToken((current) => (current === token ? null : token));
   }, []);
