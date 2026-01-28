@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getApiErrorMessage } from '../../shared/utils/api';
+import { useDarkMode } from '../../shared/hooks/useDarkMode';
 
 type PageState = 'form' | 'sent';
 
@@ -11,6 +12,7 @@ export function LoginPage() {
   const [pageState, setPageState] = useState<PageState>('form');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isDark] = useDarkMode();
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -40,12 +42,12 @@ export function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white">
+    <div className={`min-h-screen transition-colors ${isDark ? "bg-slate-950 text-white" : "bg-slate-50 text-slate-900"}`}>
       <div className="max-w-md mx-auto px-4 py-12">
         {/* Back button */}
         <button
           onClick={() => navigate('/')}
-          className="flex items-center gap-2 text-zinc-500 hover:text-white mb-8 transition-colors"
+          className={`flex items-center gap-2 mb-8 transition-colors ${isDark ? "text-slate-500 hover:text-white" : "text-slate-500 hover:text-slate-900"}`}
         >
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -55,7 +57,7 @@ export function LoginPage() {
 
         {/* Logo */}
         <div className="text-center mb-12">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-violet-500 to-fuchsia-500 rounded-2xl mb-4">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-teal-600 rounded-lg mb-4 shadow-lg shadow-teal-600/20">
             <svg className="w-8 h-8 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
               <circle cx="9" cy="7" r="4" />
@@ -63,10 +65,10 @@ export function LoginPage() {
               <path d="M16 3.13a4 4 0 0 1 0 7.75" />
             </svg>
           </div>
-          <h1 className="text-3xl font-bold tracking-tight">
+          <h1 className="font-display text-3xl font-bold tracking-tight">
             {pageState === 'form' ? 'Sign in to QueueDrop' : 'Check your email'}
           </h1>
-          <p className="text-zinc-500 mt-2">
+          <p className={`mt-2 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
             {pageState === 'form'
               ? 'Enter your email to receive a magic link'
               : `We sent a sign-in link to ${email}`}
@@ -85,13 +87,17 @@ export function LoginPage() {
                 required
                 autoFocus
                 autoComplete="email"
-                className="w-full px-5 py-4 bg-zinc-900 border border-zinc-800 rounded-xl text-white placeholder-zinc-600 focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all"
+                className={`w-full px-4 py-3.5 border rounded-lg transition-all focus:outline-none focus:ring-2 focus:ring-teal-500/20 ${
+                  isDark
+                    ? "bg-slate-900 border-slate-700 text-white placeholder-slate-500 focus:border-teal-500"
+                    : "bg-white border-slate-300 text-slate-900 placeholder-slate-400 focus:border-teal-500"
+                }`}
               />
             </div>
 
             {/* Error message */}
             {error && (
-              <div className="mb-4 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-sm">
+              <div className={`mb-4 p-4 border rounded-lg text-sm ${isDark ? "bg-red-500/10 border-red-500/20 text-red-400" : "bg-red-50 border-red-200 text-red-600"}`}>
                 {error}
               </div>
             )}
@@ -100,7 +106,7 @@ export function LoginPage() {
             <button
               type="submit"
               disabled={isLoading || !email.trim()}
-              className="w-full py-4 bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white font-semibold rounded-xl hover:from-violet-600 hover:to-fuchsia-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              className="w-full py-3.5 bg-teal-600 text-white font-semibold rounded-lg hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-teal-600/20"
             >
               {isLoading ? (
                 <span className="flex items-center justify-center gap-2">
@@ -118,13 +124,13 @@ export function LoginPage() {
         ) : (
           <div className="text-center">
             {/* Success icon */}
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-green-500/10 border border-green-500/20 rounded-full mb-6">
-              <svg className="w-8 h-8 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <div className={`inline-flex items-center justify-center w-16 h-16 rounded-lg mb-6 ${isDark ? "bg-teal-500/10 border border-teal-500/20" : "bg-teal-50 border border-teal-200"}`}>
+              <svg className="w-8 h-8 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
               </svg>
             </div>
 
-            <p className="text-zinc-400 mb-8">
+            <p className={`mb-8 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
               Click the link in your email to sign in. The link will expire in 15 minutes.
             </p>
 
@@ -135,7 +141,7 @@ export function LoginPage() {
                 setEmail('');
                 setError(null);
               }}
-              className="text-violet-400 font-medium hover:text-violet-300 transition-colors"
+              className="text-teal-600 font-medium hover:text-teal-700 transition-colors"
             >
               Use a different email
             </button>
@@ -143,7 +149,7 @@ export function LoginPage() {
         )}
 
         {/* Footer */}
-        <p className="text-center text-zinc-600 text-sm mt-12">
+        <p className={`text-center text-sm mt-12 ${isDark ? "text-slate-600" : "text-slate-400"}`}>
           No account? No problem. We'll create one for you.
         </p>
       </div>
