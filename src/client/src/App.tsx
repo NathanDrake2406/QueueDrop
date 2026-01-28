@@ -7,6 +7,7 @@ import { StaffDashboard } from "./features/staff/StaffDashboard";
 import { AuthProvider } from "./features/auth/AuthContext";
 import { LoginPage } from "./features/auth/LoginPage";
 import { VerifyPage } from "./features/auth/VerifyPage";
+import { OnboardingPage } from "./features/auth/OnboardingPage";
 
 function LandingPage() {
   const navigate = useNavigate();
@@ -335,6 +336,7 @@ export default function App() {
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/auth/verify" element={<VerifyPage />} />
+          <Route path="/onboarding" element={<OnboardingPage />} />
           <Route path="/customer" element={<CustomerJoinPage />} />
           <Route path="/scan" element={<QRScanner />} />
           <Route path="/join/:businessSlug/:queueSlug?" element={<JoinQueue />} />
