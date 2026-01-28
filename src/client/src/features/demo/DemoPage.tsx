@@ -433,6 +433,191 @@ interface CustomersResponse {
   };
 }
 
+interface CustomerPositionData {
+  position: number | null;
+  status: string;
+  queueName: string;
+  businessName: string;
+  calledMessage?: string;
+  welcomeMessage?: string;
+}
+
+interface CustomerPanelProps {
+  token: string | null;
+}
+
+function CustomerPanel({ token }: CustomerPanelProps): JSX.Element {
+  const [data, setData] = useState<CustomerPositionData | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchPosition = useCallback(async () => {
+    if (!token) {
+      setData(null);
+      setError(null);
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch(`${API_BASE}/api/q/${token}`);
+      if (!response.ok) {
+        if (response.status === 404) {
+          throw new Error("Customer not found");
+        }
+        throw new Error("Failed to fetch position");
+      }
+
+      const positionData = await safeJsonParse<CustomerPositionData>(response);
+      if (!positionData) {
+        throw new Error("Invalid position data");
+      }
+
+      setData(positionData);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "An error occurred";
+      setError(message);
+      setData(null);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [token]);
+
+  useEffect(() => {
+    fetchPosition();
+  }, [fetchPosition]);
+
+  // No token selected - show placeholder
+  if (!token) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full min-h-[300px] text-zinc-500">
+        <svg
+          className="w-12 h-12 mb-4 text-zinc-700"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={1.5}
+            d="M10 19l-7-7m0 0l7-7m-7 7h18"
+          />
+        </svg>
+        <p className="text-sm font-medium">Select a customer from the staff panel</p>
+        <p className="text-xs text-zinc-600 mt-1">to see their live view</p>
+      </div>
+    );
+  }
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full min-h-[300px]">
+        <div className="w-8 h-8 border-2 border-zinc-700 border-t-white rounded-full animate-spin" />
+        <p className="text-sm text-zinc-500 mt-4">Loading customer view...</p>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full min-h-[300px] text-center">
+        <div className="w-12 h-12 bg-red-500/20 rounded-xl flex items-center justify-center mb-4">
+          <svg className="w-6 h-6 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+            />
+          </svg>
+        </div>
+        <p className="text-sm text-zinc-400">{error}</p>
+        <button
+          onClick={fetchPosition}
+          className="mt-4 px-4 py-2 bg-zinc-800 text-white text-sm font-medium rounded-lg hover:bg-zinc-700 transition-colors"
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
+
+  // No data
+  if (!data) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full min-h-[300px] text-zinc-500">
+        <p className="text-sm">No data available</p>
+      </div>
+    );
+  }
+
+  const isCalled = data.status === "Called";
+  const isWaiting = data.status === "Waiting";
+
+  return (
+    <div className="flex flex-col h-full">
+      {/* Header */}
+      <div className="mb-4">
+        <p className="text-zinc-500 text-sm">{data.businessName}</p>
+        <p className="text-zinc-400 text-xs">{data.queueName}</p>
+      </div>
+
+      {/* Main content */}
+      <div className="flex-1 flex flex-col justify-center">
+        {isCalled ? (
+          <div className="relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-emerald-500 to-teal-600 opacity-20 blur-3xl" />
+            <div className="relative bg-gradient-to-br from-emerald-500/10 to-teal-500/10 border border-emerald-500/20 rounded-2xl p-6 text-center">
+              <div className="w-16 h-16 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg
+                  className="w-8 h-8 text-emerald-400"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <h2 className="text-2xl font-bold text-white mb-2">It's Your Turn!</h2>
+              <p className="text-emerald-200/80">{data.calledMessage || "Please proceed to the counter"}</p>
+            </div>
+          </div>
+        ) : isWaiting && data.position ? (
+          <div className="bg-zinc-800/50 border border-zinc-700 rounded-2xl p-6 text-center">
+            <p className="text-zinc-500 text-sm uppercase tracking-wider mb-2">Your position</p>
+            <div className="relative inline-block">
+              <div className="text-8xl font-bold leading-none bg-gradient-to-b from-white to-zinc-400 bg-clip-text text-transparent">
+                {data.position}
+              </div>
+              <div className="absolute -inset-4 bg-gradient-to-r from-violet-500/20 to-fuchsia-500/20 blur-3xl -z-10" />
+            </div>
+            <p className="text-zinc-400 mt-3 text-sm">
+              {data.position === 1 ? "You're next!" : `${data.position - 1} ${data.position - 1 === 1 ? "person" : "people"} ahead`}
+            </p>
+          </div>
+        ) : (
+          <div className="bg-zinc-800/50 border border-zinc-700 rounded-2xl p-6 text-center">
+            <p className="text-zinc-400">Status: {data.status}</p>
+          </div>
+        )}
+      </div>
+
+      {/* Footer */}
+      <div className="mt-4 pt-4 border-t border-zinc-800">
+        <div className="flex items-center gap-2">
+          <div className="w-2 h-2 rounded-full bg-emerald-500" />
+          <span className="text-xs text-zinc-500">Connected via SignalR</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function DemoPage(): JSX.Element {
   const [queues, setQueues] = useState<QueueInfo[]>([]);
   const [businessName, setBusinessName] = useState<string>("");
@@ -579,23 +764,7 @@ export function DemoPage(): JSX.Element {
 
           {/* Customer Panel */}
           <Panel title="Customer View" variant="customer">
-            <div className="flex flex-col items-center justify-center h-64 text-zinc-500">
-              <svg
-                className="w-12 h-12 mb-4 text-zinc-700"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={1.5}
-                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                />
-              </svg>
-              <p className="text-sm">Customer position will appear here</p>
-              <p className="text-xs text-zinc-600 mt-2">Real-time updates via SignalR</p>
-            </div>
+            <CustomerPanel token={selectedCustomerToken} />
           </Panel>
         </div>
       </main>
