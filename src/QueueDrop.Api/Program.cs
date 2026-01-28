@@ -10,9 +10,11 @@ using QueueDrop.Api.Features.Push;
 using QueueDrop.Api.Features.Queues;
 using QueueDrop.Api.Features.Staff;
 using QueueDrop.Domain.Abstractions;
+using QueueDrop.Infrastructure.Email;
 using QueueDrop.Infrastructure.Persistence;
 using QueueDrop.Infrastructure.PushNotifications;
 using QueueDrop.Infrastructure.SignalR;
+using Resend;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -74,6 +76,22 @@ builder.Services.AddHostedService<AutoNoShowService>();
 // Web Push
 builder.Services.Configure<VapidOptions>(builder.Configuration.GetSection(VapidOptions.SectionName));
 builder.Services.AddSingleton<IWebPushService, WebPushService>();
+
+// Email (Resend) - falls back to console logging in development if no API key
+var resendApiKey = builder.Configuration["Resend:ApiKey"];
+if (!string.IsNullOrWhiteSpace(resendApiKey))
+{
+    builder.Services.AddOptions();
+    builder.Services.AddHttpClient<ResendClient>();
+    builder.Services.Configure<ResendClientOptions>(o => o.ApiToken = resendApiKey);
+    builder.Services.AddTransient<IResend, ResendClient>();
+    builder.Services.Configure<ResendOptions>(builder.Configuration.GetSection(ResendOptions.SectionName));
+    builder.Services.AddTransient<IEmailService, ResendEmailService>();
+}
+else
+{
+    builder.Services.AddTransient<IEmailService, ConsoleEmailService>();
+}
 
 var app = builder.Build();
 

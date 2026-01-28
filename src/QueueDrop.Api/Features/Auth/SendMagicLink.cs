@@ -1,5 +1,6 @@
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Mvc;
+using QueueDrop.Domain.Abstractions;
 using QueueDrop.Domain.Entities;
 using QueueDrop.Infrastructure.Persistence;
 
@@ -26,6 +27,8 @@ public static partial class SendMagicLink
         Request request,
         AppDbContext db,
         TimeProvider timeProvider,
+        IEmailService emailService,
+        IConfiguration configuration,
         ILogger<Program> logger,
         CancellationToken cancellationToken)
     {
@@ -46,9 +49,24 @@ public static partial class SendMagicLink
         db.MagicLinks.Add(magicLink);
         await db.SaveChangesAsync(cancellationToken);
 
-        // TODO: Send email - for now, log to console
-        var verifyUrl = $"/auth/verify?token={magicLink.Token}";
-        logger.LogInformation("Magic link created for {Email}: {Url}", request.Email, verifyUrl);
+        // Build the full magic link URL
+        var baseUrl = configuration["App:BaseUrl"] ?? "http://localhost:5173";
+        var verifyUrl = $"{baseUrl}/auth/verify?token={magicLink.Token}";
+
+        // Send the email
+        var emailResult = await emailService.SendMagicLinkAsync(
+            request.Email,
+            verifyUrl,
+            cancellationToken);
+
+        if (!emailResult.IsSuccess)
+        {
+            logger.LogWarning(
+                "Failed to send magic link email to {Email}: {Error}",
+                request.Email,
+                emailResult.Error);
+            // Still return success to avoid leaking whether email exists
+        }
 
         return Results.Ok(new { message = "If an account exists, a login link has been sent." });
     }
