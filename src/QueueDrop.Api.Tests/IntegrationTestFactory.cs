@@ -37,6 +37,19 @@ public abstract class IntegrationTestBase : IAsyncLifetime
         _factory = new WebApplicationFactory<Program>()
             .WithWebHostBuilder(builder =>
             {
+                // Configure JWT settings before the host builds (for JWT Bearer middleware)
+                builder.ConfigureAppConfiguration((context, config) =>
+                {
+                    var jwtConfig = new Dictionary<string, string?>
+                    {
+                        ["Jwt:SecretKey"] = "test-secret-key-that-is-at-least-32-characters-long",
+                        ["Jwt:Issuer"] = "TestIssuer",
+                        ["Jwt:Audience"] = "TestAudience",
+                        ["Jwt:ExpirationMinutes"] = "60"
+                    };
+                    config.AddInMemoryCollection(jwtConfig);
+                });
+
                 builder.ConfigureServices(services =>
                 {
                     // Remove all DbContext registrations (both generic and concrete types)
@@ -66,19 +79,7 @@ public abstract class IntegrationTestBase : IAsyncLifetime
                     services.RemoveAll<TimeProvider>();
                     services.AddSingleton<TimeProvider>(new FakeTimeProvider(FixedTime));
 
-                    // JWT service for auth tests - use in-memory configuration
-                    var jwtConfig = new Dictionary<string, string?>
-                    {
-                        ["Jwt:SecretKey"] = "test-secret-key-that-is-at-least-32-characters-long",
-                        ["Jwt:Issuer"] = "TestIssuer",
-                        ["Jwt:Audience"] = "TestAudience",
-                        ["Jwt:ExpirationMinutes"] = "60"
-                    };
-                    var configuration = new ConfigurationBuilder()
-                        .AddInMemoryCollection(jwtConfig)
-                        .Build();
-                    services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
-                    services.AddSingleton<IJwtTokenService, JwtTokenService>();
+                    // JWT service already configured via ConfigureAppConfiguration above
                 });
 
                 builder.UseEnvironment("Testing");

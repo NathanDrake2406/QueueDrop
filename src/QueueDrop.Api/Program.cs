@@ -39,6 +39,12 @@ builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection(JwtOptions.SectionName));
 builder.Services.AddSingleton<IJwtTokenService, JwtTokenService>();
 
+// JWT Bearer Authentication - use IConfigureOptions for testability
+builder.Services.AddAuthentication("Bearer")
+    .AddJwtBearer("Bearer", _ => { });
+builder.Services.ConfigureOptions<ConfigureJwtBearerOptions>();
+builder.Services.AddAuthorization();
+
 // CORS - configurable for production
 var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
     ?? ["http://localhost:5173", "http://localhost:3000"];
@@ -68,6 +74,8 @@ var app = builder.Build();
 
 // Configure pipeline
 app.UseCors("Frontend");
+app.UseAuthentication();
+app.UseAuthorization();
 
 // Health check
 app.MapGet("/", () => "QueueDrop API");
@@ -91,6 +99,7 @@ GetVapidPublicKey.MapEndpoint(app);
 // Auth endpoints
 SendMagicLink.MapEndpoint(app);
 VerifyMagicLink.MapEndpoint(app);
+GetMe.MapEndpoint(app);
 
 // Demo endpoints (enabled for portfolio demo)
 SeedDemoData.MapEndpoint(app);
