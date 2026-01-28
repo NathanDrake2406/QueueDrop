@@ -10,8 +10,8 @@ namespace QueueDrop.Api.Features.Auth;
 /// </summary>
 public static class GetMe
 {
-    public sealed record BusinessInfo(Guid Id, string Name, string Slug, string Role);
-    public sealed record Response(Guid UserId, string Email, BusinessInfo? Business);
+    public sealed record BusinessDto(Guid Id, string Name, string Slug);
+    public sealed record Response(Guid UserId, string Email, List<BusinessDto> Businesses);
 
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
@@ -42,21 +42,13 @@ public static class GetMe
             return Results.Unauthorized();
         }
 
-        // Get user's business membership (if any)
-        var membership = await db.BusinessMembers
+        // Get all businesses where user is a member (JoinedAt is not null)
+        var businesses = await db.BusinessMembers
             .Include(bm => bm.Business)
-            .FirstOrDefaultAsync(bm => bm.UserId == userId && bm.JoinedAt != null, cancellationToken);
+            .Where(bm => bm.UserId == userId && bm.JoinedAt != null)
+            .Select(bm => new BusinessDto(bm.Business.Id, bm.Business.Name, bm.Business.Slug))
+            .ToListAsync(cancellationToken);
 
-        BusinessInfo? businessInfo = null;
-        if (membership is not null)
-        {
-            businessInfo = new BusinessInfo(
-                membership.Business.Id,
-                membership.Business.Name,
-                membership.Business.Slug,
-                membership.Role.ToString());
-        }
-
-        return Results.Ok(new Response(dbUser.Id, dbUser.Email, businessInfo));
+        return Results.Ok(new Response(dbUser.Id, dbUser.Email, businesses));
     }
 }
