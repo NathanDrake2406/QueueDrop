@@ -11,6 +11,7 @@ interface QueuePosition {
   recentActivity: number;
   welcomeMessage: string | null;
   calledMessage: string | null;
+  nearFrontAlert: boolean;
 }
 
 interface UseQueuePositionResult {
@@ -60,7 +61,7 @@ export function useQueuePosition(token: string): UseQueuePositionResult {
       if (!result) {
         throw new Error("Invalid response from server");
       }
-      setData(result);
+      setData({ ...result, nearFrontAlert: false });
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unknown error");
@@ -116,10 +117,23 @@ export function useQueuePosition(token: string): UseQueuePositionResult {
       setData((prev) => (prev ? { ...prev, status } : null));
     });
 
+    const unsubNearFront = on<number>("NearFront", (position) => {
+      setData((prev) =>
+        prev
+          ? {
+              ...prev,
+              position,
+              nearFrontAlert: true,
+            }
+          : null,
+      );
+    });
+
     return () => {
       unsubPosition();
       unsubCalled();
       unsubStatus();
+      unsubNearFront();
     };
   }, [on]);
 
