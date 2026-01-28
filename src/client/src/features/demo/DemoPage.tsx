@@ -1,8 +1,10 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Link } from "react-router-dom";
 import { getApiErrorMessage, safeJsonParse } from "../../shared/utils/api";
+import { useSignalR, ConnectionState } from "../../shared/hooks/useSignalR";
 
 const API_BASE = import.meta.env.VITE_API_URL || "";
+const SIGNALR_HUB_URL = `${API_BASE}/hubs/queue`;
 
 interface QueueInfo {
   queueId: string;
@@ -37,21 +39,26 @@ interface QueueData {
   calledCount: number;
 }
 
-type ConnectionState = "connecting" | "connected" | "reconnecting" | "disconnected";
-
 function ConnectionIndicator({ state }: { state: ConnectionState }): JSX.Element {
   const colors = {
-    connected: "bg-emerald-500",
+    connected: "bg-emerald-500 animate-pulse",
     connecting: "bg-amber-500 animate-pulse",
     reconnecting: "bg-amber-500 animate-pulse",
     disconnected: "bg-red-500",
+  };
+
+  const labels = {
+    connected: "Live updates active",
+    connecting: "Connecting...",
+    reconnecting: "Reconnecting...",
+    disconnected: "Disconnected",
   };
 
   return (
     <div className="flex items-center gap-2">
       <div className={`w-2 h-2 rounded-full ${colors[state]}`} />
       <span className="text-xs text-zinc-500 uppercase tracking-wide">
-        {state === "connected" ? "Live" : state}
+        {labels[state]}
       </span>
     </div>
   );
@@ -442,14 +449,25 @@ interface CustomerPositionData {
   welcomeMessage?: string;
 }
 
-interface CustomerPanelProps {
-  token: string | null;
+interface PositionChangedPayload {
+  position: number;
+  status: string;
 }
 
-function CustomerPanel({ token }: CustomerPanelProps): JSX.Element {
+interface CustomerPanelProps {
+  token: string | null;
+  signalR: {
+    state: ConnectionState;
+    invoke: <T = void>(methodName: string, ...args: unknown[]) => Promise<T>;
+    on: <T = unknown>(eventName: string, callback: (data: T) => void) => () => void;
+  };
+}
+
+function CustomerPanel({ token, signalR }: CustomerPanelProps): JSX.Element {
   const [data, setData] = useState<CustomerPositionData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const previousTokenRef = useRef<string | null>(null);
 
   const fetchPosition = useCallback(async () => {
     if (!token) {
@@ -488,6 +506,67 @@ function CustomerPanel({ token }: CustomerPanelProps): JSX.Element {
   useEffect(() => {
     fetchPosition();
   }, [fetchPosition]);
+
+  // SignalR room management and event listeners
+  useEffect(() => {
+    if (!token || signalR.state !== "connected") {
+      return;
+    }
+
+    const previousToken = previousTokenRef.current;
+
+    // Leave previous room if token changed
+    if (previousToken && previousToken !== token) {
+      signalR.invoke("LeaveCustomerRoom", previousToken).catch((err) => {
+        console.error("Failed to leave customer room:", err);
+      });
+    }
+
+    // Join new room
+    signalR.invoke("JoinCustomerRoom", token).catch((err) => {
+      console.error("Failed to join customer room:", err);
+    });
+
+    previousTokenRef.current = token;
+
+    // Set up event listeners
+    function handlePositionChanged(payload: PositionChangedPayload): void {
+      setData((current) => {
+        if (!current) return current;
+        return {
+          ...current,
+          position: payload.position,
+          status: payload.status,
+        };
+      });
+    }
+
+    function handleCalled(): void {
+      setData((current) => {
+        if (!current) return current;
+        return {
+          ...current,
+          status: "Called",
+          position: null,
+        };
+      });
+    }
+
+    const unsubscribePositionChanged = signalR.on<PositionChangedPayload>("PositionChanged", handlePositionChanged);
+    const unsubscribeCalled = signalR.on("Called", handleCalled);
+
+    // Cleanup: leave room and remove listeners
+    return () => {
+      unsubscribePositionChanged();
+      unsubscribeCalled();
+
+      if (token) {
+        signalR.invoke("LeaveCustomerRoom", token).catch((err) => {
+          console.error("Failed to leave customer room on cleanup:", err);
+        });
+      }
+    };
+  }, [token, signalR]);
 
   // No token selected - show placeholder
   if (!token) {
@@ -609,10 +688,7 @@ function CustomerPanel({ token }: CustomerPanelProps): JSX.Element {
 
       {/* Footer */}
       <div className="mt-4 pt-4 border-t border-zinc-800">
-        <div className="flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-emerald-500" />
-          <span className="text-xs text-zinc-500">Connected via SignalR</span>
-        </div>
+        <ConnectionIndicator state={signalR.state} />
       </div>
     </div>
   );
@@ -625,7 +701,8 @@ export function DemoPage(): JSX.Element {
   const [selectedCustomerToken, setSelectedCustomerToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [connectionState, setConnectionState] = useState<ConnectionState>("connecting");
+
+  const signalR = useSignalR({ hubUrl: SIGNALR_HUB_URL });
 
   const fetchQueues = useCallback(async () => {
     setIsLoading(true);
@@ -648,11 +725,9 @@ export function DemoPage(): JSX.Element {
 
       setQueues(data.queues);
       setBusinessName(data.businessName);
-      setConnectionState("connected");
     } catch (err) {
       const message = err instanceof Error ? err.message : "An unexpected error occurred";
       setError(message);
-      setConnectionState("disconnected");
     } finally {
       setIsLoading(false);
     }
@@ -729,7 +804,7 @@ export function DemoPage(): JSX.Element {
               <p className="text-sm text-zinc-500">{businessName}</p>
             </div>
           </div>
-          <ConnectionIndicator state={connectionState} />
+          <ConnectionIndicator state={signalR.state} />
         </div>
       </header>
 
@@ -764,7 +839,7 @@ export function DemoPage(): JSX.Element {
 
           {/* Customer Panel */}
           <Panel title="Customer View" variant="customer">
-            <CustomerPanel token={selectedCustomerToken} />
+            <CustomerPanel token={selectedCustomerToken} signalR={signalR} />
           </Panel>
         </div>
       </main>
