@@ -116,6 +116,48 @@ public class InviteStaffTests : IntegrationTestBase
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
+    [Fact]
+    public async Task InviteStaff_WithPendingInvite_ShouldReturn409()
+    {
+        // Arrange
+        var (token, businessSlug) = await SetupOwnerWithBusiness("owner@test.com", "my-shop");
+        Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var staffEmail = "staff@test.com";
+
+        // First invite should succeed
+        var firstResponse = await Client.PostAsJsonAsync($"/api/business/{businessSlug}/staff/invite", new
+        {
+            email = staffEmail
+        });
+        firstResponse.StatusCode.Should().Be(HttpStatusCode.Created);
+
+        // Act - second invite to same email
+        var secondResponse = await Client.PostAsJsonAsync($"/api/business/{businessSlug}/staff/invite", new
+        {
+            email = staffEmail
+        });
+
+        // Assert
+        secondResponse.StatusCode.Should().Be(HttpStatusCode.Conflict);
+    }
+
+    [Fact]
+    public async Task InviteStaff_WhenAlreadyMember_ShouldReturn409()
+    {
+        // Arrange
+        var (token, businessSlug) = await SetupOwnerWithBusiness("owner@test.com", "my-shop");
+        Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        // Act - try to invite the owner (who is already a member)
+        var response = await Client.PostAsJsonAsync($"/api/business/{businessSlug}/staff/invite", new
+        {
+            email = "owner@test.com"
+        });
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.Conflict);
+    }
+
     private async Task<(string Token, string BusinessSlug)> SetupOwnerWithBusiness(string email, string slug)
     {
         var token = await GetAuthToken(email);

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using QueueDrop.Api.Auth;
 using QueueDrop.Domain.Entities;
+using QueueDrop.Domain.Enums;
 using QueueDrop.Infrastructure.Persistence;
 
 namespace QueueDrop.Api.Features.Staff;
@@ -16,6 +17,7 @@ namespace QueueDrop.Api.Features.Staff;
 public static partial class InviteStaff
 {
     public sealed record Request(string Email);
+    public sealed record Response(string Message);
 
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
@@ -23,10 +25,11 @@ public static partial class InviteStaff
             .WithName("InviteStaff")
             .WithTags("Staff")
             .RequireAuthorization()
-            .Produces(StatusCodes.Status201Created)
+            .Produces<Response>(StatusCodes.Status201Created)
             .Produces<ProblemDetails>(StatusCodes.Status400BadRequest)
             .Produces<ProblemDetails>(StatusCodes.Status403Forbidden)
-            .Produces<ProblemDetails>(StatusCodes.Status404NotFound);
+            .Produces<ProblemDetails>(StatusCodes.Status404NotFound)
+            .Produces<ProblemDetails>(StatusCodes.Status409Conflict);
     }
 
     private static async Task<IResult> Handler(
@@ -68,7 +71,44 @@ public static partial class InviteStaff
                 statusCode: StatusCodes.Status400BadRequest);
         }
 
+        var normalizedEmail = request.Email.ToLowerInvariant();
+
+        // Check if email already belongs to a member
+        var existingMember = await db.BusinessMembers
+            .Include(bm => bm.User)
+            .Include(bm => bm.Business)
+            .FirstOrDefaultAsync(bm =>
+                bm.User.Email == normalizedEmail &&
+                bm.Business.Slug == businessSlug.ToLowerInvariant() &&
+                bm.JoinedAt != null, cancellationToken);
+
+        if (existingMember is not null)
+        {
+            return Results.Problem(
+                title: "Already a member",
+                detail: "This email is already a member of this business.",
+                statusCode: StatusCodes.Status409Conflict);
+        }
+
         var now = timeProvider.GetUtcNow();
+
+        // Check for existing pending invite
+        var existingInvite = await db.MagicLinks
+            .FirstOrDefaultAsync(ml =>
+                ml.Email == normalizedEmail &&
+                ml.BusinessId == business.Id &&
+                ml.Type == MagicLinkType.Invite &&
+                !ml.UsedAt.HasValue &&
+                ml.ExpiresAt > now, cancellationToken);
+
+        if (existingInvite is not null)
+        {
+            return Results.Problem(
+                title: "Invite already pending",
+                detail: "An invite has already been sent to this email.",
+                statusCode: StatusCodes.Status409Conflict);
+        }
+
         var magicLink = MagicLink.CreateInviteLink(
             request.Email,
             business.Id,
@@ -80,10 +120,10 @@ public static partial class InviteStaff
 
         // TODO: Send email - for now, log to console
         var inviteUrl = $"/auth/verify?token={magicLink.Token}";
-        logger.LogInformation("Staff invite created for {Email} to join {Business}: {Url}",
-            request.Email, business.Name, inviteUrl);
+        logger.LogInformation("Staff invite created for {Email} to join {Business}",
+            normalizedEmail, business.Name);
 
-        return Results.Created(inviteUrl, new { message = "Invite sent" });
+        return Results.Created(inviteUrl, new Response("Invite sent"));
     }
 
     [GeneratedRegex(@"^[^@\s]+@[^@\s]+\.[^@\s]+$", RegexOptions.Compiled)]
