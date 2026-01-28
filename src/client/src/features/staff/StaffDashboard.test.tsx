@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { StaffDashboard } from "./StaffDashboard";
+import { AuthProvider } from "../auth/AuthContext";
 
 // Mock useSignalR
 const mockInvoke = vi.fn();
@@ -66,10 +67,12 @@ const mockQueue2Customers = {
 function renderDashboard() {
   return render(
     <MemoryRouter initialEntries={["/staff/test-business"]}>
-      <Routes>
-        <Route path="/staff/:businessSlug" element={<StaffDashboard />} />
-        <Route path="/404" element={<div>404</div>} />
-      </Routes>
+      <AuthProvider>
+        <Routes>
+          <Route path="/staff/:businessSlug" element={<StaffDashboard />} />
+          <Route path="/404" element={<div>404</div>} />
+        </Routes>
+      </AuthProvider>
     </MemoryRouter>,
   );
 }
@@ -82,6 +85,22 @@ describe("StaffDashboard", () => {
 
     // Set up default mock responses
     mockFetch.mockImplementation((url: string) => {
+      // Mock auth endpoint for AuthProvider
+      if (url.includes("/api/auth/me")) {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({
+            userId: "user-1",
+            email: "test@example.com",
+            businesses: [{ id: "business-1", name: "Test Business", slug: "test-business" }],
+          }),
+          text: () => Promise.resolve(JSON.stringify({
+            userId: "user-1",
+            email: "test@example.com",
+            businesses: [{ id: "business-1", name: "Test Business", slug: "test-business" }],
+          })),
+        });
+      }
       if (url.includes("/api/business/test-business/queues")) {
         return Promise.resolve({
           ok: true,
