@@ -6,6 +6,7 @@ import { CustomerCard } from "./components/CustomerCard";
 import { QueueControls } from "./components/QueueControls";
 import { QueueSettings } from "./QueueSettings";
 import { QRCodeModal } from "./components/QRCodeModal";
+import { QRCodeDisplay } from "../../shared/components/QRCodeDisplay";
 import { QueueTabs } from "./components/QueueTabs";
 import { DashboardSkeleton } from "../../shared/components/Skeleton";
 import { UserMenu } from "../auth/components/UserMenu";
@@ -161,6 +162,7 @@ function MultiQueueDashboard({
 }: MultiQueueDashboardProps) {
   const [showSettings, setShowSettings] = useState(false);
   const [showQRCode, setShowQRCode] = useState(false);
+  const [showQR, setShowQR] = useState(false);
 
   // Track queue counts separately for tabs - updated when active queue changes
   const [queueCounts, setQueueCounts] = useState<Record<string, number>>(() =>
@@ -363,12 +365,37 @@ function MultiQueueDashboard({
         {/* Header with business name and user menu */}
         <header className="flex items-center justify-between">
           <h1 className="text-xl font-bold text-white">{businessName}</h1>
-          <UserMenu />
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setShowQR(!showQR)}
+              className="flex items-center gap-2 px-4 py-2 text-sm text-zinc-400 hover:text-white border border-zinc-700 rounded-xl hover:border-zinc-600 transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h2M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+              </svg>
+              QR Code
+            </button>
+            <UserMenu />
+          </div>
         </header>
 
         {/* Queue Tabs - only show if multiple queues */}
         {initialQueues.length > 1 && (
           <MemoizedQueueTabs queues={queueTabsData} activeQueueId={activeQueueId} onSelectQueue={onSelectQueue} />
+        )}
+
+        {/* Inline QR Code Display */}
+        {showQR && (
+          <div className="mb-6 p-6 bg-zinc-900 border border-zinc-800 rounded-2xl">
+            <h3 className="text-lg font-semibold mb-4 text-center">Queue Join Link</h3>
+            <QRCodeDisplay
+              url={`${window.location.origin}/join/${businessSlug}`}
+              title="Scan to join queue"
+            />
+            <p className="text-xs text-zinc-500 text-center mt-4">
+              {window.location.origin}/join/{businessSlug}
+            </p>
+          </div>
         )}
 
         {/* Controls */}
