@@ -8,6 +8,7 @@ using QueueDrop.Api.Features.Customers;
 using QueueDrop.Api.Features.Demo;
 using QueueDrop.Api.Features.Push;
 using QueueDrop.Api.Features.Queues;
+using QueueDrop.Api.Features.Staff;
 using QueueDrop.Domain.Abstractions;
 using QueueDrop.Infrastructure.Persistence;
 using QueueDrop.Infrastructure.PushNotifications;
@@ -110,6 +111,9 @@ CreateBusiness.MapEndpoint(app);
 CreateQueue.MapEndpoint(app);
 UpdateQueue.MapEndpoint(app);
 DeleteQueue.MapEndpoint(app);
+
+// Staff endpoints
+InviteStaff.MapEndpoint(app);
 
 // Demo endpoints (enabled for portfolio demo)
 SeedDemoData.MapEndpoint(app);
