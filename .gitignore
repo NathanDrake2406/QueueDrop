@@ -46,3 +46,6 @@ CLAUDE.md
 
 # Worktrees
 .worktrees/
+
+# Claude Code config
+.claude/
