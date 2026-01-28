@@ -68,6 +68,16 @@ public sealed class QueueHubNotifier : IQueueHubNotifier
 
         await Task.WhenAll(tasks);
     }
+
+    public async Task NotifyNearFrontAsync(
+        string customerToken,
+        int position,
+        CancellationToken cancellationToken = default)
+    {
+        await _hubContext.Clients
+            .Group($"customer:{customerToken}")
+            .NearFront(position);
+    }
 }
 
 /// <summary>
@@ -80,6 +90,7 @@ public interface IQueueHubClient
     Task YouAreCalled(string? message);
     Task StatusChanged(string status);
     Task QueueUpdated(string queueId, string updateType);
+    Task NearFront(int position);
 }
 
 /// <summary>

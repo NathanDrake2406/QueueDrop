@@ -30,6 +30,11 @@ public interface IQueueHubNotifier
     /// Notifies multiple customers of their new positions in batch.
     /// </summary>
     Task NotifyPositionsChangedAsync(IEnumerable<(string CustomerToken, int NewPosition)> updates, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Notifies a customer that they're near the front of the queue.
+    /// </summary>
+    Task NotifyNearFrontAsync(string customerToken, int position, CancellationToken cancellationToken = default);
 }
 
 /// <summary>
