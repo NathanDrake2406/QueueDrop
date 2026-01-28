@@ -115,6 +115,7 @@ DeleteQueue.MapEndpoint(app);
 // Staff endpoints
 InviteStaff.MapEndpoint(app);
 ListStaff.MapEndpoint(app);
+RemoveStaff.MapEndpoint(app);
 
 // Demo endpoints (enabled for portfolio demo)
 SeedDemoData.MapEndpoint(app);
