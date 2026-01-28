@@ -16,7 +16,8 @@ public static class GetSettings
         int NoShowTimeoutMinutes,
         bool AllowJoinWhenPaused,
         string? WelcomeMessage,
-        string? CalledMessage);
+        string? CalledMessage,
+        int? NearFrontThreshold);
 
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
@@ -51,6 +52,7 @@ public static class GetSettings
             settings.NoShowTimeoutMinutes,
             settings.AllowJoinWhenPaused,
             settings.WelcomeMessage,
-            settings.CalledMessage));
+            settings.CalledMessage,
+            settings.NearFrontThreshold));
     }
 }

@@ -18,7 +18,8 @@ public static class UpdateSettings
         int NoShowTimeoutMinutes,
         bool AllowJoinWhenPaused,
         string? WelcomeMessage,
-        string? CalledMessage);
+        string? CalledMessage,
+        int? NearFrontThreshold);
 
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
@@ -81,7 +82,8 @@ public static class UpdateSettings
             NoShowTimeoutMinutes = request.NoShowTimeoutMinutes,
             AllowJoinWhenPaused = request.AllowJoinWhenPaused,
             WelcomeMessage = request.WelcomeMessage?.Trim(),
-            CalledMessage = request.CalledMessage?.Trim()
+            CalledMessage = request.CalledMessage?.Trim(),
+            NearFrontThreshold = request.NearFrontThreshold
         };
 
         queue.UpdateSettings(newSettings);

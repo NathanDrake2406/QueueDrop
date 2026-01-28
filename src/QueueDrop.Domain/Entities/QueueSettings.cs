@@ -24,5 +24,8 @@ public sealed record QueueSettings
     /// <summary>Custom message shown when customer is called.</summary>
     public string? CalledMessage { get; init; }
 
+    /// <summary>Position at which to send "almost your turn" notification. Null means disabled.</summary>
+    public int? NearFrontThreshold { get; init; }
+
     public static QueueSettings Default => new();
 }
