@@ -19,7 +19,7 @@ export function QRCodeDisplay({ url, size = 200, title }: QRCodeDisplayProps) {
     img.onload = () => {
       canvas.width = size * 2;
       canvas.height = size * 2;
-      ctx?.fillStyle && (ctx.fillStyle = "#ffffff");
+      if (ctx) ctx.fillStyle = "#ffffff";
       ctx?.fillRect(0, 0, canvas.width, canvas.height);
       ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
 

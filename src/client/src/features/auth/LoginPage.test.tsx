@@ -116,7 +116,7 @@ describe("LoginPage", () => {
     const user = userEvent.setup();
 
     // Make the request hang
-    mockFetch.mockImplementation((url: string, options?: RequestInit) => {
+    mockFetch.mockImplementation((url: string) => {
       if (url.includes("/api/auth/me")) {
         return Promise.resolve({ ok: false, status: 401, text: () => Promise.resolve("") });
       }
