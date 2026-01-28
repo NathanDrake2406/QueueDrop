@@ -118,6 +118,37 @@ public static class CallNext
                 cancellationToken));
         }
 
+        // Check for near-front alerts
+        if (queue.Settings.NearFrontThreshold.HasValue)
+        {
+            var threshold = queue.Settings.NearFrontThreshold.Value;
+            var customersToNotify = queue.Customers
+                .Where(c => c.Status == CustomerStatus.Waiting && c.NearFrontNotifiedAt == null)
+                .Select(c => (Customer: c, Position: queue.GetCustomerPosition(c.Id)))
+                .Where(x => x.Position.HasValue && x.Position.Value <= threshold)
+                .ToList();
+
+            foreach (var (customer, position) in customersToNotify)
+            {
+                queue.MarkCustomerNearFrontNotified(customer.Id, now);
+
+                notificationTasks.Add(notifier.NotifyNearFrontAsync(
+                    customer.Token,
+                    position!.Value,
+                    cancellationToken));
+
+                // Send push notification if subscribed
+                if (!string.IsNullOrEmpty(customer.PushSubscription))
+                {
+                    notificationTasks.Add(webPush.SendNotificationAsync(
+                        customer.PushSubscription,
+                        "Almost Your Turn!",
+                        $"You're #{position} in line. Get ready!",
+                        cancellationToken));
+                }
+            }
+        }
+
         await Task.WhenAll(notificationTasks);
 
         return Results.Ok(new Response(

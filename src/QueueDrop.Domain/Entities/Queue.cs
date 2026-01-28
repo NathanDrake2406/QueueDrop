@@ -257,4 +257,17 @@ public sealed class Queue : Entity
     {
         return _customers.Find(c => c.Token == token);
     }
+
+    /// <summary>
+    /// Marks a customer as having been notified that they're near the front of the queue.
+    /// </summary>
+    public Result MarkCustomerNearFrontNotified(Guid customerId, DateTimeOffset timestamp)
+    {
+        var customer = _customers.Find(c => c.Id == customerId);
+        if (customer is null)
+            return DomainErrors.Queue.CustomerNotFound(customerId);
+
+        customer.MarkNearFrontNotified(timestamp);
+        return Result.Success();
+    }
 }
