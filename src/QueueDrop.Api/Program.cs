@@ -109,6 +109,7 @@ GetMe.MapEndpoint(app);
 CreateBusiness.MapEndpoint(app);
 CreateQueue.MapEndpoint(app);
 UpdateQueue.MapEndpoint(app);
+DeleteQueue.MapEndpoint(app);
 
 // Demo endpoints (enabled for portfolio demo)
 SeedDemoData.MapEndpoint(app);
