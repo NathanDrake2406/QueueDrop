@@ -23,7 +23,8 @@ public static class SavePushSubscription
             .WithTags("Customers")
             .Produces(StatusCodes.Status204NoContent)
             .Produces<ProblemDetails>(StatusCodes.Status404NotFound)
-            .Produces<ProblemDetails>(StatusCodes.Status400BadRequest);
+            .Produces<ProblemDetails>(StatusCodes.Status400BadRequest)
+            .Produces<ProblemDetails>(StatusCodes.Status409Conflict);
     }
 
     private static async Task<IResult> Handler(
@@ -86,7 +87,17 @@ public static class SavePushSubscription
                 statusCode: StatusCodes.Status400BadRequest);
         }
 
-        await db.SaveChangesAsync(cancellationToken);
+        try
+        {
+            await db.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            return Results.Problem(
+                title: "Concurrency conflict",
+                detail: "Please try again.",
+                statusCode: StatusCodes.Status409Conflict);
+        }
 
         return Results.NoContent();
     }

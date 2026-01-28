@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using QueueDrop.Domain.Entities;
 using QueueDrop.Infrastructure.Persistence;
@@ -25,7 +26,8 @@ public static class SeedDemoData
             .WithName("SeedDemoData")
             .WithTags("Demo")
             .Produces<Response>(StatusCodes.Status200OK)
-            .Produces(StatusCodes.Status404NotFound);
+            .Produces(StatusCodes.Status404NotFound)
+            .Produces<ProblemDetails>(StatusCodes.Status409Conflict);
     }
 
     private static async Task<IResult> Handler(
@@ -90,7 +92,17 @@ public static class SeedDemoData
             }
         }
 
-        await db.SaveChangesAsync(cancellationToken);
+        try
+        {
+            await db.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            return Results.Problem(
+                title: "Concurrency conflict",
+                detail: "The demo data was modified. Please try again.",
+                statusCode: StatusCodes.Status409Conflict);
+        }
 
         return Results.Ok(new Response(
             customersAdded,

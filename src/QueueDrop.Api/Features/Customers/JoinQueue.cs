@@ -29,7 +29,8 @@ public static class JoinQueue
             .WithTags("Customers")
             .Produces<Response>(StatusCodes.Status201Created)
             .Produces<MultipleQueuesResponse>(StatusCodes.Status400BadRequest)
-            .Produces<ProblemDetails>(StatusCodes.Status404NotFound);
+            .Produces<ProblemDetails>(StatusCodes.Status404NotFound)
+            .Produces<ProblemDetails>(StatusCodes.Status409Conflict);
     }
 
     private static async Task<IResult> Handler(
@@ -138,7 +139,17 @@ public static class JoinQueue
         // This is needed because adding to a tracked collection may not always detect new entities
         db.Entry(customer).State = EntityState.Added;
 
-        await db.SaveChangesAsync(cancellationToken);
+        try
+        {
+            await db.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            return Results.Problem(
+                title: "Concurrency conflict",
+                detail: "The queue was modified while joining. Please try again.",
+                statusCode: StatusCodes.Status409Conflict);
+        }
 
         // Calculate position
         var position = queue.GetCustomerPosition(customer.Id) ?? 1;

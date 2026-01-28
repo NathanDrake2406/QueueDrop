@@ -66,53 +66,102 @@ public sealed class AutoNoShowService : BackgroundService
 
         foreach (var queue in queuesWithCalledCustomers)
         {
-            var timeoutMinutes = queue.Settings.NoShowTimeoutMinutes;
+            await ProcessQueueWithRetryAsync(queue.Id, db, notifier, timeProvider, cancellationToken);
+        }
+    }
 
-            // Find expired called customers for this queue
-            var expiredCustomers = queue.Customers
-                .Where(c => c.Status == CustomerStatus.Called &&
-                           c.CalledAt.HasValue &&
-                           c.CalledAt.Value.AddMinutes(timeoutMinutes) < now)
-                .ToList();
 
-            if (expiredCustomers.Count == 0)
-                continue;
+    private async Task ProcessQueueWithRetryAsync(
+        Guid queueId,
+        AppDbContext db,
+        IQueueHubNotifier notifier,
+        TimeProvider timeProvider,
+        CancellationToken cancellationToken)
+    {
+        const int maxRetries = 3;
 
-            _logger.LogInformation(
-                "Marking {Count} customers as no-show in queue {QueueId} (timeout: {Timeout} minutes)",
-                expiredCustomers.Count,
-                queue.Id,
-                timeoutMinutes);
-
-            foreach (var customer in expiredCustomers)
+        for (var attempt = 1; attempt <= maxRetries; attempt++)
+        {
+            try
             {
-                var result = queue.MarkCustomerNoShow(customer.Id, now);
-                if (result.IsFailure)
+                // Reload queue fresh from database on each attempt
+                var queue = await db.Queues
+                    .Include(q => q.Settings)
+                    .Include(q => q.Customers.Where(c => c.Status == CustomerStatus.Called))
+                    .FirstOrDefaultAsync(q => q.Id == queueId, cancellationToken);
+
+                if (queue is null)
+                    return;
+
+                var now = timeProvider.GetUtcNow();
+                var timeoutMinutes = queue.Settings.NoShowTimeoutMinutes;
+
+                // Find expired called customers for this queue
+                var expiredCustomers = queue.Customers
+                    .Where(c => c.Status == CustomerStatus.Called &&
+                               c.CalledAt.HasValue &&
+                               c.CalledAt.Value.AddMinutes(timeoutMinutes) < now)
+                    .ToList();
+
+                if (expiredCustomers.Count == 0)
+                    return;
+
+                _logger.LogInformation(
+                    "Marking {Count} customers as no-show in queue {QueueId} (timeout: {Timeout} minutes)",
+                    expiredCustomers.Count,
+                    queue.Id,
+                    timeoutMinutes);
+
+                foreach (var customer in expiredCustomers)
                 {
-                    _logger.LogWarning(
-                        "Failed to mark customer {CustomerId} as no-show: {Error}",
-                        customer.Id,
-                        result.Error.Message);
-                    continue;
+                    var result = queue.MarkCustomerNoShow(customer.Id, now);
+                    if (result.IsFailure)
+                    {
+                        _logger.LogWarning(
+                            "Failed to mark customer {CustomerId} as no-show: {Error}",
+                            customer.Id,
+                            result.Error.Message);
+                        continue;
+                    }
+
+                    // Notify customer
+                    await notifier.NotifyStatusChangedAsync(customer.Token, "NoShow", cancellationToken);
                 }
 
-                // Notify customer
-                await notifier.NotifyStatusChangedAsync(customer.Token, "NoShow", cancellationToken);
+                await db.SaveChangesAsync(cancellationToken);
+
+                // Notify staff about queue update
+                await notifier.NotifyQueueUpdatedAsync(queue.Id, QueueUpdateType.CustomerNoShow, cancellationToken);
+
+                // Update positions for remaining waiting customers
+                var updatedPositions = queue.GetUpdatedPositions()
+                    .Select(p => (queue.Customers.First(c => c.Id == p.CustomerId).Token, p.NewPosition))
+                    .ToList();
+
+                if (updatedPositions.Count > 0)
+                {
+                    await notifier.NotifyPositionsChangedAsync(updatedPositions, cancellationToken);
+                }
+
+                return; // Success, exit retry loop
             }
-
-            await db.SaveChangesAsync(cancellationToken);
-
-            // Notify staff about queue update
-            await notifier.NotifyQueueUpdatedAsync(queue.Id, QueueUpdateType.CustomerNoShow, cancellationToken);
-
-            // Update positions for remaining waiting customers
-            var updatedPositions = queue.GetUpdatedPositions()
-                .Select(p => (queue.Customers.First(c => c.Id == p.CustomerId).Token, p.NewPosition))
-                .ToList();
-
-            if (updatedPositions.Count > 0)
+            catch (DbUpdateConcurrencyException) when (attempt < maxRetries)
             {
-                await notifier.NotifyPositionsChangedAsync(updatedPositions, cancellationToken);
+                _logger.LogWarning(
+                    "Concurrency conflict processing queue {QueueId}, attempt {Attempt}/{MaxRetries}. Retrying...",
+                    queueId,
+                    attempt,
+                    maxRetries);
+
+                // Clear the change tracker to get fresh entities on next attempt
+                db.ChangeTracker.Clear();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                _logger.LogError(
+                    "Concurrency conflict processing queue {QueueId} after {MaxRetries} attempts. Giving up.",
+                    queueId,
+                    maxRetries);
             }
         }
     }
