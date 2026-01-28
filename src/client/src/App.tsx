@@ -4,6 +4,7 @@ import { JoinQueue } from "./features/customer/JoinQueue";
 import { QueuePosition } from "./features/customer/QueuePosition";
 import { QRScanner } from "./features/customer/QRScanner";
 import { StaffDashboard } from "./features/staff/StaffDashboard";
+import { DemoPage } from "./features/demo/DemoPage";
 import { AuthProvider } from "./features/auth/AuthContext";
 import { LoginPage } from "./features/auth/LoginPage";
 import { VerifyPage } from "./features/auth/VerifyPage";
@@ -350,6 +351,7 @@ export default function App() {
           <Route path="/auth/verify" element={<VerifyPage />} />
           <Route path="/onboarding" element={<OnboardingPage />} />
           <Route path="/customer" element={<CustomerJoinPage />} />
+          <Route path="/demo" element={<DemoPage />} />
           <Route path="/scan" element={<QRScanner />} />
           <Route path="/join/:businessSlug/:queueSlug?" element={<JoinQueue />} />
           <Route path="/q/:token" element={<QueuePosition />} />
