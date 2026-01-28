@@ -8,6 +8,7 @@ import { AuthProvider } from "./features/auth/AuthContext";
 import { LoginPage } from "./features/auth/LoginPage";
 import { VerifyPage } from "./features/auth/VerifyPage";
 import { OnboardingPage } from "./features/auth/OnboardingPage";
+import { ProtectedRoute } from "./features/auth/components/ProtectedRoute";
 
 function LandingPage() {
   const navigate = useNavigate();
@@ -341,7 +342,14 @@ export default function App() {
           <Route path="/scan" element={<QRScanner />} />
           <Route path="/join/:businessSlug/:queueSlug?" element={<JoinQueue />} />
           <Route path="/q/:token" element={<QueuePosition />} />
-          <Route path="/staff/:businessSlug" element={<StaffDashboard />} />
+          <Route
+            path="/staff/:businessSlug"
+            element={
+              <ProtectedRoute>
+                <StaffDashboard />
+              </ProtectedRoute>
+            }
+          />
           <Route path="/404" element={<NotFound />} />
           <Route path="*" element={<Navigate to="/404" replace />} />
         </Routes>
