@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using QueueDrop.Api.Auth;
 using QueueDrop.Api.BackgroundServices;
 using QueueDrop.Api.Features.Auth;
+using QueueDrop.Api.Features.Business;
 using QueueDrop.Api.Features.Customers;
 using QueueDrop.Api.Features.Demo;
 using QueueDrop.Api.Features.Push;
@@ -100,6 +101,9 @@ GetVapidPublicKey.MapEndpoint(app);
 SendMagicLink.MapEndpoint(app);
 VerifyMagicLink.MapEndpoint(app);
 GetMe.MapEndpoint(app);
+
+// Business endpoints
+CreateBusiness.MapEndpoint(app);
 
 // Demo endpoints (enabled for portfolio demo)
 SeedDemoData.MapEndpoint(app);
