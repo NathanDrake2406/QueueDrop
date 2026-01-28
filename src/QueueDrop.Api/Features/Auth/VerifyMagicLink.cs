@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using QueueDrop.Api.Auth;
 using QueueDrop.Domain.Entities;
+using QueueDrop.Domain.Enums;
 using QueueDrop.Infrastructure.Persistence;
 
 namespace QueueDrop.Api.Features.Auth;
@@ -75,6 +76,22 @@ public static class VerifyMagicLink
         }
 
         await db.SaveChangesAsync(cancellationToken);
+
+        // If this is an invite link, create staff membership
+        if (magicLink.Type == MagicLinkType.Invite && magicLink.BusinessId.HasValue)
+        {
+            var existingMembership = await db.BusinessMembers
+                .FirstOrDefaultAsync(bm => bm.UserId == user!.Id && bm.BusinessId == magicLink.BusinessId.Value,
+                    cancellationToken);
+
+            if (existingMembership is null)
+            {
+                var membership = BusinessMember.CreateStaffInvite(user!.Id, magicLink.BusinessId.Value, magicLink.CreatedAt);
+                membership.AcceptInvite(now);
+                db.BusinessMembers.Add(membership);
+                await db.SaveChangesAsync(cancellationToken);
+            }
+        }
 
         // Generate JWT
         var jwt = jwtService.GenerateToken(user!.Id, user.Email);
