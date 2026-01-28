@@ -1,5 +1,7 @@
-import { useState, useEffect, ReactNode, useCallback } from 'react';
-import { AuthContext, AuthState, User, Business, TOKEN_KEY } from './authTypes';
+import { useState, useEffect, useCallback } from 'react';
+import type { ReactNode } from 'react';
+import { AuthContext, TOKEN_KEY } from './authTypes';
+import type { AuthState, User, Business } from './authTypes';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<AuthState>({

@@ -9,15 +9,23 @@
 
 Real-time queue management system for walk-in businesses. Customers join remotely via QR code, track their position live, and get push notifications when called.
 
+## 🎮 [Try the Live Demo →](https://queuedrop.vercel.app/demo)
+
+Click "Call Next" and watch both panels update in real-time via WebSockets!
+
 ---
 
 ## Features
 
+- **Interactive split-screen demo** — See staff and customer views side-by-side with real-time SignalR updates
 - **Multi-queue support** — Businesses can run multiple concurrent queues (Dine-in, Takeout, Bar)
 - **Real-time updates** — SignalR WebSockets push position changes instantly
 - **Push notifications** — Web Push API alerts customers even with browser closed
+- **QR code generation** — Download QR codes for customers to scan and join
+- **Near-front alerts** — Notify customers when they're almost up
 - **Mobile-first PWA** — Installable, works offline, no app store needed
 - **Staff dashboard** — One-click actions: call next, mark served, remove, no-show
+- **Magic link auth** — Passwordless authentication for staff
 
 ## Tech Stack
 
@@ -66,15 +74,13 @@ cd src/client && npm install && npm run dev
 
 Open http://localhost:5173
 
-### Demo Data
+### Demo
 
-Seeds automatically with multiple queues:
-
-| URL                                          | Description           |
-| -------------------------------------------- | --------------------- |
-| http://localhost:5173/staff/demo-shop        | Staff dashboard       |
-| http://localhost:5173/join/demo-shop         | Customer queue select |
-| http://localhost:5173/join/demo-shop/takeout | Join specific queue   |
+| URL                                  | Description                               |
+| ------------------------------------ | ----------------------------------------- |
+| http://localhost:5173/demo           | **Interactive demo** (staff + customer)   |
+| http://localhost:5173/staff/demo-shop| Staff dashboard                           |
+| http://localhost:5173/join/demo-shop | Customer queue join                       |
 
 ## API
 
@@ -103,15 +109,16 @@ DELETE /api/queues/{id}/customers/{id}               # Remove
 | ----------------- | ----------------------------- | ------------------------- |
 | `PositionChanged` | `int newPosition`             | Customer position updated |
 | `YouAreCalled`    | `string? message`             | Customer has been called  |
+| `NearFront`       | `int position`                | Customer almost up        |
 | `QueueUpdated`    | `string queueId, string type` | Queue state changed       |
 
 ## Testing
 
 ```bash
-# Backend tests (121 tests)
+# Backend tests (124 tests)
 dotnet test src/QueueDrop.sln
 
-# Frontend unit tests (15 tests)
+# Frontend unit tests (52 tests)
 cd src/client && npm test
 
 # E2E tests (Playwright)
@@ -121,12 +128,6 @@ cd src/client && npm run test:e2e
 dotnet test src/QueueDrop.sln --collect:"XPlat Code Coverage"
 cd src/client && npm run test:coverage
 ```
-
-**Coverage targets:**
-
-- Domain layer: ~84%
-- API layer: ~76%
-- Frontend hooks and components: unit tested with Vitest + Testing Library
 
 ## Load Testing
 
@@ -168,8 +169,11 @@ Deploy with Vercel (frontend) + Railway (backend + PostgreSQL).
 ## Roadmap
 
 - [x] Multi-queue support per business
-- [ ] Live demo deployment
-- [ ] Staff authentication (Auth0)
+- [x] Live demo deployment
+- [x] Staff authentication (magic links)
+- [x] Near-front alerts
+- [x] QR code generation
+- [x] Interactive split-screen demo
 - [ ] SMS notifications (Twilio)
 - [ ] Wait time predictions (ML-based)
 

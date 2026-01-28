@@ -12,20 +12,27 @@ test.describe("Customer Queue Journey", () => {
     await page.evaluate(() => localStorage.clear());
   });
 
-  test("should display home page with demo queue link", async ({ page }) => {
+  test("should display home page with demo link", async ({ page }) => {
     await page.goto("/");
 
     await expect(page.getByText("QueueDrop").first()).toBeVisible();
-    await expect(page.getByRole("button", { name: "Try Demo Queue" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Try Interactive Demo" })).toBeVisible();
+  });
+
+  test("should navigate to interactive demo page", async ({ page }) => {
+    await page.goto("/");
+
+    await page.getByRole("button", { name: "Try Interactive Demo" }).click();
+
+    // Should go to the interactive demo page
+    await expect(page).toHaveURL("/demo");
+    await expect(page.getByRole("heading", { name: "Interactive Demo" })).toBeVisible();
   });
 
   test("should navigate to join queue page", async ({ page }) => {
-    await page.goto("/");
-
-    await page.getByRole("button", { name: "Try Demo Queue" }).click();
+    await page.goto("/join/demo-shop");
 
     // With multi-queue, first see queue selector
-    await expect(page).toHaveURL("/join/demo-shop");
     await expect(page.getByRole("heading", { name: "Choose a queue" })).toBeVisible();
 
     // Click on Main Queue
