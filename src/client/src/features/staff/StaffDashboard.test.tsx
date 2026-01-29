@@ -42,6 +42,12 @@ const mockBusinessResponse = {
   ],
 };
 
+const mockEmptyQueuesResponse = {
+  businessId: "business-1",
+  businessName: "Test Business",
+  queues: [],
+};
+
 const mockQueue1Customers = {
   customers: [
     {
@@ -103,12 +109,12 @@ describe("StaffDashboard", () => {
           json: () => Promise.resolve({
             userId: "user-1",
             email: "test@example.com",
-            businesses: [{ id: "business-1", name: "Test Business", slug: "test-business" }],
+            businesses: [{ id: "business-1", name: "Test Business", slug: "test-business", role: "owner" }],
           }),
           text: () => Promise.resolve(JSON.stringify({
             userId: "user-1",
             email: "test@example.com",
-            businesses: [{ id: "business-1", name: "Test Business", slug: "test-business" }],
+            businesses: [{ id: "business-1", name: "Test Business", slug: "test-business", role: "owner" }],
           })),
         });
       }
@@ -138,8 +144,7 @@ describe("StaffDashboard", () => {
   });
 
   describe("All view caching", () => {
-    // TODO: Caching not yet implemented - these tests document expected behavior
-    it.skip("should cache All view data and not refetch when switching back", async () => {
+    it("should cache All view data and not refetch when switching back", async () => {
       const user = userEvent.setup();
       renderDashboard();
 
@@ -194,7 +199,7 @@ describe("StaffDashboard", () => {
       expect(switchBackFetchCount).toBe(0);
     });
 
-    it.skip("should refresh All view when explicitly requested", async () => {
+    it("should refresh All view when explicitly requested", async () => {
       // This test verifies that caching doesn't prevent manual refresh
       // Implementation note: The current code doesn't cache, so this will inform the fix
       const user = userEvent.setup();
@@ -234,6 +239,142 @@ describe("StaffDashboard", () => {
 
       // With caching implemented, this should pass
       expect(fetchCount).toBe(0);
+    });
+  });
+
+  describe("Role-based UI for NoQueuesState", () => {
+    it("shows create queue UI for owners when no queues exist", async () => {
+      // Set up mock responses for owner with no queues
+      mockFetch.mockImplementation((url: string) => {
+        if (url.includes("/api/auth/me")) {
+          return Promise.resolve({
+            ok: true,
+            json: () => Promise.resolve({
+              userId: "user-1",
+              email: "owner@example.com",
+              businesses: [{ id: "business-1", name: "Test Business", slug: "test-business", role: "owner" }],
+            }),
+            text: () => Promise.resolve(JSON.stringify({
+              userId: "user-1",
+              email: "owner@example.com",
+              businesses: [{ id: "business-1", name: "Test Business", slug: "test-business", role: "owner" }],
+            })),
+          });
+        }
+        if (url.includes("/api/business/test-business/queues")) {
+          return Promise.resolve({
+            ok: true,
+            json: () => Promise.resolve(mockEmptyQueuesResponse),
+            text: () => Promise.resolve(JSON.stringify(mockEmptyQueuesResponse)),
+          });
+        }
+        return Promise.resolve({ ok: false, status: 404, text: () => Promise.resolve("") });
+      });
+
+      renderDashboard();
+
+      // Wait for the create queue form to appear
+      await waitFor(() => {
+        expect(screen.getByText("Create your first queue to get started")).toBeInTheDocument();
+      });
+
+      // Owner should see the create queue form
+      expect(screen.getByLabelText("Queue name")).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /Create Queue/i })).toBeInTheDocument();
+    });
+
+    it("hides create queue UI for staff when no queues exist", async () => {
+      // Set up mock responses for staff with no queues
+      mockFetch.mockImplementation((url: string) => {
+        if (url.includes("/api/auth/me")) {
+          return Promise.resolve({
+            ok: true,
+            json: () => Promise.resolve({
+              userId: "user-1",
+              email: "staff@example.com",
+              businesses: [{ id: "business-1", name: "Test Business", slug: "test-business", role: "staff" }],
+            }),
+            text: () => Promise.resolve(JSON.stringify({
+              userId: "user-1",
+              email: "staff@example.com",
+              businesses: [{ id: "business-1", name: "Test Business", slug: "test-business", role: "staff" }],
+            })),
+          });
+        }
+        if (url.includes("/api/business/test-business/queues")) {
+          return Promise.resolve({
+            ok: true,
+            json: () => Promise.resolve(mockEmptyQueuesResponse),
+            text: () => Promise.resolve(JSON.stringify(mockEmptyQueuesResponse)),
+          });
+        }
+        return Promise.resolve({ ok: false, status: 404, text: () => Promise.resolve("") });
+      });
+
+      renderDashboard();
+
+      // Wait for the staff message to appear
+      await waitFor(() => {
+        expect(screen.getByText("Contact your business owner to create a queue")).toBeInTheDocument();
+      });
+
+      // Staff should NOT see the create queue form
+      expect(screen.queryByLabelText("Queue name")).not.toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: /Create Queue/i })).not.toBeInTheDocument();
+    });
+
+    it("shows queue management UI for staff when queues exist", async () => {
+      // Staff should be able to manage existing queues normally
+      mockFetch.mockImplementation((url: string) => {
+        if (url.includes("/api/auth/me")) {
+          return Promise.resolve({
+            ok: true,
+            json: () => Promise.resolve({
+              userId: "user-1",
+              email: "staff@example.com",
+              businesses: [{ id: "business-1", name: "Test Business", slug: "test-business", role: "staff" }],
+            }),
+            text: () => Promise.resolve(JSON.stringify({
+              userId: "user-1",
+              email: "staff@example.com",
+              businesses: [{ id: "business-1", name: "Test Business", slug: "test-business", role: "staff" }],
+            })),
+          });
+        }
+        if (url.includes("/api/business/test-business/queues")) {
+          return Promise.resolve({
+            ok: true,
+            json: () => Promise.resolve(mockBusinessResponse),
+            text: () => Promise.resolve(JSON.stringify(mockBusinessResponse)),
+          });
+        }
+        if (url.includes("/api/queues/queue-1/customers")) {
+          return Promise.resolve({
+            ok: true,
+            json: () => Promise.resolve(mockQueue1Customers),
+            text: () => Promise.resolve(JSON.stringify(mockQueue1Customers)),
+          });
+        }
+        if (url.includes("/api/queues/queue-2/customers")) {
+          return Promise.resolve({
+            ok: true,
+            json: () => Promise.resolve(mockQueue2Customers),
+            text: () => Promise.resolve(JSON.stringify(mockQueue2Customers)),
+          });
+        }
+        return Promise.resolve({ ok: false, status: 404, text: () => Promise.resolve("") });
+      });
+
+      renderDashboard();
+
+      // Staff should see the queue management dashboard with customers
+      await waitFor(() => {
+        expect(screen.getByText("Alice")).toBeInTheDocument();
+      });
+
+      // Queue tabs should be visible
+      expect(screen.getByRole("button", { name: /^Queue 1/ })).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /^Queue 2/ })).toBeInTheDocument();
     });
   });
 });

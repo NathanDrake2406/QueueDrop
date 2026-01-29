@@ -11,6 +11,7 @@ import { QRCodeDisplay } from "../../shared/components/QRCodeDisplay";
 import { QueueTabs } from "./components/QueueTabs";
 import { DashboardSkeleton } from "../../shared/components/Skeleton";
 import { UserMenu } from "../auth/components/UserMenu";
+import { useAuth } from "../auth/hooks/useAuth";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "";
 
@@ -56,12 +57,277 @@ function EmptyQueueState({ onShowQRCode }: { onShowQRCode: () => void }) {
   );
 }
 
+interface AddQueueModalProps {
+  businessSlug: string;
+  token: string | null;
+  onClose: () => void;
+  onQueueCreated: (queue: QueueInfo) => void;
+}
+
+function AddQueueModal({ businessSlug, token, onClose, onQueueCreated }: AddQueueModalProps) {
+  const [queueName, setQueueName] = useState("");
+  const [isCreating, setIsCreating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleCreate = async () => {
+    if (!queueName.trim() || !token) return;
+
+    setIsCreating(true);
+    setError(null);
+
+    try {
+      const response = await fetch(`/api/business/${businessSlug}/queues`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ name: queueName.trim() }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data.detail || "Failed to create queue");
+      }
+
+      const data = await response.json();
+      onQueueCreated({
+        queueId: data.id,
+        name: data.name,
+        slug: data.slug,
+        waitingCount: 0,
+        estimatedWaitMinutes: 0,
+      });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to create queue");
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 w-full max-w-md">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl font-bold text-white">Add New Queue</h2>
+          <button
+            onClick={onClose}
+            className="text-slate-400 hover:text-white transition-colors"
+          >
+            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <label htmlFor="newQueueName" className="block text-sm font-medium text-slate-400 mb-2">
+          Queue name
+        </label>
+        <input
+          id="newQueueName"
+          type="text"
+          value={queueName}
+          onChange={(e) => setQueueName(e.target.value)}
+          placeholder="e.g., Takeout, Bar, VIP"
+          className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition-all mb-4"
+          autoFocus
+        />
+
+        {error && (
+          <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-sm">
+            {error}
+          </div>
+        )}
+
+        <div className="flex gap-3">
+          <button
+            onClick={onClose}
+            className="flex-1 py-3 text-slate-400 font-medium rounded-xl border border-slate-700 hover:border-slate-600 hover:text-white transition-all"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleCreate}
+            disabled={isCreating || !queueName.trim()}
+            className="flex-1 py-3 bg-teal-600 text-white font-semibold rounded-xl hover:bg-teal-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
+          >
+            {isCreating ? (
+              <>
+                <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                </svg>
+                Creating...
+              </>
+            ) : (
+              "Create Queue"
+            )}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+interface NoQueuesStateProps {
+  businessSlug: string;
+  businessName: string;
+  isOwner: boolean;
+  onQueueCreated: (queue: QueueInfo) => void;
+}
+
+function NoQueuesState({ businessSlug, businessName, isOwner, onQueueCreated }: NoQueuesStateProps) {
+  const { token } = useAuth();
+  const [queueName, setQueueName] = useState("Main Queue");
+  const [isCreating, setIsCreating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleCreate = async () => {
+    if (!queueName.trim()) return;
+
+    // In dev mode, allow creating without auth token
+    const isDev = process.env.NODE_ENV === "development";
+    if (!isDev && !token) return;
+
+    setIsCreating(true);
+    setError(null);
+
+    try {
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+      };
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+
+      // Use dev endpoint in development mode (no auth required)
+      const endpoint = isDev && !token
+        ? `/api/demo/business/${businessSlug}/queues`
+        : `/api/business/${businessSlug}/queues`;
+
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ name: queueName.trim() }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data.detail || "Failed to create queue");
+      }
+
+      const data = await response.json();
+      onQueueCreated({
+        queueId: data.id,
+        name: data.name,
+        slug: data.slug,
+        waitingCount: 0,
+        estimatedWaitMinutes: 0,
+      });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to create queue");
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
+  // Staff sees a different view - they can't create queues
+  if (!isOwner) {
+    return (
+      <div className="min-h-screen bg-slate-950 text-white">
+        <div className="max-w-md mx-auto px-4 py-12">
+          <div className="text-center mb-8">
+            <div className="w-16 h-16 bg-slate-800 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={1.5}
+                  d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                />
+              </svg>
+            </div>
+            <h1 className="text-2xl font-bold">{businessName || "Your Business"}</h1>
+            <p className="text-slate-400 mt-2">Contact your business owner to create a queue</p>
+          </div>
+
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 text-center">
+            <p className="text-slate-400">
+              No queues have been set up yet. As a staff member, you&apos;ll be able to manage customers once a queue is created.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-slate-950 text-white">
+      <div className="max-w-md mx-auto px-4 py-12">
+        <div className="text-center mb-8">
+          <div className="w-16 h-16 bg-slate-800 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <svg className="w-8 h-8 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
+          </div>
+          <h1 className="text-2xl font-bold">{businessName || "Your Business"}</h1>
+          <p className="text-slate-400 mt-2">Create your first queue to get started</p>
+        </div>
+
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+          <label htmlFor="queueName" className="block text-sm font-medium text-slate-400 mb-2">
+            Queue name
+          </label>
+          <input
+            id="queueName"
+            type="text"
+            value={queueName}
+            onChange={(e) => setQueueName(e.target.value)}
+            placeholder="e.g., Main Queue, Takeout, Bar"
+            className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition-all mb-4"
+          />
+
+          {error && (
+            <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-sm">
+              {error}
+            </div>
+          )}
+
+          <button
+            onClick={handleCreate}
+            disabled={isCreating || !queueName.trim()}
+            className="w-full py-3 bg-teal-600 text-white font-semibold rounded-xl hover:bg-teal-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
+          >
+            {isCreating ? (
+              <>
+                <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                </svg>
+                Creating...
+              </>
+            ) : (
+              <>
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+                Create Queue
+              </>
+            )}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 interface StaffDashboardProps {
   businessSlug: string;
 }
 
 export function StaffDashboard({ businessSlug }: StaffDashboardProps) {
   const router = useRouter();
+  const { isOwner } = useAuth();
   const [queues, setQueues] = useState<QueueInfo[]>([]);
   const [businessName, setBusinessName] = useState<string>("");
   const [loadingQueues, setLoadingQueues] = useState(true);
@@ -112,12 +378,15 @@ export function StaffDashboard({ businessSlug }: StaffDashboardProps) {
 
   if (queues.length === 0) {
     return (
-      <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-xl font-semibold text-red-400">No queues available</p>
-          <p className="mt-2 text-slate-500">This business has no active queues.</p>
-        </div>
-      </div>
+      <NoQueuesState
+        businessSlug={businessSlug}
+        businessName={businessName}
+        isOwner={isOwner(businessSlug)}
+        onQueueCreated={(queue) => {
+          setQueues([queue]);
+          setActiveQueueId(queue.queueId);
+        }}
+      />
     );
   }
 
@@ -128,6 +397,11 @@ export function StaffDashboard({ businessSlug }: StaffDashboardProps) {
       businessName={businessName}
       activeQueueId={activeQueueId}
       onSelectQueue={setActiveQueueId}
+      isOwner={isOwner(businessSlug)}
+      onQueueCreated={(queue) => {
+        setQueues((prev) => [...prev, queue]);
+        setActiveQueueId(queue.queueId);
+      }}
     />
   );
 }
@@ -138,6 +412,8 @@ interface MultiQueueDashboardProps {
   businessName: string;
   activeQueueId: string | null;
   onSelectQueue: (queueId: string | null) => void;
+  isOwner: boolean;
+  onQueueCreated: (queue: QueueInfo) => void;
 }
 
 function MultiQueueDashboard({
@@ -146,10 +422,14 @@ function MultiQueueDashboard({
   businessName,
   activeQueueId,
   onSelectQueue,
+  isOwner,
+  onQueueCreated,
 }: MultiQueueDashboardProps) {
+  const { token } = useAuth();
   const [showSettings, setShowSettings] = useState(false);
   const [showQRCode, setShowQRCode] = useState(false);
   const [showQR, setShowQR] = useState(false);
+  const [showAddQueue, setShowAddQueue] = useState(false);
 
   // Track queue counts separately for tabs - updated when active queue changes
   const [queueCounts, setQueueCounts] = useState<Record<string, number>>(() =>
@@ -348,11 +628,35 @@ function MultiQueueDashboard({
         />
       )}
 
+      {/* Add Queue Modal */}
+      {showAddQueue && (
+        <AddQueueModal
+          businessSlug={businessSlug}
+          token={token}
+          onClose={() => setShowAddQueue(false)}
+          onQueueCreated={(queue) => {
+            onQueueCreated(queue);
+            setShowAddQueue(false);
+          }}
+        />
+      )}
+
       <div className="max-w-4xl mx-auto p-4 space-y-6">
         {/* Header with business name and user menu */}
         <header className="flex items-center justify-between">
           <h1 className="text-xl font-bold text-white">{businessName}</h1>
           <div className="flex items-center gap-3">
+            {isOwner && (
+              <button
+                onClick={() => setShowAddQueue(true)}
+                className="flex items-center gap-2 px-4 py-2 text-sm text-teal-400 hover:text-teal-300 border border-teal-700 rounded-xl hover:border-teal-600 transition-colors"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+                Add Queue
+              </button>
+            )}
             <button
               onClick={() => setShowQR(!showQR)}
               className="flex items-center gap-2 px-4 py-2 text-sm text-slate-400 hover:text-white border border-slate-700 rounded-xl hover:border-slate-600 transition-colors"
