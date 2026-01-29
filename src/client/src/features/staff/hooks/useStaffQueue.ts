@@ -110,7 +110,9 @@ export function useStaffQueue(queueId: string): UseStaffQueueResult {
     // Cleanup: leave room on unmount or when dependencies change
     return () => {
       if (joinedRoomRef.current) {
-        invoke("LeaveStaffRoom", joinedRoomRef.current).catch(console.error);
+        invoke("LeaveStaffRoom", joinedRoomRef.current).catch(() => {
+          // Ignore errors during cleanup - connection may be closing
+        });
         joinedRoomRef.current = null;
       }
     };

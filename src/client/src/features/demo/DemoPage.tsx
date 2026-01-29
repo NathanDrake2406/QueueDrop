@@ -597,7 +597,7 @@ function CustomerPanel({ token, signalR }: CustomerPanelProps) {
         });
       }
     };
-  }, [token, signalR]);
+  }, [token, signalR.state, signalR.invoke, signalR.on]);
 
   // No token selected - show placeholder
   if (!token) {
@@ -728,6 +728,7 @@ function CustomerPanel({ token, signalR }: CustomerPanelProps) {
 export function DemoPage() {
   const [queues, setQueues] = useState<QueueInfo[]>([]);
   const [businessName, setBusinessName] = useState<string>("");
+  const [selectedQueueId, setSelectedQueueId] = useState<string | null>(null);
   const [queueData, setQueueData] = useState<QueueData | null>(null);
   const [selectedCustomerToken, setSelectedCustomerToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -756,6 +757,10 @@ export function DemoPage() {
 
       setQueues(data.queues);
       setBusinessName(data.businessName);
+      // Auto-select first queue
+      if (data.queues.length > 0 && !selectedQueueId) {
+        setSelectedQueueId(data.queues[0].queueId);
+      }
     } catch (err) {
       const message = err instanceof Error ? err.message : "An unexpected error occurred";
       setError(message);
@@ -764,13 +769,11 @@ export function DemoPage() {
     }
   }, []);
 
-  const primaryQueueId = queues[0]?.queueId;
-
   const fetchQueueData = useCallback(async () => {
-    if (!primaryQueueId) return;
+    if (!selectedQueueId) return;
 
     try {
-      const response = await fetch(`${API_BASE}/api/queues/${primaryQueueId}/customers`);
+      const response = await fetch(`${API_BASE}/api/queues/${selectedQueueId}/customers`);
       if (!response.ok) {
         throw new Error("Failed to fetch queue customers");
       }
@@ -781,7 +784,7 @@ export function DemoPage() {
       }
 
       setQueueData({
-        queueId: primaryQueueId,
+        queueId: selectedQueueId,
         queueName: data.queueInfo.name,
         customers: data.customers,
         waitingCount: data.queueInfo.waitingCount,
@@ -790,17 +793,28 @@ export function DemoPage() {
     } catch (err) {
       console.error("Failed to fetch queue data:", err);
     }
-  }, [primaryQueueId]);
+  }, [selectedQueueId]);
 
   useEffect(() => {
     fetchQueues();
   }, [fetchQueues]);
 
   useEffect(() => {
-    if (primaryQueueId) {
+    if (selectedQueueId) {
       fetchQueueData();
     }
-  }, [primaryQueueId, fetchQueueData]);
+  }, [selectedQueueId, fetchQueueData]);
+
+  // Sync queue tab counts when queueData changes
+  useEffect(() => {
+    if (queueData && selectedQueueId) {
+      setQueues((prev) =>
+        prev.map((q) =>
+          q.queueId === selectedQueueId ? { ...q, waitingCount: queueData.waitingCount } : q
+        )
+      );
+    }
+  }, [queueData, selectedQueueId]);
 
   // Staff room SignalR: join room and listen for QueueUpdated
   useEffect(() => {
@@ -829,7 +843,7 @@ export function DemoPage() {
         });
       }
     };
-  }, [signalR.state, queueData, signalR, fetchQueueData]);
+  }, [signalR.state, queueData, signalR.invoke, signalR.on, fetchQueueData]);
 
   const handleCustomerSelect = useCallback((token: string) => {
     setSelectedCustomerToken((current) => (current === token ? null : token));
@@ -878,12 +892,41 @@ export function DemoPage() {
       {/* Main content */}
       <main className="max-w-7xl mx-auto px-4 py-8">
         {/* Description */}
-        <div className="mb-8 p-4 bg-teal-500/10 border border-teal-500/20 rounded-2xl">
+        <div className="mb-6 p-4 bg-teal-500/10 border border-teal-500/20 rounded-2xl">
           <p className="text-teal-300 text-sm">
             This demo shows both staff and customer views side-by-side. Click "Call Next" on the staff
             panel and watch both views update in real-time via SignalR.
           </p>
         </div>
+
+        {/* Queue Tabs */}
+        {queues.length > 1 && (
+          <div className="mb-6 flex gap-2 flex-wrap">
+            {queues.map((queue) => (
+              <button
+                key={queue.queueId}
+                onClick={() => {
+                  setSelectedQueueId(queue.queueId);
+                  setSelectedCustomerToken(null);
+                }}
+                className={`px-4 py-2 rounded-xl font-medium text-sm transition-all ${
+                  selectedQueueId === queue.queueId
+                    ? "bg-teal-600 text-white"
+                    : "bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white"
+                }`}
+              >
+                {queue.name}
+                <span className={`ml-2 px-2 py-0.5 rounded-full text-xs ${
+                  selectedQueueId === queue.queueId
+                    ? "bg-teal-500/30 text-teal-100"
+                    : "bg-slate-700 text-slate-400"
+                }`}>
+                  {queue.waitingCount}
+                </span>
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* Split layout */}
         <div className="flex flex-col lg:flex-row gap-6">
