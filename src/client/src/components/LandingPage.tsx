@@ -27,7 +27,7 @@ const STEPS = [
   { step: "3", title: "Get Notified", description: "Push notification when it's their turn." },
 ] as const;
 
-const TECH_STACK = ["React 19", ".NET 8", "SignalR", "PostgreSQL", "Tailwind"] as const;
+const TECH_STACK = ["Next.js 16", ".NET 8", "SignalR", "PostgreSQL", "Tailwind"] as const;
 
 // Static logo - drop with queue dots
 function Logo({ size = 40 }: { size?: number }) {
