@@ -34,3 +34,4 @@ next-env.d.ts
 /playwright/.cache/
 .vercel
 .env*.local
+tsconfig.tsbuildinfo
