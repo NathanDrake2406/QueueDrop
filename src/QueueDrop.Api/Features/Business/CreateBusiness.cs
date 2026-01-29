@@ -73,6 +73,14 @@ public static class CreateBusiness
         var membership = BusinessMember.CreateOwner(userId, business.Id, now);
         db.BusinessMembers.Add(membership);
 
+        // Create a default queue for the business
+        var defaultQueue = Domain.Entities.Queue.Create(
+            business.Id,
+            "Main Queue",
+            "main-queue",
+            now);
+        db.Queues.Add(defaultQueue);
+
         await db.SaveChangesAsync(cancellationToken);
 
         return Results.Created(
