@@ -67,8 +67,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setState(s => ({ ...s, businesses: [...s.businesses, business] }));
   }, []);
 
+  const isOwner = useCallback((businessSlug: string): boolean => {
+    const business = state.businesses.find(b => b.slug === businessSlug);
+    return business?.role === "owner";
+  }, [state.businesses]);
+
   return (
-    <AuthContext.Provider value={{ ...state, login, logout, addBusiness, fetchMe }}>
+    <AuthContext.Provider value={{ ...state, login, logout, addBusiness, fetchMe, isOwner }}>
       {children}
     </AuthContext.Provider>
   );

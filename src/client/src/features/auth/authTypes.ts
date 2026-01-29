@@ -5,10 +5,13 @@ export interface User {
   email: string;
 }
 
+export type BusinessRole = "owner" | "staff";
+
 export interface Business {
   id: string;
   name: string;
   slug: string;
+  role: BusinessRole;
 }
 
 export interface AuthState {
@@ -24,6 +27,7 @@ export interface AuthContextValue extends AuthState {
   logout: () => void;
   addBusiness: (business: Business) => void;
   fetchMe: () => Promise<void>;
+  isOwner: (businessSlug: string) => boolean;
 }
 
 export const AuthContext = createContext<AuthContextValue | null>(null);

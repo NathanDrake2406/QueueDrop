@@ -76,11 +76,12 @@ export function OnboardingPage() {
 
       const data = await response.json();
 
-      // Add business to auth context
+      // Add business to auth context (creator is always owner)
       addBusiness({
         id: data.id,
         name: data.name,
         slug: data.slug,
+        role: "owner",
       });
 
       // Navigate to staff dashboard
