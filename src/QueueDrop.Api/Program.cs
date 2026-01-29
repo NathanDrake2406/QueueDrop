@@ -78,7 +78,37 @@ builder.Services.Configure<VapidOptions>(builder.Configuration.GetSection(VapidO
 builder.Services.AddSingleton<IWebPushService, WebPushService>();
 
 // Email (Resend) - falls back to console logging in development if no API key
+// Allow common env var names from Resend docs (RESEND_API_KEY, etc.).
 var resendApiKey = builder.Configuration["Resend:ApiKey"];
+if (string.IsNullOrWhiteSpace(resendApiKey))
+{
+    var resendEnvKey = builder.Configuration["RESEND_API_KEY"];
+    if (!string.IsNullOrWhiteSpace(resendEnvKey))
+    {
+        builder.Configuration["Resend:ApiKey"] = resendEnvKey;
+        resendApiKey = resendEnvKey;
+    }
+}
+
+var resendFromEmail = builder.Configuration["Resend:FromEmail"];
+if (string.IsNullOrWhiteSpace(resendFromEmail))
+{
+    var resendFromEmailEnv = builder.Configuration["RESEND_FROM_EMAIL"];
+    if (!string.IsNullOrWhiteSpace(resendFromEmailEnv))
+    {
+        builder.Configuration["Resend:FromEmail"] = resendFromEmailEnv;
+    }
+}
+
+var resendFromName = builder.Configuration["Resend:FromName"];
+if (string.IsNullOrWhiteSpace(resendFromName))
+{
+    var resendFromNameEnv = builder.Configuration["RESEND_FROM_NAME"];
+    if (!string.IsNullOrWhiteSpace(resendFromNameEnv))
+    {
+        builder.Configuration["Resend:FromName"] = resendFromNameEnv;
+    }
+}
 if (!string.IsNullOrWhiteSpace(resendApiKey))
 {
     builder.Services.AddOptions();
@@ -94,6 +124,12 @@ else
 }
 
 var app = builder.Build();
+
+if (string.IsNullOrWhiteSpace(resendApiKey) && app.Environment.IsProduction())
+{
+    app.Logger.LogWarning(
+        "Resend API key is not configured; magic link emails will be logged to console only.");
+}
 
 // Configure pipeline
 app.UseCors("Frontend");

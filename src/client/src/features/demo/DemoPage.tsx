@@ -57,7 +57,7 @@ function ConnectionIndicator({ state }: { state: ConnectionState }) {
   return (
     <div className="flex items-center gap-2">
       <div className={`w-2 h-2 rounded-full ${colors[state]}`} />
-      <span className="text-xs text-zinc-500 uppercase tracking-wide">
+      <span className="text-xs text-slate-500 uppercase tracking-wide">
         {labels[state]}
       </span>
     </div>
@@ -66,8 +66,8 @@ function ConnectionIndicator({ state }: { state: ConnectionState }) {
 
 function LoadingSpinner() {
   return (
-    <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
-      <div className="w-8 h-8 border-2 border-zinc-700 border-t-white rounded-full animate-spin" />
+    <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+      <div className="w-8 h-8 border-2 border-slate-700 border-t-white rounded-full animate-spin" />
     </div>
   );
 }
@@ -79,7 +79,7 @@ interface ErrorDisplayProps {
 
 function ErrorDisplay({ message, onRetry }: ErrorDisplayProps) {
   return (
-    <div className="min-h-screen bg-zinc-950 text-white flex items-center justify-center p-4">
+    <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center p-4">
       <div className="w-full max-w-md text-center">
         <div className="w-16 h-16 bg-red-500/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
           <svg className="w-8 h-8 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -92,10 +92,10 @@ function ErrorDisplay({ message, onRetry }: ErrorDisplayProps) {
           </svg>
         </div>
         <h1 className="text-xl font-bold mb-2">Something went wrong</h1>
-        <p className="text-zinc-500 mb-6">{message}</p>
+        <p className="text-slate-500 mb-6">{message}</p>
         <button
           onClick={onRetry}
-          className="px-6 py-3 bg-white text-zinc-900 font-semibold rounded-xl hover:bg-zinc-100 transition-colors"
+          className="px-6 py-3 bg-white text-slate-900 font-semibold rounded-xl hover:bg-slate-100 transition-colors"
         >
           Try Again
         </button>
@@ -111,10 +111,10 @@ interface PanelProps {
 }
 
 function Panel({ title, variant, children }: PanelProps) {
-  const bgClass = variant === "staff" ? "bg-zinc-900" : "bg-zinc-900/70";
+  const bgClass = variant === "staff" ? "bg-slate-900" : "bg-slate-900/70";
 
   return (
-    <div className={`flex-1 ${bgClass} border border-zinc-800 rounded-2xl p-6 min-h-[400px]`}>
+    <div className={`flex-1 ${bgClass} border border-slate-800 rounded-2xl p-6 min-h-[400px]`}>
       <h2 className="text-lg font-semibold text-white mb-4">{title}</h2>
       {children}
     </div>
@@ -250,21 +250,21 @@ function StaffPanel({
         <button
           onClick={handleCallNext}
           disabled={waitingCustomers.length === 0 || isCallingNext}
-          className="flex-1 px-4 py-3 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white font-semibold rounded-xl hover:from-violet-500 hover:to-fuchsia-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+          className="flex-1 px-4 py-3 bg-teal-600 text-white font-semibold rounded-xl hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-teal-600/20"
         >
           {isCallingNext ? "Calling..." : "Call Next"}
         </button>
         <button
           onClick={handleSeedCustomers}
           disabled={isSeeding}
-          className="px-4 py-3 bg-zinc-800 text-white font-medium rounded-xl hover:bg-zinc-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="px-4 py-3 bg-slate-800 text-white font-medium rounded-xl hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           {isSeeding ? "Adding..." : "+ Add Demo Customers"}
         </button>
         <button
           onClick={handleSeedCustomers}
           disabled={isSeeding}
-          className="px-4 py-3 bg-zinc-800 text-zinc-300 rounded-xl hover:bg-zinc-700 transition-colors"
+          className="px-4 py-3 bg-slate-800 text-slate-300 rounded-xl hover:bg-slate-700 transition-colors"
           title="Reset demo to initial state"
         >
           ↺ Reset
@@ -274,11 +274,11 @@ function StaffPanel({
       {/* Stats row */}
       <div className="flex gap-4 text-sm">
         <div className="flex items-center gap-2">
-          <span className="text-zinc-500">Waiting:</span>
+          <span className="text-slate-500">Waiting:</span>
           <span className="text-white font-semibold">{queueData.waitingCount}</span>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-zinc-500">Called:</span>
+          <span className="text-slate-500">Called:</span>
           <span className="text-amber-400 font-semibold">{queueData.calledCount}</span>
         </div>
       </div>
@@ -298,7 +298,7 @@ function StaffPanel({
                   onClick={() => onCustomerSelect(customer.token)}
                   className={`bg-amber-500/10 border rounded-xl p-3 cursor-pointer transition-all ${
                     isSelected
-                      ? "border-violet-500 ring-2 ring-violet-500/20"
+                      ? "border-teal-500 ring-2 ring-teal-500/20"
                       : "border-amber-500/20 hover:border-amber-500/40"
                   }`}
                 >
@@ -333,7 +333,7 @@ function StaffPanel({
                     </div>
                   </div>
                   {isSelected && (
-                    <p className="text-xs text-violet-400 mt-2 flex items-center gap-1">
+                    <p className="text-xs text-teal-400 mt-2 flex items-center gap-1">
                       <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path
                           strokeLinecap="round"
@@ -354,11 +354,11 @@ function StaffPanel({
 
       {/* Waiting customers section */}
       <div className="space-y-2">
-        <h3 className="text-sm font-medium text-zinc-400 uppercase tracking-wide">Waiting</h3>
+        <h3 className="text-sm font-medium text-slate-400 uppercase tracking-wide">Waiting</h3>
         {waitingCustomers.length === 0 ? (
-          <div className="text-center py-8 text-zinc-600">
+          <div className="text-center py-8 text-slate-600">
             <svg
-              className="w-12 h-12 mx-auto mb-3 text-zinc-700"
+              className="w-12 h-12 mx-auto mb-3 text-slate-700"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -383,15 +383,15 @@ function StaffPanel({
                 <div
                   key={customer.id}
                   onClick={() => onCustomerSelect(customer.token)}
-                  className={`bg-zinc-800 border rounded-xl p-3 cursor-pointer transition-all ${
+                  className={`bg-slate-800 border rounded-xl p-3 cursor-pointer transition-all ${
                     isSelected
-                      ? "border-violet-500 ring-2 ring-violet-500/20"
-                      : "border-zinc-700 hover:border-zinc-600"
+                      ? "border-teal-500 ring-2 ring-teal-500/20"
+                      : "border-slate-700 hover:border-slate-600"
                   }`}
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-zinc-700 rounded-lg flex items-center justify-center font-bold text-sm text-white">
+                      <div className="w-8 h-8 bg-slate-700 rounded-lg flex items-center justify-center font-bold text-sm text-white">
                         {customer.position}
                       </div>
                       <span className="font-medium text-white">{customer.name}</span>
@@ -402,7 +402,7 @@ function StaffPanel({
                         handleRemoveCustomer(customer.id);
                       }}
                       disabled={isProcessing}
-                      className="p-1.5 text-zinc-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg disabled:opacity-50 transition-colors"
+                      className="p-1.5 text-slate-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg disabled:opacity-50 transition-colors"
                     >
                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path
@@ -415,7 +415,7 @@ function StaffPanel({
                     </button>
                   </div>
                   {isSelected && (
-                    <p className="text-xs text-violet-400 mt-2 flex items-center gap-1">
+                    <p className="text-xs text-teal-400 mt-2 flex items-center gap-1">
                       <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path
                           strokeLinecap="round"
@@ -579,9 +579,9 @@ function CustomerPanel({ token, signalR }: CustomerPanelProps) {
   // No token selected - show placeholder
   if (!token) {
     return (
-      <div className="flex flex-col items-center justify-center h-full min-h-[300px] text-zinc-500">
+      <div className="flex flex-col items-center justify-center h-full min-h-[300px] text-slate-500">
         <svg
-          className="w-12 h-12 mb-4 text-zinc-700"
+          className="w-12 h-12 mb-4 text-slate-700"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -594,7 +594,7 @@ function CustomerPanel({ token, signalR }: CustomerPanelProps) {
           />
         </svg>
         <p className="text-sm font-medium">Select a customer from the staff panel</p>
-        <p className="text-xs text-zinc-600 mt-1">to see their live view</p>
+        <p className="text-xs text-slate-600 mt-1">to see their live view</p>
       </div>
     );
   }
@@ -603,8 +603,8 @@ function CustomerPanel({ token, signalR }: CustomerPanelProps) {
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center h-full min-h-[300px]">
-        <div className="w-8 h-8 border-2 border-zinc-700 border-t-white rounded-full animate-spin" />
-        <p className="text-sm text-zinc-500 mt-4">Loading customer view...</p>
+        <div className="w-8 h-8 border-2 border-slate-700 border-t-white rounded-full animate-spin" />
+        <p className="text-sm text-slate-500 mt-4">Loading customer view...</p>
       </div>
     );
   }
@@ -623,10 +623,10 @@ function CustomerPanel({ token, signalR }: CustomerPanelProps) {
             />
           </svg>
         </div>
-        <p className="text-sm text-zinc-400">{error}</p>
+        <p className="text-sm text-slate-400">{error}</p>
         <button
           onClick={fetchPosition}
-          className="mt-4 px-4 py-2 bg-zinc-800 text-white text-sm font-medium rounded-lg hover:bg-zinc-700 transition-colors"
+          className="mt-4 px-4 py-2 bg-slate-800 text-white text-sm font-medium rounded-lg hover:bg-slate-700 transition-colors"
         >
           Retry
         </button>
@@ -637,7 +637,7 @@ function CustomerPanel({ token, signalR }: CustomerPanelProps) {
   // No data
   if (!data) {
     return (
-      <div className="flex flex-col items-center justify-center h-full min-h-[300px] text-zinc-500">
+      <div className="flex flex-col items-center justify-center h-full min-h-[300px] text-slate-500">
         <p className="text-sm">No data available</p>
       </div>
     );
@@ -650,8 +650,8 @@ function CustomerPanel({ token, signalR }: CustomerPanelProps) {
     <div className="flex flex-col h-full">
       {/* Header */}
       <div className="mb-4">
-        <p className="text-zinc-500 text-sm">{data.businessName}</p>
-        <p className="text-zinc-400 text-xs">{data.queueName}</p>
+        <p className="text-slate-500 text-sm">{data.businessName}</p>
+        <p className="text-slate-400 text-xs">{data.queueName}</p>
       </div>
 
       {/* Main content */}
@@ -675,27 +675,27 @@ function CustomerPanel({ token, signalR }: CustomerPanelProps) {
             </div>
           </div>
         ) : isWaiting && data.position ? (
-          <div className="bg-zinc-800/50 border border-zinc-700 rounded-2xl p-6 text-center">
-            <p className="text-zinc-500 text-sm uppercase tracking-wider mb-2">Your position</p>
+          <div className="bg-slate-800/50 border border-slate-700 rounded-2xl p-6 text-center">
+            <p className="text-slate-500 text-sm uppercase tracking-wider mb-2">Your position</p>
             <div className="relative inline-block">
-              <div className="text-8xl font-bold leading-none bg-gradient-to-b from-white to-zinc-400 bg-clip-text text-transparent">
+              <div className="text-8xl font-bold leading-none bg-gradient-to-b from-white to-slate-400 bg-clip-text text-transparent">
                 {data.position}
               </div>
-              <div className="absolute -inset-4 bg-gradient-to-r from-violet-500/20 to-fuchsia-500/20 blur-3xl -z-10" />
+              <div className="absolute -inset-4 bg-teal-500/20 blur-3xl -z-10" />
             </div>
-            <p className="text-zinc-400 mt-3 text-sm">
+            <p className="text-slate-400 mt-3 text-sm">
               {data.position === 1 ? "You're next!" : `${data.position - 1} ${data.position - 1 === 1 ? "person" : "people"} ahead`}
             </p>
           </div>
         ) : (
-          <div className="bg-zinc-800/50 border border-zinc-700 rounded-2xl p-6 text-center">
-            <p className="text-zinc-400">Status: {data.status}</p>
+          <div className="bg-slate-800/50 border border-slate-700 rounded-2xl p-6 text-center">
+            <p className="text-slate-400">Status: {data.status}</p>
           </div>
         )}
       </div>
 
       {/* Footer */}
-      <div className="mt-4 pt-4 border-t border-zinc-800">
+      <div className="mt-4 pt-4 border-t border-slate-800">
         <ConnectionIndicator state={signalR.state} />
       </div>
     </div>
@@ -818,24 +818,24 @@ export function DemoPage() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white">
+    <div className="min-h-screen bg-slate-950 text-white">
       {/* Header */}
-      <header className="border-b border-zinc-900">
+      <header className="border-b border-slate-900">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Link
               to="/"
-              className="flex items-center gap-2 text-zinc-500 hover:text-white transition-colors"
+              className="flex items-center gap-2 text-slate-500 hover:text-white transition-colors"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
               Back
             </Link>
-            <div className="w-px h-6 bg-zinc-800" />
+            <div className="w-px h-6 bg-slate-800" />
             <div>
               <h1 className="text-xl font-bold">Interactive Demo</h1>
-              <p className="text-sm text-zinc-500">{businessName}</p>
+              <p className="text-sm text-slate-500">{businessName}</p>
             </div>
           </div>
           <ConnectionIndicator state={signalR.state} />
@@ -843,8 +843,8 @@ export function DemoPage() {
       </header>
 
       {/* Instructional banner */}
-      <div className="bg-violet-500/10 border-b border-violet-500/20 px-4 py-2">
-        <div className="max-w-7xl mx-auto text-center text-sm text-violet-300">
+      <div className="bg-teal-500/10 border-b border-teal-500/20 px-4 py-2">
+        <div className="max-w-7xl mx-auto text-center text-sm text-teal-300">
           <span className="font-medium">Try it:</span> Click "Call Next" on the left, watch the customer position update on the right in real-time!
         </div>
       </div>
@@ -852,8 +852,8 @@ export function DemoPage() {
       {/* Main content */}
       <main className="max-w-7xl mx-auto px-4 py-8">
         {/* Description */}
-        <div className="mb-8 p-4 bg-violet-500/10 border border-violet-500/20 rounded-2xl">
-          <p className="text-violet-300 text-sm">
+        <div className="mb-8 p-4 bg-teal-500/10 border border-teal-500/20 rounded-2xl">
+          <p className="text-teal-300 text-sm">
             This demo shows both staff and customer views side-by-side. Click "Call Next" on the staff
             panel and watch both views update in real-time via SignalR.
           </p>
@@ -871,8 +871,8 @@ export function DemoPage() {
                 selectedCustomerToken={selectedCustomerToken}
               />
             ) : (
-              <div className="flex flex-col items-center justify-center h-64 text-zinc-500">
-                <div className="w-8 h-8 border-2 border-zinc-700 border-t-white rounded-full animate-spin" />
+              <div className="flex flex-col items-center justify-center h-64 text-slate-500">
+                <div className="w-8 h-8 border-2 border-slate-700 border-t-white rounded-full animate-spin" />
                 <p className="text-sm mt-4">Loading queue data...</p>
               </div>
             )}
