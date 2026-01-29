@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using QueueDrop.Api.Auth;
 using QueueDrop.Domain.Entities;
+using QueueDrop.Domain.Enums;
 using QueueDrop.Infrastructure.Persistence;
 
 namespace QueueDrop.Api.Features.Demo;
@@ -14,6 +16,13 @@ public static class SeedDemoData
 {
     public sealed record SeedResponse(int CustomersAdded, string Message);
     public sealed record ResetResponse(int CustomersRemoved, string Message);
+    public sealed record RoleTestResponse(
+        string OwnerEmail,
+        string OwnerToken,
+        string StaffEmail,
+        string StaffToken,
+        string BusinessSlug,
+        string Message);
 
     private static readonly string[] FirstNames =
     [
@@ -28,6 +37,9 @@ public static class SeedDemoData
         "Petrov", "Santos", "O'Brien", "Wang", "Johnson", "Brown", "Davis", "Miller",
         "Wilson", "Moore", "Taylor", "Anderson", "Thomas", "Jackson", "White", "Harris"
     ];
+
+    public sealed record CreateQueueRequest(string Name);
+    public sealed record CreateQueueResponse(Guid Id, string Name, string Slug);
 
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
@@ -44,6 +56,20 @@ public static class SeedDemoData
             .Produces<ResetResponse>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound)
             .Produces<ProblemDetails>(StatusCodes.Status409Conflict);
+
+        // Dev-only: Create queue without auth (for testing)
+        app.MapPost("/api/demo/business/{businessSlug}/queues", CreateQueueHandler)
+            .WithName("DevCreateQueue")
+            .WithTags("Demo")
+            .Produces<CreateQueueResponse>(StatusCodes.Status201Created)
+            .Produces(StatusCodes.Status404NotFound)
+            .Produces<ProblemDetails>(StatusCodes.Status409Conflict);
+
+        // Dev-only: Set up owner + staff for role testing
+        app.MapPost("/api/demo/setup-roles", SetupRolesHandler)
+            .WithName("SetupRoleTest")
+            .WithTags("Demo")
+            .Produces<RoleTestResponse>(StatusCodes.Status200OK);
     }
 
     private static async Task<IResult> SeedHandler(
@@ -165,5 +191,132 @@ public static class SeedDemoData
     {
         var notes = new[] { "Allergies", "Wheelchair access", "Birthday celebration", "VIP", "First time visitor" };
         return notes[random.Next(notes.Length)];
+    }
+
+    private static async Task<IResult> CreateQueueHandler(
+        string businessSlug,
+        CreateQueueRequest request,
+        AppDbContext db,
+        TimeProvider timeProvider,
+        CancellationToken cancellationToken)
+    {
+        var business = await db.Businesses
+            .Include(b => b.Queues)
+            .FirstOrDefaultAsync(b => b.Slug == businessSlug.ToLowerInvariant(), cancellationToken);
+
+        if (business is null)
+            return Results.NotFound();
+
+        if (string.IsNullOrWhiteSpace(request.Name))
+        {
+            return Results.Problem(
+                title: "Invalid name",
+                detail: "Queue name is required.",
+                statusCode: StatusCodes.Status400BadRequest);
+        }
+
+        var slug = request.Name
+            .ToLowerInvariant()
+            .Trim()
+            .Replace(" ", "-")
+            .Replace("'", "")
+            .Replace("\"", "");
+
+        if (business.Queues.Any(q => q.Slug == slug))
+        {
+            return Results.Problem(
+                title: "Slug already exists",
+                detail: $"A queue with slug '{slug}' already exists in this business.",
+                statusCode: StatusCodes.Status409Conflict);
+        }
+
+        var now = timeProvider.GetUtcNow();
+        var queue = Queue.Create(business.Id, request.Name, slug, now);
+
+        db.Queues.Add(queue);
+        await db.SaveChangesAsync(cancellationToken);
+
+        return Results.Created(
+            $"/api/business/{businessSlug}/queues/{queue.Slug}",
+            new CreateQueueResponse(queue.Id, queue.Name, queue.Slug));
+    }
+
+    private static async Task<IResult> SetupRolesHandler(
+        AppDbContext db,
+        IJwtTokenService jwtService,
+        TimeProvider timeProvider,
+        CancellationToken cancellationToken)
+    {
+        var now = timeProvider.GetUtcNow();
+        const string businessSlug = "role-test-shop";
+        const string ownerEmail = "owner@test.local";
+        const string staffEmail = "staff@test.local";
+
+        // Clean up any existing test data
+        var existingBusiness = await db.Businesses
+            .Include(b => b.Queues)
+            .FirstOrDefaultAsync(b => b.Slug == businessSlug, cancellationToken);
+
+        if (existingBusiness is not null)
+        {
+            // Remove queues and business
+            db.Queues.RemoveRange(existingBusiness.Queues);
+            db.Businesses.Remove(existingBusiness);
+        }
+
+        // Remove existing test users' memberships (but keep users for simplicity)
+        var existingMemberships = await db.BusinessMembers
+            .Include(bm => bm.User)
+            .Where(bm => bm.User.Email == ownerEmail || bm.User.Email == staffEmail)
+            .ToListAsync(cancellationToken);
+        db.BusinessMembers.RemoveRange(existingMemberships);
+
+        await db.SaveChangesAsync(cancellationToken);
+
+        // Find or create owner user
+        var ownerUser = await db.Users.FirstOrDefaultAsync(u => u.Email == ownerEmail, cancellationToken);
+        if (ownerUser is null)
+        {
+            ownerUser = User.Create(ownerEmail, now);
+            db.Users.Add(ownerUser);
+        }
+
+        // Find or create staff user
+        var staffUser = await db.Users.FirstOrDefaultAsync(u => u.Email == staffEmail, cancellationToken);
+        if (staffUser is null)
+        {
+            staffUser = User.Create(staffEmail, now);
+            db.Users.Add(staffUser);
+        }
+
+        await db.SaveChangesAsync(cancellationToken);
+
+        // Create business (NO queues - to test the NoQueuesState UI)
+        var business = Domain.Entities.Business.Create("Role Test Shop", businessSlug, now, "For testing owner/staff roles");
+        db.Businesses.Add(business);
+        await db.SaveChangesAsync(cancellationToken);
+
+        // Add owner membership
+        var ownerMembership = BusinessMember.CreateOwner(ownerUser.Id, business.Id, now);
+        db.BusinessMembers.Add(ownerMembership);
+
+        // Add staff membership
+        var staffMembership = BusinessMember.CreateStaffInvite(staffUser.Id, business.Id, now);
+        staffMembership.AcceptInvite(now);
+        db.BusinessMembers.Add(staffMembership);
+
+        await db.SaveChangesAsync(cancellationToken);
+
+        // Generate tokens
+        var ownerToken = jwtService.GenerateToken(ownerUser.Id, ownerUser.Email);
+        var staffToken = jwtService.GenerateToken(staffUser.Id, staffUser.Email);
+
+        return Results.Ok(new RoleTestResponse(
+            ownerEmail,
+            ownerToken,
+            staffEmail,
+            staffToken,
+            businessSlug,
+            $"Created '{businessSlug}' with NO queues. Owner sees create form, staff sees 'contact owner' message. Visit /staff/{businessSlug}"));
     }
 }
