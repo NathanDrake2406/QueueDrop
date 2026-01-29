@@ -597,6 +597,7 @@ function CustomerPanel({ token, signalR }: CustomerPanelProps) {
         });
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- signalR methods are stable
   }, [token, signalR.state, signalR.invoke, signalR.on]);
 
   // No token selected - show placeholder
@@ -767,6 +768,7 @@ export function DemoPage() {
     } finally {
       setIsLoading(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only fetch on mount
   }, []);
 
   const fetchQueueData = useCallback(async () => {
@@ -840,6 +842,7 @@ export function DemoPage() {
         });
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- signalR methods are stable
   }, [signalR.state, queueData, signalR.invoke, signalR.on, fetchQueueData]);
 
   const handleCustomerSelect = useCallback((token: string) => {

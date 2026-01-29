@@ -14,12 +14,6 @@ export function ProtectedRoute({ children, requireBusiness }: Props) {
   const router = useRouter();
   const pathname = usePathname();
 
-  // Dev bypass - skip auth in development mode
-  const isDev = process.env.NODE_ENV === "development";
-  if (isDev) {
-    return <>{children}</>;
-  }
-
   useEffect(() => {
     if (isLoading) return;
 
