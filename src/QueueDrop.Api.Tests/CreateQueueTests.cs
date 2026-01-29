@@ -18,15 +18,15 @@ public class CreateQueueTests : IntegrationTestBase
         // Act
         var response = await Client.PostAsJsonAsync($"/api/business/{businessSlug}/queues", new
         {
-            name = "Main Queue",
-            slug = "main-queue"
+            name = "Second Queue",
+            slug = "second-queue"
         });
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Created);
         var result = await response.Content.ReadFromJsonAsync<CreateQueueResponse>();
-        result!.Name.Should().Be("Main Queue");
-        result.Slug.Should().Be("main-queue");
+        result!.Name.Should().Be("Second Queue");
+        result.Slug.Should().Be("second-queue");
     }
 
     [Fact]
