@@ -1,6 +1,6 @@
 import type { NextConfig } from "next";
 
-const backendUrl = process.env.BACKEND_URL || "http://localhost:5000";
+const backendUrl = process.env.BACKEND_URL || "http://localhost:5001";
 
 const nextConfig: NextConfig = {
   // Allow cross-origin requests from local network during development

@@ -30,12 +30,12 @@ export default defineConfig({
   webServer: [
     {
       command: "dotnet run --project ../QueueDrop.Api",
-      url: "http://localhost:5000/health",
+      url: "http://localhost:5001/health",
       reuseExistingServer: !process.env.CI,
       timeout: 60000,
       env: {
         ASPNETCORE_ENVIRONMENT: "Development",
-        ASPNETCORE_URLS: "http://localhost:5000",
+        ASPNETCORE_URLS: "http://localhost:5001",
         // Use env var if set (CI), otherwise default to local Docker postgres
         ConnectionStrings__DefaultConnection:
           process.env.ConnectionStrings__DefaultConnection ||

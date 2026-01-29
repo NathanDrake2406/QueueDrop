@@ -161,6 +161,8 @@ function StaffPanel({
     }
   }, [queueData.queueId, onRefresh]);
 
+  const [isResetting, setIsResetting] = useState(false);
+
   const handleSeedCustomers = useCallback(async () => {
     setIsSeeding(true);
     try {
@@ -168,14 +170,32 @@ function StaffPanel({
         method: "POST",
       });
       if (!response.ok) {
-        const errorMessage = await getApiErrorMessage(response, "Failed to seed customers");
+        const errorMessage = await getApiErrorMessage(response, "Failed to add customers");
         console.error(errorMessage);
       }
       onRefresh();
     } catch (err) {
-      console.error("Failed to seed:", err);
+      console.error("Failed to add customers:", err);
     } finally {
       setIsSeeding(false);
+    }
+  }, [queueData.queueId, onRefresh]);
+
+  const handleReset = useCallback(async () => {
+    setIsResetting(true);
+    try {
+      const response = await fetch(`${API_BASE}/api/demo/reset?queueId=${queueData.queueId}`, {
+        method: "POST",
+      });
+      if (!response.ok) {
+        const errorMessage = await getApiErrorMessage(response, "Failed to reset queue");
+        console.error(errorMessage);
+      }
+      onRefresh();
+    } catch (err) {
+      console.error("Failed to reset:", err);
+    } finally {
+      setIsResetting(false);
     }
   }, [queueData.queueId, onRefresh]);
 
@@ -264,12 +284,12 @@ function StaffPanel({
           {isSeeding ? "Adding..." : "+ Add Demo Customers"}
         </button>
         <button
-          onClick={handleSeedCustomers}
-          disabled={isSeeding}
-          className="px-4 py-3 bg-slate-800 text-slate-300 rounded-xl hover:bg-slate-700 transition-colors"
-          title="Reset demo to initial state"
+          onClick={handleReset}
+          disabled={isResetting}
+          className="px-4 py-3 bg-slate-800 text-slate-300 rounded-xl hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          title="Clear all customers from queue"
         >
-          ↺ Reset
+          {isResetting ? "..." : "↺ Clear"}
         </button>
       </div>
 
@@ -570,9 +590,10 @@ function CustomerPanel({ token, signalR }: CustomerPanelProps) {
       unsubscribePositionChanged();
       unsubscribeCalled();
 
-      if (token) {
-        signalR.invoke("LeaveCustomerRoom", token).catch((err) => {
-          console.error("Failed to leave customer room on cleanup:", err);
+      // Only try to leave room if still connected (may already be disconnected during cleanup)
+      if (token && signalR.state === "connected") {
+        signalR.invoke("LeaveCustomerRoom", token).catch(() => {
+          // Ignore errors during cleanup - connection may be closing
         });
       }
     };
@@ -801,9 +822,12 @@ export function DemoPage() {
 
     return () => {
       unsubscribe();
-      signalR.invoke("LeaveStaffRoom", DEMO_BUSINESS_ID).catch((err) => {
-        console.error("Failed to leave staff room:", err);
-      });
+      // Only try to leave room if still connected (may already be disconnected during cleanup)
+      if (signalR.state === "connected") {
+        signalR.invoke("LeaveStaffRoom", DEMO_BUSINESS_ID).catch(() => {
+          // Ignore errors during cleanup - connection may be closing
+        });
+      }
     };
   }, [signalR.state, queueData, signalR, fetchQueueData]);
 

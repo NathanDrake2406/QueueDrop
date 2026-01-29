@@ -24,7 +24,7 @@ const CONFIG = {
   connections: parseInt(args.connections || "100"),
   duration: parseInt(args.duration || "60"),
   rampUp: parseInt(args["ramp-up"] || "10"),
-  baseUrl: args.url || "http://localhost:5000",
+  baseUrl: args.url || "http://localhost:5001",
 };
 
 // Metrics

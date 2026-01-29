@@ -47,6 +47,9 @@ export function useSignalR({ hubUrl, autoConnect = true, onStateChange }: UseSig
 
   // Create connection
   useEffect(() => {
+    // Reset mounted flag on each mount (important for StrictMode)
+    mountedRef.current = true;
+
     const connection = new HubConnectionBuilder()
       .withUrl(hubUrl)
       .withAutomaticReconnect({
@@ -62,13 +65,21 @@ export function useSignalR({ hubUrl, autoConnect = true, onStateChange }: UseSig
     // Set up event handlers
     connection.onreconnecting(() => updateState("reconnecting"));
     connection.onreconnected(() => updateState("connected"));
-    connection.onclose(() => updateState("disconnected"));
+    connection.onclose(() => {
+      // Only update state if still mounted (avoids state update during cleanup)
+      if (mountedRef.current) {
+        updateState("disconnected");
+      }
+    });
 
     connectionRef.current = connection;
 
     return () => {
       mountedRef.current = false;
-      connection.stop();
+      // Stop connection without waiting - let it clean up in background
+      connection.stop().catch(() => {
+        // Ignore errors during cleanup
+      });
     };
   }, [hubUrl, updateState]);
 
@@ -76,29 +87,48 @@ export function useSignalR({ hubUrl, autoConnect = true, onStateChange }: UseSig
   const startConnection = useCallback(async () => {
     const connection = connectionRef.current;
     if (!connection || connection.state !== HubConnectionState.Disconnected) return;
+    if (!mountedRef.current) return; // Don't connect if unmounted
 
     updateState("connecting");
     try {
       await connection.start();
-      updateState("connected");
+      // Only update state if still mounted
+      if (mountedRef.current) {
+        updateState("connected");
+      }
     } catch (err) {
+      // Ignore abort errors from StrictMode cleanup
+      if (err instanceof Error && err.message.includes("stopped")) {
+        return;
+      }
       console.error("SignalR connection failed:", err);
-      updateState("disconnected");
+      if (mountedRef.current) {
+        updateState("disconnected");
+      }
     }
   }, [updateState]);
 
-  // Auto-connect
+  // Auto-connect (with small delay to handle StrictMode double-mount)
   useEffect(() => {
-    if (autoConnect) {
-      startConnection();
-    }
+    if (!autoConnect) return;
+
+    // Small delay allows StrictMode cleanup to complete before connecting
+    const timer = setTimeout(() => {
+      if (mountedRef.current) {
+        startConnection();
+      }
+    }, 100);
+
+    return () => clearTimeout(timer);
   }, [autoConnect, startConnection]);
 
   // Invoke method
   const invoke = useCallback(async <T = void>(methodName: string, ...args: unknown[]): Promise<T> => {
     const connection = connectionRef.current;
     if (!connection || connection.state !== HubConnectionState.Connected) {
-      throw new Error("SignalR not connected");
+      // Return rejected promise instead of throwing synchronously
+      // This allows callers using .catch() to handle gracefully
+      return Promise.reject(new Error("SignalR not connected"));
     }
     return connection.invoke<T>(methodName, ...args);
   }, []);

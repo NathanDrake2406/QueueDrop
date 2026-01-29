@@ -30,7 +30,7 @@ export const options = {
   },
 };
 
-const BASE_URL = __ENV.BASE_URL || "http://localhost:5000";
+const BASE_URL = __ENV.BASE_URL || "http://localhost:5001";
 
 export default function () {
   const uniqueId = `${__VU}-${__ITER}-${Date.now()}`;
