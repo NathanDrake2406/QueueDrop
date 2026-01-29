@@ -68,7 +68,7 @@ src/
 - Queue as Aggregate Root — all mutations through domain methods
 - Result<T> for explicit error handling, no exceptions for control flow
 - Token-based customer identity — unique URLs, no auth required for customers
-- Vertical slices — each feature self-contained in one file (chose this over N-tier to minimize cross-cutting changes; adding a feature means touching one file, not four layers)
+- Vertical slices — each feature self-contained in one file
 
 [Architecture Decision Records →](docs/adr/001-architecture-decisions.md)
 
