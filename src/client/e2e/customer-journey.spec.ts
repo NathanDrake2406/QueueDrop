@@ -16,13 +16,13 @@ test.describe("Customer Queue Journey", () => {
     await page.goto("/");
 
     await expect(page.getByText("QueueDrop").first()).toBeVisible();
-    await expect(page.getByRole("button", { name: "Try Interactive Demo" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Try the Demo" })).toBeVisible();
   });
 
   test("should navigate to interactive demo page", async ({ page }) => {
     await page.goto("/");
 
-    await page.getByRole("button", { name: "Try Interactive Demo" }).click();
+    await page.getByRole("link", { name: "Try the Demo" }).click();
 
     // Should go to the interactive demo page
     await expect(page).toHaveURL("/demo");
