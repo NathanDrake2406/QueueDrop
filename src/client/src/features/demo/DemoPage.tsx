@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import { getApiErrorMessage, safeJsonParse } from "../../shared/utils/api";
+import { useDarkMode } from "@/shared/hooks/useDarkMode";
 import { useSignalR, type ConnectionState } from "../../shared/hooks/useSignalR";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "";
@@ -43,9 +44,9 @@ interface QueueData {
 
 function ConnectionIndicator({ state }: { state: ConnectionState }) {
   const colors = {
-    connected: "bg-emerald-500 animate-pulse",
-    connecting: "bg-amber-500 animate-pulse",
-    reconnecting: "bg-amber-500 animate-pulse",
+    connected: "bg-emerald-400 animate-pulse",
+    connecting: "bg-amber-400 animate-pulse",
+    reconnecting: "bg-amber-400 animate-pulse",
     disconnected: "bg-red-500",
   };
 
@@ -57,9 +58,9 @@ function ConnectionIndicator({ state }: { state: ConnectionState }) {
   };
 
   return (
-    <div className="flex items-center gap-2">
-      <div className={`w-2 h-2 rounded-full ${colors[state]}`} />
-      <span className="text-xs text-slate-500 uppercase tracking-wide">
+    <div className="flex items-center gap-2 px-3 py-1.5 rounded-none bg-white/5 border border-white/5 backdrop-blur">
+      <div className={`w-2.5 h-2.5 rounded-full ${colors[state]} shadow-[0_0_0_4px_rgba(255,255,255,0.04)]`} />
+      <span className="text-[11px] text-slate-200 uppercase tracking-[0.08em]">
         {labels[state]}
       </span>
     </div>
@@ -69,7 +70,10 @@ function ConnectionIndicator({ state }: { state: ConnectionState }) {
 function LoadingSpinner() {
   return (
     <div className="min-h-screen bg-slate-950 flex items-center justify-center">
-      <div className="w-8 h-8 border-2 border-slate-700 border-t-white rounded-full animate-spin" />
+      <div className="relative">
+        <div className="w-14 h-14 rounded-full border border-teal-500/30" />
+        <div className="absolute inset-0 w-14 h-14 rounded-full border-2 border-transparent border-t-teal-400 animate-spin" />
+      </div>
     </div>
   );
 }
@@ -82,9 +86,9 @@ interface ErrorDisplayProps {
 function ErrorDisplay({ message, onRetry }: ErrorDisplayProps) {
   return (
     <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center p-4">
-      <div className="w-full max-w-md text-center">
-        <div className="w-16 h-16 bg-red-500/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
-          <svg className="w-8 h-8 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <div className="w-full max-w-md text-center border border-red-500/30 bg-red-500/5 rounded-none px-6 py-8 shadow-[0_16px_40px_rgba(0,0,0,0.35)]">
+        <div className="w-16 h-16 bg-red-500/20 rounded-none flex items-center justify-center mx-auto mb-6">
+          <svg className="w-8 h-8 text-red-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -94,10 +98,14 @@ function ErrorDisplay({ message, onRetry }: ErrorDisplayProps) {
           </svg>
         </div>
         <h1 className="text-xl font-bold mb-2">Something went wrong</h1>
-        <p className="text-slate-500 mb-6">{message}</p>
+        <p className="text-slate-300/80 mb-6">{message}</p>
+        <div className="flex items-center gap-3 justify-center text-sm text-slate-500 mb-4">
+          <span className="w-2 h-2 rounded-full bg-red-400 animate-pulse" />
+          <span>Connection paused</span>
+        </div>
         <button
           onClick={onRetry}
-          className="px-6 py-3 bg-white text-slate-900 font-semibold rounded-xl hover:bg-slate-100 transition-colors"
+          className="px-6 py-3 bg-white text-slate-900 font-semibold rounded-none hover:bg-slate-100 transition-colors"
         >
           Try Again
         </button>
@@ -107,30 +115,48 @@ function ErrorDisplay({ message, onRetry }: ErrorDisplayProps) {
 }
 
 interface PanelProps {
+  isDark: boolean;
   title: string;
   variant: "staff" | "customer";
   children: React.ReactNode;
 }
 
-function Panel({ title, variant, children }: PanelProps) {
-  const bgClass = variant === "staff" ? "bg-slate-900" : "bg-slate-900/70";
+function Panel({ title, variant, children, isDark }: PanelProps) {
+  const bgClass = isDark
+    ? variant === "staff"
+      ? "bg-slate-900"
+      : "bg-slate-900/70"
+    : variant === "staff"
+      ? "bg-white"
+      : "bg-slate-50";
+  const borderClass = isDark ? "border-slate-800" : "border-slate-200";
+  const accentClass = isDark
+    ? variant === "staff"
+      ? "shadow-[0_14px_40px_rgba(0,0,0,0.30)]"
+      : "shadow-[0_10px_32px_rgba(0,0,0,0.25)]"
+    : "shadow-[0_12px_30px_rgba(15,23,42,0.08)]";
 
   return (
-    <div className={`flex-1 ${bgClass} border border-slate-800 rounded-2xl p-6 min-h-[400px]`}>
-      <h2 className="text-lg font-semibold text-white mb-4">{title}</h2>
+    <div className={`flex-1 ${bgClass} border ${borderClass} rounded-none p-6 min-h-[420px] backdrop-blur-sm ${accentClass}`}>
+      <div className="flex items-center justify-between mb-4">
+        <h2 className={`text-lg font-semibold font-display tracking-tight ${isDark ? "text-white" : "text-slate-900"}`}>{title}</h2>
+        <div className={`h-px flex-1 ml-4 bg-gradient-to-r ${isDark ? "from-white/15 via-white/5" : "from-slate-900/10 via-slate-900/5"} to-transparent`} />
+      </div>
       {children}
     </div>
   );
 }
 
 interface StaffPanelProps {
+  isDark: boolean;
   queueData: QueueData;
   onRefresh: () => void;
-  onCustomerSelect: (token: string) => void;
+  onCustomerSelect: (token: string | null) => void;
   selectedCustomerToken: string | null;
 }
 
 function StaffPanel({
+  isDark,
   queueData,
   onRefresh,
   onCustomerSelect,
@@ -192,12 +218,13 @@ function StaffPanel({
         console.error(errorMessage);
       }
       onRefresh();
+      onCustomerSelect(null);
     } catch (err) {
       console.error("Failed to reset:", err);
     } finally {
       setIsResetting(false);
     }
-  }, [queueData.queueId, onRefresh]);
+  }, [queueData.queueId, onRefresh, onCustomerSelect]);
 
   const handleMarkServed = useCallback(
     async (customerId: string) => {
@@ -272,21 +299,29 @@ function StaffPanel({
         <button
           onClick={handleCallNext}
           disabled={waitingCustomers.length === 0 || isCallingNext}
-          className="flex-1 px-4 py-3 bg-teal-600 text-white font-semibold rounded-xl hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-teal-600/20"
+          className="flex-1 px-4 py-3 bg-gradient-to-r from-teal-500 via-emerald-500 to-teal-400 text-slate-950 font-semibold rounded-none hover:brightness-110 disabled:opacity-60 disabled:cursor-not-allowed transition-all shadow-[0_14px_30px_rgba(16,185,129,0.28)]"
         >
           {isCallingNext ? "Calling..." : "Call Next"}
         </button>
         <button
           onClick={handleSeedCustomers}
           disabled={isSeeding}
-          className="px-4 py-3 bg-slate-800 text-white font-medium rounded-xl hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className={`px-4 py-3 font-medium rounded-none border disabled:opacity-50 disabled:cursor-not-allowed transition-all ${
+            isDark
+              ? "bg-slate-800 text-white border-white/5 hover:border-teal-400/40 hover:bg-slate-800/80"
+              : "bg-slate-100 text-slate-800 border-slate-200 hover:border-emerald-300 hover:bg-white"
+          }`}
         >
           {isSeeding ? "Adding..." : "+ Add Demo Customers"}
         </button>
         <button
           onClick={handleReset}
           disabled={isResetting}
-          className="px-4 py-3 bg-slate-800 text-slate-300 rounded-xl hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className={`px-4 py-3 rounded-none border disabled:opacity-50 disabled:cursor-not-allowed transition-all ${
+            isDark
+              ? "bg-slate-900 text-slate-300 border-slate-700 hover:border-red-400/40 hover:text-white"
+              : "bg-white text-slate-700 border-slate-200 hover:border-red-300 hover:text-red-500"
+          }`}
           title="Clear all customers from queue"
         >
           {isResetting ? "..." : "↺ Clear"}
@@ -294,21 +329,37 @@ function StaffPanel({
       </div>
 
       {/* Stats row */}
-      <div className="flex gap-4 text-sm">
-        <div className="flex items-center gap-2">
-          <span className="text-slate-500">Waiting:</span>
-          <span className="text-white font-semibold">{queueData.waitingCount}</span>
+      <div className="grid grid-cols-2 gap-3 text-sm">
+        <div className={`flex items-center gap-3 rounded-none border px-3 py-2 ${
+          isDark ? "bg-slate-800/60 border-slate-700" : "bg-slate-100 border-slate-200"
+        }`}>
+          <div className={`w-9 h-9 rounded-none flex items-center justify-center font-bold ${
+            isDark ? "bg-slate-700 text-white" : "bg-white text-slate-900 border border-slate-200"
+          }`}>{queueData.waitingCount}</div>
+          <div>
+            <p className="text-[11px] uppercase tracking-[0.08em] text-slate-500">Waiting</p>
+            <p className={`${isDark ? "text-white" : "text-slate-900"} text-sm`}>Guests in line</p>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <span className="text-slate-500">Called:</span>
-          <span className="text-amber-400 font-semibold">{queueData.calledCount}</span>
+        <div className={`flex items-center gap-3 rounded-none border px-3 py-2 ${
+          isDark ? "bg-amber-500/10 border-amber-400/30" : "bg-amber-50 border-amber-200"
+        }`}>
+          <div className={`w-9 h-9 rounded-none flex items-center justify-center font-bold ${
+            isDark ? "bg-amber-500/30 text-white" : "bg-amber-100 text-amber-700 border border-amber-200"
+          }`}>{queueData.calledCount}</div>
+          <div>
+            <p className="text-[11px] uppercase tracking-[0.08em] text-amber-300/80">Called</p>
+            <p className={`${isDark ? "text-amber-100" : "text-amber-800"} text-sm`}>Awaiting service</p>
+          </div>
         </div>
       </div>
 
       {/* Called customers section */}
       {calledCustomers.length > 0 && (
         <div className="space-y-2">
-          <h3 className="text-sm font-medium text-amber-400 uppercase tracking-wide">Called</h3>
+          <h3 className="text-xs font-semibold text-amber-200 uppercase tracking-[0.12em] flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" /> Called to counter
+          </h3>
           <div className="space-y-2">
             {calledCustomers.map((customer) => {
               const isSelected = customer.token === selectedCustomerToken;
@@ -318,18 +369,22 @@ function StaffPanel({
                 <div
                   key={customer.id}
                   onClick={() => onCustomerSelect(customer.token)}
-                  className={`bg-amber-500/10 border rounded-xl p-3 cursor-pointer transition-all ${
+                  className={`border rounded-none p-3 cursor-pointer transition-all ${
                     isSelected
-                      ? "border-teal-500 ring-2 ring-teal-500/20"
-                      : "border-amber-500/20 hover:border-amber-500/40"
+                      ? "border-teal-400 ring-2 ring-teal-400/20 shadow-[0_12px_32px_rgba(20,184,166,0.25)]"
+                      : isDark
+                        ? "bg-amber-500/10 border-amber-500/20 hover:border-amber-400/40"
+                        : "bg-amber-50 border-amber-200 hover:border-amber-300"
                   }`}
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-amber-500/20 rounded-lg flex items-center justify-center">
+                      <div className={`w-9 h-9 rounded-none flex items-center justify-center ${
+                        isDark ? "bg-amber-500/25" : "bg-amber-100"
+                      }`}>
                         <div className="w-2 h-2 bg-amber-500 rounded-full animate-pulse" />
                       </div>
-                      <span className="font-medium text-white">{customer.name}</span>
+                      <span className={`font-medium ${isDark ? "text-white" : "text-slate-900"}`}>{customer.name}</span>
                     </div>
                     <div className="flex gap-2">
                       <button
@@ -338,7 +393,7 @@ function StaffPanel({
                           handleMarkServed(customer.id);
                         }}
                         disabled={isProcessing}
-                        className="px-3 py-1.5 bg-emerald-500 text-white text-sm font-medium rounded-lg hover:bg-emerald-400 disabled:opacity-50 transition-colors"
+                        className="px-3 py-1.5 bg-emerald-500 text-white text-sm font-medium rounded-none hover:bg-emerald-400 disabled:opacity-50 transition-colors"
                       >
                         {isProcessing ? "..." : "Served"}
                       </button>
@@ -348,7 +403,9 @@ function StaffPanel({
                           handleMarkNoShow(customer.id);
                         }}
                         disabled={isProcessing}
-                        className="px-3 py-1.5 bg-red-500/20 text-red-400 text-sm font-medium rounded-lg hover:bg-red-500/30 disabled:opacity-50 transition-colors"
+                        className={`px-3 py-1.5 text-sm font-medium rounded-none disabled:opacity-50 transition-colors ${
+                          isDark ? "bg-red-500/20 text-red-300 hover:bg-red-500/30" : "bg-red-100 text-red-700 hover:bg-red-200"
+                        }`}
                       >
                         {isProcessing ? "..." : "No-show"}
                       </button>
@@ -378,25 +435,33 @@ function StaffPanel({
       <div className="space-y-2">
         <h3 className="text-sm font-medium text-slate-400 uppercase tracking-wide">Waiting</h3>
         {waitingCustomers.length === 0 ? (
-          <div className="text-center py-8 text-slate-600">
-            <svg
-              className="w-12 h-12 mx-auto mb-3 text-slate-700"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={1.5}
-                d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"
-              />
-            </svg>
-            <p className="text-sm">No customers waiting</p>
-            <p className="text-xs mt-1">Click "+ Add Demo Customers" to populate the queue</p>
+        <div className={`text-center py-10 text-slate-500 border border-dashed rounded-none ${
+          isDark ? "border-slate-800 bg-slate-900/40" : "border-slate-200 bg-white"
+        }`}>
+          <div className="flex justify-center mb-4">
+            <div className={`w-14 h-14 rounded-none flex items-center justify-center ${
+              isDark ? "bg-gradient-to-br from-slate-700 to-slate-800" : "bg-gradient-to-br from-slate-200 to-white"
+            }`}>
+              <svg
+                className="w-7 h-7 text-slate-300"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={1.5}
+                  d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"
+                />
+              </svg>
+            </div>
           </div>
-        ) : (
-          <div className="space-y-2">
+          <p className="text-sm font-medium text-slate-200">No customers waiting</p>
+          <p className="text-xs mt-1 text-slate-500">Click "+ Add Demo Customers" to populate the queue</p>
+        </div>
+      ) : (
+        <div className="space-y-2">
             {waitingCustomers.map((customer) => {
               const isSelected = customer.token === selectedCustomerToken;
               const isProcessing = actionInProgress === customer.id;
@@ -405,18 +470,22 @@ function StaffPanel({
                 <div
                   key={customer.id}
                   onClick={() => onCustomerSelect(customer.token)}
-                  className={`bg-slate-800 border rounded-xl p-3 cursor-pointer transition-all ${
+                  className={`border rounded-none p-3 cursor-pointer transition-all ${
                     isSelected
                       ? "border-teal-500 ring-2 ring-teal-500/20"
-                      : "border-slate-700 hover:border-slate-600"
+                      : isDark
+                        ? "bg-slate-800 border-slate-700 hover:border-slate-600"
+                        : "bg-white border-slate-200 hover:border-slate-300"
                   }`}
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-slate-700 rounded-lg flex items-center justify-center font-bold text-sm text-white">
+                      <div className={`w-8 h-8 rounded-none flex items-center justify-center font-bold text-sm ${
+                        isDark ? "bg-slate-700 text-white" : "bg-slate-100 text-slate-800"
+                      }`}>
                         {customer.position}
                       </div>
-                      <span className="font-medium text-white">{customer.name}</span>
+                      <span className={`font-medium ${isDark ? "text-white" : "text-slate-900"}`}>{customer.name}</span>
                     </div>
                     <button
                       onClick={(e) => {
@@ -424,7 +493,9 @@ function StaffPanel({
                         handleRemoveCustomer(customer.id);
                       }}
                       disabled={isProcessing}
-                      className="p-1.5 text-slate-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg disabled:opacity-50 transition-colors"
+                      className={`p-1.5 rounded-none disabled:opacity-50 transition-colors ${
+                        isDark ? "text-slate-500 hover:text-red-400 hover:bg-red-500/10" : "text-slate-500 hover:text-red-500 hover:bg-red-100"
+                      }`}
                     >
                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path
@@ -491,9 +562,10 @@ interface CustomerPanelProps {
     invoke: <T = void>(methodName: string, ...args: unknown[]) => Promise<T>;
     on: <T = unknown>(eventName: string, callback: (data: T) => void) => () => void;
   };
+  isDark: boolean;
 }
 
-function CustomerPanel({ token, signalR }: CustomerPanelProps) {
+function CustomerPanel({ token, signalR, isDark }: CustomerPanelProps) {
   const [data, setData] = useState<CustomerPositionData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -554,6 +626,9 @@ function CustomerPanel({ token, signalR }: CustomerPanelProps) {
 
     // Join new room
     signalR.invoke("JoinCustomerRoom", token).catch((err) => {
+      if (err instanceof Error && err.message === "SignalR not connected") {
+        return; // avoid noisy console when connection is still warming up
+      }
       console.error("Failed to join customer room:", err);
     });
 
@@ -592,8 +667,11 @@ function CustomerPanel({ token, signalR }: CustomerPanelProps) {
 
       // Only try to leave room if still connected (may already be disconnected during cleanup)
       if (token && signalR.state === "connected") {
-        signalR.invoke("LeaveCustomerRoom", token).catch(() => {
-          // Ignore errors during cleanup - connection may be closing
+        signalR.invoke("LeaveCustomerRoom", token).catch((err) => {
+          if (err instanceof Error && err.message === "SignalR not connected") {
+            return;
+          }
+          console.warn("Failed to leave customer room:", err);
         });
       }
     };
@@ -603,22 +681,26 @@ function CustomerPanel({ token, signalR }: CustomerPanelProps) {
   // No token selected - show placeholder
   if (!token) {
     return (
-      <div className="flex flex-col items-center justify-center h-full min-h-[300px] text-slate-500">
-        <svg
-          className="w-12 h-12 mb-4 text-slate-700"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={1.5}
-            d="M10 19l-7-7m0 0l7-7m-7 7h18"
-          />
-        </svg>
-        <p className="text-sm font-medium">Select a customer from the staff panel</p>
-        <p className="text-xs text-slate-600 mt-1">to see their live view</p>
+      <div className="flex flex-col items-center justify-center h-full text-slate-400 gap-2">
+        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+          isDark ? "bg-slate-800 text-slate-300" : "bg-slate-200 text-slate-600"
+        }`}>
+          <svg
+            className="w-5 h-5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={1.5}
+              d="M10 19l-7-7m0 0l7-7m-7 7h18"
+            />
+          </svg>
+        </div>
+        <p className={`text-sm font-medium ${isDark ? "text-slate-100" : "text-slate-800"}`}>Select a customer from the staff panel</p>
+        <p className={`text-xs ${isDark ? "text-slate-500" : "text-slate-600"}`}>to preview their live updates</p>
       </div>
     );
   }
@@ -626,8 +708,11 @@ function CustomerPanel({ token, signalR }: CustomerPanelProps) {
   // Loading state
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center h-full min-h-[300px]">
-        <div className="w-8 h-8 border-2 border-slate-700 border-t-white rounded-full animate-spin" />
+      <div className="flex flex-col items-center justify-center h-full min-h-[320px]">
+        <div className="relative">
+          <div className="w-12 h-12 rounded-full border border-slate-800" />
+          <div className="absolute inset-0 w-12 h-12 rounded-full border-2 border-transparent border-t-teal-400 animate-spin" />
+        </div>
         <p className="text-sm text-slate-500 mt-4">Loading customer view...</p>
       </div>
     );
@@ -636,9 +721,13 @@ function CustomerPanel({ token, signalR }: CustomerPanelProps) {
   // Error state
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center h-full min-h-[300px] text-center">
-        <div className="w-12 h-12 bg-red-500/20 rounded-xl flex items-center justify-center mb-4">
-          <svg className="w-6 h-6 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <div className={`flex flex-col items-center justify-center h-full min-h-[320px] text-center rounded-none border ${
+        isDark ? "border-red-500/30 bg-red-500/5" : "border-red-200 bg-red-50"
+      }`}>
+        <div className={`w-12 h-12 rounded-none flex items-center justify-center mb-4 ${
+          isDark ? "bg-red-500/20" : "bg-red-100"
+        }`}>
+          <svg className="w-6 h-6 text-red-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -647,10 +736,10 @@ function CustomerPanel({ token, signalR }: CustomerPanelProps) {
             />
           </svg>
         </div>
-        <p className="text-sm text-slate-400">{error}</p>
+        <p className="text-sm text-slate-300">{error}</p>
         <button
           onClick={fetchPosition}
-          className="mt-4 px-4 py-2 bg-slate-800 text-white text-sm font-medium rounded-lg hover:bg-slate-700 transition-colors"
+          className="mt-4 px-4 py-2 bg-white text-slate-900 text-sm font-semibold rounded-none hover:bg-slate-100 transition-colors"
         >
           Retry
         </button>
@@ -672,56 +761,64 @@ function CustomerPanel({ token, signalR }: CustomerPanelProps) {
 
   return (
     <div className="flex flex-col h-full">
-      {/* Header */}
-      <div className="mb-4">
-        <p className="text-slate-500 text-sm">{data.businessName}</p>
-        <p className="text-slate-400 text-xs">{data.queueName}</p>
-      </div>
-
       {/* Main content */}
-      <div className="flex-1 flex flex-col justify-center">
-        {isCalled ? (
-          <div className="relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-emerald-500 to-teal-600 opacity-20 blur-3xl" />
-            <div className="relative bg-gradient-to-br from-emerald-500/10 to-teal-500/10 border border-emerald-500/20 rounded-2xl p-6 text-center">
-              <div className="w-16 h-16 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg
-                  className="w-8 h-8 text-emerald-400"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
+      <div className="relative flex-1">
+        <div className="sticky top-1/2 -translate-y-1/2 transform space-y-4">
+          {isCalled ? (
+            <div className="relative overflow-hidden">
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(52,211,153,0.18),transparent_35%),radial-gradient(circle_at_80%_0%,rgba(34,211,238,0.18),transparent_32%)] blur-3xl" />
+              <div className={`relative border rounded-none p-7 text-center ${
+                isDark
+                  ? "bg-gradient-to-br from-emerald-500/15 to-cyan-500/10 border-emerald-400/40 shadow-[0_14px_38px_rgba(16,185,129,0.24)]"
+                  : "bg-white border-emerald-200 shadow-[0_14px_32px_rgba(16,185,129,0.15)]"
+              }`}>
+                <div className={`w-16 h-16 rounded-none flex items-center justify-center mx-auto mb-4 shadow-inner ${
+                  isDark ? "bg-emerald-500/25 shadow-emerald-900/50" : "bg-emerald-100 shadow-emerald-200"
+                }`}>
+                  <svg
+                    className="w-8 h-8 text-emerald-200"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <h2 className="text-3xl font-bold text-white mb-2 font-display">It's your turn</h2>
+                <p className={`${isDark ? "text-emerald-50/80" : "text-emerald-800"} text-sm`}>
+                  {data.calledMessage || "Please proceed to the counter"}
+                </p>
               </div>
-              <h2 className="text-2xl font-bold text-white mb-2">It's Your Turn!</h2>
-              <p className="text-emerald-200/80">{data.calledMessage || "Please proceed to the counter"}</p>
             </div>
-          </div>
-        ) : isWaiting && data.position ? (
-          <div className="bg-slate-800/50 border border-slate-700 rounded-2xl p-6 text-center">
-            <p className="text-slate-500 text-sm uppercase tracking-wider mb-2">Your position</p>
-            <div className="relative inline-block">
-              <div className="text-8xl font-bold leading-none bg-gradient-to-b from-white to-slate-400 bg-clip-text text-transparent">
-                {data.position}
+          ) : isWaiting && data.position ? (
+            <div className={`relative overflow-hidden rounded-none border p-7 text-center ${
+              isDark
+                ? "border-white/10 bg-gradient-to-b from-slate-900/80 to-slate-900/40 shadow-[0_12px_34px_rgba(0,0,0,0.3)]"
+                : "border-slate-200 bg-white shadow-[0_12px_30px_rgba(15,23,42,0.08)]"
+            }`}>
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(16,185,129,0.18),transparent_30%)] blur-3xl" />
+              <p className="text-slate-500 text-xs uppercase tracking-[0.2em] mb-3">Your position</p>
+              <div className="relative inline-flex items-baseline justify-center">
+                <div className="text-8xl font-bold leading-none bg-gradient-to-b from-white to-slate-400 bg-clip-text text-transparent drop-shadow-[0_10px_35px_rgba(16,185,129,0.25)]">
+                  {data.position}
+                </div>
               </div>
-              <div className="absolute -inset-4 bg-teal-500/20 blur-3xl -z-10" />
+              <p className="text-slate-300 mt-4 text-sm">
+                {data.position === 1 ? "You're next!" : `${data.position - 1} ${data.position - 1 === 1 ? "person" : "people"} ahead of you`}
+              </p>
+              <div className="mt-4 h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+              <p className={`text-[11px] uppercase tracking-[0.16em] mt-3 ${isDark ? "text-emerald-300/80" : "text-emerald-700"}`}>
+                Live updates on deck
+              </p>
             </div>
-            <p className="text-slate-400 mt-3 text-sm">
-              {data.position === 1 ? "You're next!" : `${data.position - 1} ${data.position - 1 === 1 ? "person" : "people"} ahead`}
-            </p>
-          </div>
-        ) : (
-          <div className="bg-slate-800/50 border border-slate-700 rounded-2xl p-6 text-center">
-            <p className="text-slate-400">Status: {data.status}</p>
-          </div>
-        )}
+          ) : (
+            <div className="bg-slate-800/50 border border-slate-700 rounded-none p-6 text-center">
+              <p className="text-slate-400">Status: {data.status}</p>
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* Footer */}
-      <div className="mt-4 pt-4 border-t border-slate-800">
-        <ConnectionIndicator state={signalR.state} />
-      </div>
     </div>
   );
 }
@@ -734,6 +831,7 @@ export function DemoPage() {
   const [selectedCustomerToken, setSelectedCustomerToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isDark, setIsDark] = useDarkMode();
 
   const signalR = useSignalR({ hubUrl: SIGNALR_HUB_URL });
 
@@ -807,6 +905,15 @@ export function DemoPage() {
     }
   }, [selectedQueueId, fetchQueueData]);
 
+  // Clear selected customer if it no longer exists (e.g., after reset/remove)
+  useEffect(() => {
+    if (!selectedCustomerToken || !queueData) return;
+    const stillPresent = queueData.customers.some((c) => c.token === selectedCustomerToken);
+    if (!stillPresent) {
+      setSelectedCustomerToken(null);
+    }
+  }, [queueData, selectedCustomerToken]);
+
   // Get the display count for a queue - use live data for selected queue
   const getQueueWaitingCount = useCallback((queueId: string): number => {
     if (queueId === selectedQueueId && queueData) {
@@ -824,6 +931,9 @@ export function DemoPage() {
     const DEMO_BUSINESS_ID = "11111111-1111-1111-1111-111111111111";
 
     signalR.invoke("JoinStaffRoom", DEMO_BUSINESS_ID).catch((err) => {
+      if (err instanceof Error && err.message === "SignalR not connected") {
+        return;
+      }
       console.error("Failed to join staff room:", err);
     });
 
@@ -837,15 +947,22 @@ export function DemoPage() {
       unsubscribe();
       // Only try to leave room if still connected (may already be disconnected during cleanup)
       if (signalR.state === "connected") {
-        signalR.invoke("LeaveStaffRoom", DEMO_BUSINESS_ID).catch(() => {
-          // Ignore errors during cleanup - connection may be closing
+        signalR.invoke("LeaveStaffRoom", DEMO_BUSINESS_ID).catch((err) => {
+          if (err instanceof Error && err.message === "SignalR not connected") {
+            return;
+          }
+          console.warn("Failed to leave staff room:", err);
         });
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- signalR methods are stable
   }, [signalR.state, queueData, signalR.invoke, signalR.on, fetchQueueData]);
 
-  const handleCustomerSelect = useCallback((token: string) => {
+  const handleCustomerSelect = useCallback((token: string | null) => {
+    if (token === null) {
+      setSelectedCustomerToken(null);
+      return;
+    }
     setSelectedCustomerToken((current) => (current === token ? null : token));
   }, []);
 
@@ -858,14 +975,14 @@ export function DemoPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white">
-      {/* Header */}
-      <header className="border-b border-slate-900">
+    <div className={`min-h-screen ${isDark ? "bg-gradient-to-b from-slate-950 via-slate-950 to-slate-900 text-white" : "bg-slate-50 text-slate-900"}`}>
+      {/* Header (kept minimal) */}
+      <header className={`${isDark ? "border-b border-white/5 bg-slate-950/70" : "border-b border-slate-200 bg-white/80"} backdrop-blur-md`}>
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             <Link
               href="/"
-              className="flex items-center gap-2 text-slate-500 hover:text-white transition-colors"
+              className={`flex items-center gap-2 transition-colors ${isDark ? "text-slate-500 hover:text-white" : "text-slate-600 hover:text-slate-900"}`}
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -873,35 +990,44 @@ export function DemoPage() {
               Back
             </Link>
             <div className="w-px h-6 bg-slate-800" />
-            <div>
-              <h1 className="text-xl font-bold">Interactive Demo</h1>
-              <p className="text-sm text-slate-500">{businessName}</p>
-            </div>
+            <h1 className="text-lg font-semibold font-display tracking-tight">Interactive Demo</h1>
+            {businessName && (
+              <span className="text-xs text-slate-500 px-2 py-1 rounded-none border border-white/10 bg-white/5">
+                {businessName}
+              </span>
+            )}
           </div>
-          <ConnectionIndicator state={signalR.state} />
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setIsDark(!isDark)}
+              aria-label="Toggle dark mode"
+              className={`p-2 rounded-none border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 ${
+                isDark
+                  ? "bg-slate-900 border-slate-700 text-slate-300 hover:bg-slate-800 focus-visible:ring-offset-slate-900"
+                  : "bg-white border-slate-200 text-slate-600 hover:bg-slate-100 focus-visible:ring-offset-white"
+              }`}
+            >
+              {isDark ? (
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+              ) : (
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                </svg>
+              )}
+            </button>
+            <ConnectionIndicator state={signalR.state} />
+          </div>
         </div>
       </header>
 
-      {/* Instructional banner */}
-      <div className="bg-teal-500/10 border-b border-teal-500/20 px-4 py-2">
-        <div className="max-w-7xl mx-auto text-center text-sm text-teal-300">
-          <span className="font-medium">Try it:</span> Click "Call Next" on the left, watch the customer position update on the right in real-time!
-        </div>
-      </div>
-
       {/* Main content */}
-      <main className="max-w-7xl mx-auto px-4 py-8">
-        {/* Description */}
-        <div className="mb-6 p-4 bg-teal-500/10 border border-teal-500/20 rounded-2xl">
-          <p className="text-teal-300 text-sm">
-            This demo shows both staff and customer views side-by-side. Click "Call Next" on the staff
-            panel and watch both views update in real-time via SignalR.
-          </p>
-        </div>
+      <main className="max-w-7xl mx-auto px-4 py-10">
 
         {/* Queue Tabs */}
         {queues.length > 1 && (
-          <div className="mb-6 flex gap-2 flex-wrap">
+          <div className="mb-8 flex gap-2 flex-wrap">
             {queues.map((queue) => (
               <button
                 key={queue.queueId}
@@ -909,17 +1035,25 @@ export function DemoPage() {
                   setSelectedQueueId(queue.queueId);
                   setSelectedCustomerToken(null);
                 }}
-                className={`px-4 py-2 rounded-xl font-medium text-sm transition-all ${
+                className={`px-4 py-2 rounded-none font-medium text-sm transition-all border ${
                   selectedQueueId === queue.queueId
-                    ? "bg-teal-600 text-white"
-                    : "bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white"
+                    ? isDark
+                      ? "bg-emerald-500/20 border-emerald-400/40 text-white shadow-[0_14px_30px_rgba(16,185,129,0.25)]"
+                      : "bg-emerald-50 border-emerald-200 text-emerald-900 shadow-[0_8px_20px_rgba(16,185,129,0.15)]"
+                    : isDark
+                      ? "bg-slate-900/60 border-slate-800 text-slate-400 hover:border-emerald-400/30 hover:text-white"
+                      : "bg-white border-slate-200 text-slate-600 hover:border-emerald-200 hover:text-emerald-700"
                 }`}
               >
                 {queue.name}
-                <span className={`ml-2 px-2 py-0.5 rounded-full text-xs tabular-nums ${
+                <span className={`ml-2 px-2 py-0.5 rounded-full text-xs tabular-nums border ${
                   selectedQueueId === queue.queueId
-                    ? "bg-teal-500/30 text-teal-100"
-                    : "bg-slate-700 text-slate-400"
+                    ? isDark
+                      ? "bg-emerald-500/25 text-emerald-50 border-transparent"
+                      : "bg-emerald-100 text-emerald-800 border-emerald-200"
+                    : isDark
+                      ? "bg-slate-800 text-slate-400 border-slate-700"
+                      : "bg-slate-100 text-slate-600 border-slate-200"
                 }`}>
                   {getQueueWaitingCount(queue.queueId)}
                 </span>
@@ -931,12 +1065,13 @@ export function DemoPage() {
         {/* Split layout */}
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Staff Panel */}
-          <Panel title="Staff Dashboard" variant="staff">
+          <Panel title="Staff Dashboard" variant="staff" isDark={isDark}>
             {queueData ? (
               <StaffPanel
+                isDark={isDark}
                 queueData={queueData}
                 onRefresh={fetchQueueData}
-                onCustomerSelect={handleCustomerSelect}
+          onCustomerSelect={handleCustomerSelect}
                 selectedCustomerToken={selectedCustomerToken}
               />
             ) : (
@@ -948,8 +1083,8 @@ export function DemoPage() {
           </Panel>
 
           {/* Customer Panel */}
-          <Panel title="Customer View" variant="customer">
-            <CustomerPanel token={selectedCustomerToken} signalR={signalR} />
+          <Panel title="Customer View" variant="customer" isDark={isDark}>
+            <CustomerPanel token={selectedCustomerToken} signalR={signalR} isDark={isDark} />
           </Panel>
         </div>
       </main>

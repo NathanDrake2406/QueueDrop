@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 
 export function useDarkMode() {
   // Always start with false during SSR to avoid hydration mismatch
-  const [isDark, setIsDark] = useState(false);
+  const [isDark, setIsDark] = useState(true);
   const [hasMounted, setHasMounted] = useState(false);
 
   // On mount, read the stored preference
@@ -11,9 +11,10 @@ export function useDarkMode() {
     const saved = localStorage.getItem("theme");
     if (saved) {
       setIsDark(saved === "dark");
-    } else {
-      setIsDark(window.matchMedia("(prefers-color-scheme: dark)").matches);
+      return;
     }
+    // Default to dark sitewide when no preference is stored
+    setIsDark(true);
   }, []);
 
   // Apply dark mode class and save preference

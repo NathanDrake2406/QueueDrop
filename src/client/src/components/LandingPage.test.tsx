@@ -96,8 +96,8 @@ describe("LandingPage", () => {
     const toggleButton = screen.getByLabelText(/toggle dark mode/i);
     await user.click(toggleButton);
 
-    // After clicking, dark mode should be toggled
-    expect(localStorage.getItem("theme")).toBe("dark");
+    // After clicking, dark mode should toggle off (default is dark)
+    expect(localStorage.getItem("theme")).toBe("light");
   });
 
   it("renders CTA section with demo links", async () => {
@@ -115,10 +115,11 @@ describe("LandingPage", () => {
     renderLandingPage();
 
     await waitFor(() => {
-      expect(screen.getByText("React 19")).toBeInTheDocument();
+      expect(screen.getByText("Next.js 16")).toBeInTheDocument();
     });
     expect(screen.getByText(".NET 8")).toBeInTheDocument();
     expect(screen.getByText("SignalR")).toBeInTheDocument();
     expect(screen.getByText("PostgreSQL")).toBeInTheDocument();
+    expect(screen.getByText("Tailwind")).toBeInTheDocument();
   });
 });

@@ -1,5 +1,5 @@
 import { renderHook, act, waitFor } from "@testing-library/react";
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach } from "vitest";
 import { useDarkMode } from "./useDarkMode";
 
 describe("useDarkMode", () => {
@@ -8,9 +8,9 @@ describe("useDarkMode", () => {
     document.documentElement.classList.remove("dark");
   });
 
-  it("returns false by default (SSR-safe initial value)", () => {
+  it("returns true by default (site defaults to dark)", () => {
     const { result } = renderHook(() => useDarkMode());
-    expect(result.current[0]).toBe(false);
+    expect(result.current[0]).toBe(true);
   });
 
   it("reads dark mode preference from localStorage on mount", async () => {
@@ -30,7 +30,7 @@ describe("useDarkMode", () => {
     const { result } = renderHook(() => useDarkMode());
 
     await waitFor(() => {
-      // Should stay false since light theme is stored
+      // Should stay light since light theme is stored
       expect(result.current[0]).toBe(false);
     });
   });
@@ -40,21 +40,10 @@ describe("useDarkMode", () => {
 
     // Wait for initial mount
     await waitFor(() => {
-      expect(result.current[0]).toBe(false);
-    });
-
-    // Toggle to dark mode
-    act(() => {
-      result.current[1](true);
-    });
-
-    await waitFor(() => {
       expect(result.current[0]).toBe(true);
-      expect(localStorage.getItem("theme")).toBe("dark");
-      expect(document.documentElement.classList.contains("dark")).toBe(true);
     });
 
-    // Toggle back to light mode
+    // Toggle to light mode
     act(() => {
       result.current[1](false);
     });
@@ -64,27 +53,21 @@ describe("useDarkMode", () => {
       expect(localStorage.getItem("theme")).toBe("light");
       expect(document.documentElement.classList.contains("dark")).toBe(false);
     });
-  });
 
-  it("respects system preference when no stored theme", async () => {
-    // Mock system preference for dark mode
-    const matchMediaMock = vi.fn().mockImplementation((query: string) => ({
-      matches: query === "(prefers-color-scheme: dark)",
-      media: query,
-      onchange: null,
-      addListener: vi.fn(),
-      removeListener: vi.fn(),
-      addEventListener: vi.fn(),
-      removeEventListener: vi.fn(),
-      dispatchEvent: vi.fn(),
-    }));
-    Object.defineProperty(window, "matchMedia", {
-      writable: true,
-      value: matchMediaMock,
+    // Toggle back to dark mode
+    act(() => {
+      result.current[1](true);
     });
 
-    const { result } = renderHook(() => useDarkMode());
+    await waitFor(() => {
+      expect(result.current[0]).toBe(true);
+      expect(localStorage.getItem("theme")).toBe("dark");
+      expect(document.documentElement.classList.contains("dark")).toBe(true);
+    });
+  });
 
+  it("defaults to dark when no stored theme", async () => {
+    const { result } = renderHook(() => useDarkMode());
     await waitFor(() => {
       expect(result.current[0]).toBe(true);
     });
