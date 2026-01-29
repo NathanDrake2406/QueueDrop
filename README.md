@@ -1,6 +1,7 @@
 # QueueDrop
 
 ![.NET](https://img.shields.io/badge/.NET-8.0-512BD4?logo=dotnet)
+![Next.js](https://img.shields.io/badge/Next.js-16-000000?logo=nextdotjs)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.0-3178C6?logo=typescript)
 ![React](https://img.shields.io/badge/React-19-61DAFB?logo=react)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql)
@@ -58,7 +59,7 @@ src/
 ├── QueueDrop.Domain/           # Entities, value objects, Result<T>
 ├── QueueDrop.Infrastructure/   # EF Core, SignalR, Web Push
 ├── QueueDrop.Api/              # Vertical slices (handler + DTOs per feature)
-└── client/                     # React SPA
+└── client/                     # Next.js 16 App Router
 ```
 
 **Key patterns:**
@@ -67,6 +68,7 @@ src/
 - Result<T> for explicit error handling, no exceptions for control flow
 - Token-based customer identity — unique URLs, no auth required for customers
 - Vertical slices — each feature self-contained in one file
+- Next.js App Router — file-based routing with React Server Components
 
 [Architecture Decision Records →](docs/adr/001-architecture-decisions.md)
 
