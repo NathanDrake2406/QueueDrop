@@ -9,9 +9,23 @@
 
 Real-time queue management system for walk-in businesses. Customers join remotely via QR code, track their position live, and get push notifications when called.
 
+> **500 concurrent WebSocket connections, 100% success rate, <2ms P95 latency**
+
 ## 🎮 [Try the Live Demo →](https://queuedrop.me/demo)
 
 Click "Call Next" and watch both panels update in real-time via WebSockets!
+
+<!-- TODO: Add GIF of split-screen demo showing real-time updates -->
+
+---
+
+## The Problem
+
+Walk-in businesses (cafes, clinics, barbers) lose customers who leave rather than wait in crowded lobbies. Paper lists and "we'll call your name" don't work when customers want to wait in their car or grab coffee next door.
+
+## The Solution
+
+QueueDrop lets customers scan a QR code, join remotely, and track their position in real-time. Push notifications bring them back when it's their turn. No app install, no phone number collection, no standing around.
 
 ---
 
@@ -54,7 +68,7 @@ src/
 - Queue as Aggregate Root — all mutations through domain methods
 - Result<T> for explicit error handling, no exceptions for control flow
 - Token-based customer identity — unique URLs, no auth required for customers
-- Vertical slices — each feature self-contained in one file
+- Vertical slices — each feature self-contained in one file (chose this over N-tier to minimize cross-cutting changes; adding a feature means touching one file, not four layers)
 
 [Architecture Decision Records →](docs/adr/001-architecture-decisions.md)
 
