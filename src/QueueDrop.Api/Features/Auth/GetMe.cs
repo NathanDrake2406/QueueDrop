@@ -10,7 +10,7 @@ namespace QueueDrop.Api.Features.Auth;
 /// </summary>
 public static class GetMe
 {
-    public sealed record BusinessDto(Guid Id, string Name, string Slug);
+    public sealed record BusinessDto(Guid Id, string Name, string Slug, string Role);
     public sealed record Response(Guid UserId, string Email, List<BusinessDto> Businesses);
 
     public static void MapEndpoint(IEndpointRouteBuilder app)
@@ -46,7 +46,11 @@ public static class GetMe
         var businesses = await db.BusinessMembers
             .Include(bm => bm.Business)
             .Where(bm => bm.UserId == userId && bm.JoinedAt != null)
-            .Select(bm => new BusinessDto(bm.Business.Id, bm.Business.Name, bm.Business.Slug))
+            .Select(bm => new BusinessDto(
+                bm.Business.Id,
+                bm.Business.Name,
+                bm.Business.Slug,
+                bm.Role.ToString().ToLowerInvariant()))
             .ToListAsync(cancellationToken);
 
         return Results.Ok(new Response(dbUser.Id, dbUser.Email, businesses));
