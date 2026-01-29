@@ -805,16 +805,13 @@ export function DemoPage() {
     }
   }, [selectedQueueId, fetchQueueData]);
 
-  // Sync queue tab counts when queueData changes
-  useEffect(() => {
-    if (queueData && selectedQueueId) {
-      setQueues((prev) =>
-        prev.map((q) =>
-          q.queueId === selectedQueueId ? { ...q, waitingCount: queueData.waitingCount } : q
-        )
-      );
+  // Get the display count for a queue - use live data for selected queue
+  const getQueueWaitingCount = useCallback((queueId: string): number => {
+    if (queueId === selectedQueueId && queueData) {
+      return queueData.waitingCount;
     }
-  }, [queueData, selectedQueueId]);
+    return queues.find(q => q.queueId === queueId)?.waitingCount ?? 0;
+  }, [selectedQueueId, queueData, queues]);
 
   // Staff room SignalR: join room and listen for QueueUpdated
   useEffect(() => {
@@ -916,12 +913,12 @@ export function DemoPage() {
                 }`}
               >
                 {queue.name}
-                <span className={`ml-2 px-2 py-0.5 rounded-full text-xs ${
+                <span className={`ml-2 px-2 py-0.5 rounded-full text-xs tabular-nums ${
                   selectedQueueId === queue.queueId
                     ? "bg-teal-500/30 text-teal-100"
                     : "bg-slate-700 text-slate-400"
                 }`}>
-                  {queue.waitingCount}
+                  {getQueueWaitingCount(queue.queueId)}
                 </span>
               </button>
             ))}
