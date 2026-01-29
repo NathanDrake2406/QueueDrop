@@ -15,9 +15,9 @@ export function QueueSelector({ businessName, queues, onSelect }: QueueSelectorP
   return (
     <div className="space-y-4">
       <div className="text-center mb-6">
-        <p className="text-violet-400 font-medium mb-2">{businessName}</p>
+        <p className="text-teal-400 font-medium mb-2">{businessName}</p>
         <h2 className="text-2xl font-bold">Choose a queue</h2>
-        <p className="text-zinc-500 mt-2">Select which line you'd like to join</p>
+        <p className="text-slate-500 mt-2">Select which line you'd like to join</p>
       </div>
 
       <div className="space-y-3">
@@ -25,14 +25,14 @@ export function QueueSelector({ businessName, queues, onSelect }: QueueSelectorP
           <button
             key={queue.slug}
             onClick={() => onSelect(queue.slug)}
-            className="w-full p-5 bg-zinc-900 border border-zinc-800 rounded-2xl hover:bg-zinc-800 hover:border-zinc-700 transition-all text-left group"
+            className="w-full p-5 bg-slate-900 border border-slate-800 rounded-2xl hover:bg-slate-800 hover:border-slate-700 transition-all text-left group"
           >
             <div className="flex items-center justify-between">
               <div className="flex-1">
-                <h3 className="font-semibold text-lg text-white group-hover:text-violet-400 transition-colors">
+                <h3 className="font-semibold text-lg text-white group-hover:text-teal-400 transition-colors">
                   {queue.name}
                 </h3>
-                <div className="flex items-center gap-4 mt-2 text-sm text-zinc-400">
+                <div className="flex items-center gap-4 mt-2 text-sm text-slate-400">
                   <span className="flex items-center gap-1.5">
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path
@@ -58,7 +58,7 @@ export function QueueSelector({ businessName, queues, onSelect }: QueueSelectorP
                 </div>
               </div>
               <svg
-                className="w-5 h-5 text-zinc-600 group-hover:text-violet-400 transition-colors"
+                className="w-5 h-5 text-slate-600 group-hover:text-teal-400 transition-colors"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"

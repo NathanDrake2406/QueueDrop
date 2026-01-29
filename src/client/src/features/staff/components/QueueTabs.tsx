@@ -21,15 +21,15 @@ export function QueueTabs({ queues, activeQueueId, onSelectQueue }: QueueTabsPro
         onClick={() => onSelectQueue(null)}
         className={`px-4 py-2 rounded-xl font-medium text-sm transition-colors flex items-center gap-2 ${
           activeQueueId === null
-            ? "bg-violet-600 text-white"
-            : "bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white"
+            ? "bg-teal-600 text-white"
+            : "bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white"
         }`}
       >
         All
         {totalWaiting > 0 && (
           <span
             className={`min-w-[20px] h-5 px-1.5 rounded-full text-xs font-semibold flex items-center justify-center ${
-              activeQueueId === null ? "bg-violet-500 text-white" : "bg-zinc-700 text-zinc-300"
+              activeQueueId === null ? "bg-teal-500 text-white" : "bg-slate-700 text-slate-300"
             }`}
           >
             {totalWaiting}
@@ -44,15 +44,15 @@ export function QueueTabs({ queues, activeQueueId, onSelectQueue }: QueueTabsPro
           onClick={() => onSelectQueue(queue.queueId)}
           className={`px-4 py-2 rounded-xl font-medium text-sm transition-colors flex items-center gap-2 ${
             activeQueueId === queue.queueId
-              ? "bg-violet-600 text-white"
-              : "bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white"
+              ? "bg-teal-600 text-white"
+              : "bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white"
           }`}
         >
           {queue.name}
           {queue.waitingCount > 0 && (
             <span
               className={`min-w-[20px] h-5 px-1.5 rounded-full text-xs font-semibold flex items-center justify-center ${
-                activeQueueId === queue.queueId ? "bg-violet-500 text-white" : "bg-zinc-700 text-zinc-300"
+                activeQueueId === queue.queueId ? "bg-teal-500 text-white" : "bg-slate-700 text-slate-300"
               }`}
             >
               {queue.waitingCount}

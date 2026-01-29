@@ -183,13 +183,13 @@ export function JoinQueue() {
   // Loading state
   if (pageState === "loading") {
     return (
-      <div className="min-h-screen bg-zinc-950 text-white flex items-center justify-center">
+      <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center">
         <div className="flex items-center gap-3">
-          <svg className="animate-spin w-6 h-6 text-violet-400" viewBox="0 0 24 24" fill="none">
+          <svg className="animate-spin w-6 h-6 text-teal-400" viewBox="0 0 24 24" fill="none">
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
           </svg>
-          <span className="text-zinc-400">Loading...</span>
+          <span className="text-slate-400">Loading...</span>
         </div>
       </div>
     );
@@ -198,13 +198,13 @@ export function JoinQueue() {
   // Error state
   if (pageState === "error") {
     return (
-      <div className="min-h-screen bg-zinc-950 text-white flex items-center justify-center p-4">
+      <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center p-4">
         <div className="text-center">
           <p className="text-xl font-semibold text-red-400 mb-2">Something went wrong</p>
-          <p className="text-zinc-500 mb-6">{loadError}</p>
+          <p className="text-slate-500 mb-6">{loadError}</p>
           <button
             onClick={() => navigate("/")}
-            className="px-6 py-3 bg-zinc-800 text-white rounded-xl hover:bg-zinc-700 transition-colors"
+            className="px-6 py-3 bg-slate-800 text-white rounded-xl hover:bg-slate-700 transition-colors"
           >
             Go Home
           </button>
@@ -216,12 +216,12 @@ export function JoinQueue() {
   // Already joined state
   if (pageState === "already-joined" && existingToken) {
     return (
-      <div className="min-h-screen bg-zinc-950 text-white flex items-center justify-center p-4">
+      <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center p-4">
         <div className="w-full max-w-md">
           {/* Back button */}
           <button
             onClick={() => (queues.length > 1 ? handleBackToQueueSelection() : navigate("/"))}
-            className="flex items-center gap-2 text-zinc-500 hover:text-white mb-8 transition-colors"
+            className="flex items-center gap-2 text-slate-500 hover:text-white mb-8 transition-colors"
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -229,25 +229,25 @@ export function JoinQueue() {
             {queues.length > 1 ? "Back to queues" : "Back"}
           </button>
 
-          <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-8 text-center">
-            <div className="w-16 h-16 bg-violet-500/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
-              <svg className="w-8 h-8 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-8 text-center">
+            <div className="w-16 h-16 bg-teal-500/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
+              <svg className="w-8 h-8 text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             </div>
             <h1 className="text-2xl font-bold mb-2">You're already in line</h1>
-            <p className="text-zinc-500 mb-2">for {selectedQueueName}</p>
-            <p className="text-zinc-600 text-sm mb-8">Check your position or start fresh</p>
+            <p className="text-slate-500 mb-2">for {selectedQueueName}</p>
+            <p className="text-slate-600 text-sm mb-8">Check your position or start fresh</p>
             <div className="space-y-3">
               <button
                 onClick={() => navigate(`/q/${existingToken}`)}
-                className="w-full py-4 bg-white text-zinc-900 font-semibold rounded-2xl hover:bg-zinc-100 transition-colors"
+                className="w-full py-4 bg-white text-slate-900 font-semibold rounded-2xl hover:bg-slate-100 transition-colors"
               >
                 Check My Position
               </button>
               <button
                 onClick={handleJoinAgain}
-                className="w-full py-4 bg-zinc-800 text-white font-semibold rounded-2xl hover:bg-zinc-700 transition-colors"
+                className="w-full py-4 bg-slate-800 text-white font-semibold rounded-2xl hover:bg-slate-700 transition-colors"
               >
                 Join Again
               </button>
@@ -261,12 +261,12 @@ export function JoinQueue() {
   // Queue selection state
   if (pageState === "select-queue") {
     return (
-      <div className="min-h-screen bg-zinc-950 text-white">
+      <div className="min-h-screen bg-slate-950 text-white">
         <div className="max-w-md mx-auto px-4 py-8">
           {/* Back button */}
           <button
             onClick={() => navigate("/")}
-            className="flex items-center gap-2 text-zinc-500 hover:text-white mb-8 transition-colors"
+            className="flex items-center gap-2 text-slate-500 hover:text-white mb-8 transition-colors"
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -291,12 +291,12 @@ export function JoinQueue() {
 
   // Join form state
   return (
-    <div className="min-h-screen bg-zinc-950 text-white">
+    <div className="min-h-screen bg-slate-950 text-white">
       <div className="max-w-md mx-auto px-4 py-8">
         {/* Back button */}
         <button
           onClick={() => (queues.length > 1 ? handleBackToQueueSelection() : navigate("/"))}
-          className="flex items-center gap-2 text-zinc-500 hover:text-white mb-8 transition-colors"
+          className="flex items-center gap-2 text-slate-500 hover:text-white mb-8 transition-colors"
         >
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -306,15 +306,15 @@ export function JoinQueue() {
 
         {/* Header */}
         <div className="mb-8">
-          <p className="text-violet-400 font-medium mb-2">{businessName || businessSlug?.replace(/-/g, " ")}</p>
+          <p className="text-teal-400 font-medium mb-2">{businessName || businessSlug?.replace(/-/g, " ")}</p>
           <h1 className="text-3xl font-bold tracking-tight">Join {selectedQueueName || "the queue"}</h1>
-          <p className="text-zinc-500 mt-2">We'll let you know when it's your turn</p>
+          <p className="text-slate-500 mt-2">We'll let you know when it's your turn</p>
         </div>
 
         {/* Form */}
         <form onSubmit={handleSubmit}>
           <div className="mb-6">
-            <label htmlFor="name" className="block text-sm font-medium text-zinc-400 mb-2">
+            <label htmlFor="name" className="block text-sm font-medium text-slate-400 mb-2">
               Your name
             </label>
             <input
@@ -323,7 +323,7 @@ export function JoinQueue() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Enter your name"
-              className="w-full px-5 py-4 bg-zinc-900 border border-zinc-800 rounded-2xl text-white placeholder-zinc-600 focus:outline-none focus:border-zinc-600 focus:ring-1 focus:ring-zinc-600 transition-all"
+              className="w-full px-5 py-4 bg-slate-900 border border-slate-800 rounded-2xl text-white placeholder-slate-600 focus:outline-none focus:border-slate-600 focus:ring-1 focus:ring-slate-600 transition-all"
               maxLength={100}
               required
               autoFocus
@@ -340,7 +340,7 @@ export function JoinQueue() {
           <button
             type="submit"
             disabled={isSubmitting || !name.trim()}
-            className="w-full py-4 bg-white text-zinc-900 font-semibold rounded-2xl hover:bg-zinc-100 disabled:bg-zinc-800 disabled:text-zinc-600 disabled:cursor-not-allowed transition-colors"
+            className="w-full py-4 bg-white text-slate-900 font-semibold rounded-2xl hover:bg-slate-100 disabled:bg-slate-800 disabled:text-slate-600 disabled:cursor-not-allowed transition-colors"
           >
             {isSubmitting ? (
               <span className="flex items-center justify-center gap-2">

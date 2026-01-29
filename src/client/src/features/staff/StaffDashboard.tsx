@@ -46,9 +46,9 @@ function EmptyQueueState({ onSeedDemo, queueId }: { onSeedDemo: () => void; queu
   }, [onSeedDemo, queueId]);
 
   return (
-    <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8 text-center">
-      <div className="w-16 h-16 bg-zinc-800 rounded-2xl flex items-center justify-center mx-auto mb-4">
-        <svg className="w-8 h-8 text-zinc-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <div className="bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center">
+      <div className="w-16 h-16 bg-slate-800 rounded-2xl flex items-center justify-center mx-auto mb-4">
+        <svg className="w-8 h-8 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -57,16 +57,16 @@ function EmptyQueueState({ onSeedDemo, queueId }: { onSeedDemo: () => void; queu
           />
         </svg>
       </div>
-      <p className="text-zinc-400 mb-6">No customers in queue yet</p>
+      <p className="text-slate-400 mb-6">No customers in queue yet</p>
       <div className="flex flex-col sm:flex-row gap-3 justify-center">
         <button
           onClick={handleSeedDemo}
           disabled={isSeeding}
-          className="px-6 py-3 bg-violet-600 text-white font-medium rounded-xl hover:bg-violet-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="px-6 py-3 bg-teal-600 text-white font-medium rounded-xl hover:bg-teal-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           {isSeeding ? "Adding..." : "Add Demo Customers"}
         </button>
-        <span className="text-zinc-600 self-center">or share your QR code</span>
+        <span className="text-slate-600 self-center">or share your QR code</span>
       </div>
     </div>
   );
@@ -125,10 +125,10 @@ export function StaffDashboard() {
 
   if (queues.length === 0) {
     return (
-      <div className="min-h-screen bg-zinc-950 text-white flex items-center justify-center">
+      <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center">
         <div className="text-center">
           <p className="text-xl font-semibold text-red-400">No queues available</p>
-          <p className="mt-2 text-zinc-500">This business has no active queues.</p>
+          <p className="mt-2 text-slate-500">This business has no active queues.</p>
         </div>
       </div>
     );
@@ -329,10 +329,10 @@ function MultiQueueDashboard({
 
   if (!activeQueueInfo) {
     return (
-      <div className="min-h-screen bg-zinc-950 text-white flex items-center justify-center">
+      <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center">
         <div className="text-center">
           <p className="text-xl font-semibold text-red-400">Failed to load queue</p>
-          <p className="mt-2 text-zinc-500">{error || "Please try again later."}</p>
+          <p className="mt-2 text-slate-500">{error || "Please try again later."}</p>
         </div>
       </div>
     );
@@ -343,7 +343,7 @@ function MultiQueueDashboard({
   const waitingCustomers = displayCustomers.filter((c) => c.status === "Waiting");
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white">
+    <div className="min-h-screen bg-slate-950 text-white">
       {/* Settings Modal */}
       {showSettings && activeQueueId && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -368,7 +368,7 @@ function MultiQueueDashboard({
           <div className="flex items-center gap-3">
             <button
               onClick={() => setShowQR(!showQR)}
-              className="flex items-center gap-2 px-4 py-2 text-sm text-zinc-400 hover:text-white border border-zinc-700 rounded-xl hover:border-zinc-600 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 text-sm text-slate-400 hover:text-white border border-slate-700 rounded-xl hover:border-slate-600 transition-colors"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h2M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
@@ -386,13 +386,13 @@ function MultiQueueDashboard({
 
         {/* Inline QR Code Display */}
         {showQR && (
-          <div className="mb-6 p-6 bg-zinc-900 border border-zinc-800 rounded-2xl">
+          <div className="mb-6 p-6 bg-slate-900 border border-slate-800 rounded-2xl">
             <h3 className="text-lg font-semibold mb-4 text-center">Queue Join Link</h3>
             <QRCodeDisplay
               url={`${window.location.origin}/join/${businessSlug}`}
               title="Scan to join queue"
             />
-            <p className="text-xs text-zinc-500 text-center mt-4">
+            <p className="text-xs text-slate-500 text-center mt-4">
               {window.location.origin}/join/{businessSlug}
             </p>
           </div>
@@ -416,7 +416,7 @@ function MultiQueueDashboard({
         {/* Called customers section */}
         {calledCustomers.length > 0 && (
           <section>
-            <h2 className="text-sm font-medium text-zinc-500 uppercase tracking-wider mb-3">Called — Awaiting</h2>
+            <h2 className="text-sm font-medium text-slate-500 uppercase tracking-wider mb-3">Called — Awaiting</h2>
             <div className="space-y-3">
               {calledCustomers.map((customer) => (
                 <CustomerCard
@@ -433,13 +433,13 @@ function MultiQueueDashboard({
 
         {/* Waiting customers section */}
         <section>
-          <h2 className="text-sm font-medium text-zinc-500 uppercase tracking-wider mb-3">
+          <h2 className="text-sm font-medium text-slate-500 uppercase tracking-wider mb-3">
             Waiting ({waitingCustomers.length})
           </h2>
           {waitingCustomers.length === 0 && calledCustomers.length === 0 ? (
             <EmptyQueueState onSeedDemo={refresh} queueId={primaryQueueId} />
           ) : waitingCustomers.length === 0 ? (
-            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8 text-center text-zinc-500">
+            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center text-slate-500">
               No customers waiting.
             </div>
           ) : (

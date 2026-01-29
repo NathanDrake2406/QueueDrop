@@ -92,10 +92,10 @@ export function OnboardingPage() {
   // Show loading state while checking auth
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-zinc-950 text-white flex items-center justify-center">
+      <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center">
         <div className="text-center">
           <div className="inline-flex items-center justify-center w-16 h-16 mb-6">
-            <svg className="w-12 h-12 animate-spin text-violet-500" fill="none" viewBox="0 0 24 24">
+            <svg className="w-12 h-12 animate-spin text-teal-500" fill="none" viewBox="0 0 24 24">
               <circle
                 className="opacity-25"
                 cx="12"
@@ -111,18 +111,18 @@ export function OnboardingPage() {
               />
             </svg>
           </div>
-          <p className="text-zinc-400">Loading...</p>
+          <p className="text-slate-400">Loading...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white">
+    <div className="min-h-screen bg-slate-950 text-white">
       <div className="max-w-md mx-auto px-4 py-12">
         {/* Logo */}
         <div className="text-center mb-12">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-violet-500 to-fuchsia-500 rounded-2xl mb-4">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-teal-500 to-teal-500 rounded-2xl mb-4">
             <svg className="w-8 h-8 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
               <circle cx="9" cy="7" r="4" />
@@ -131,13 +131,13 @@ export function OnboardingPage() {
             </svg>
           </div>
           <h1 className="text-3xl font-bold tracking-tight">Create your business</h1>
-          <p className="text-zinc-500 mt-2">Set up your first queue in seconds</p>
+          <p className="text-slate-500 mt-2">Set up your first queue in seconds</p>
         </div>
 
         <form onSubmit={handleSubmit}>
           {/* Business name input */}
           <div className="mb-4">
-            <label htmlFor="name" className="block text-sm font-medium text-zinc-400 mb-2">
+            <label htmlFor="name" className="block text-sm font-medium text-slate-400 mb-2">
               Business name
             </label>
             <input
@@ -148,17 +148,17 @@ export function OnboardingPage() {
               placeholder="My Awesome Shop"
               required
               autoFocus
-              className="w-full px-5 py-4 bg-zinc-900 border border-zinc-800 rounded-xl text-white placeholder-zinc-600 focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all"
+              className="w-full px-5 py-4 bg-slate-900 border border-slate-800 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition-all"
             />
           </div>
 
           {/* URL slug input */}
           <div className="mb-6">
-            <label htmlFor="slug" className="block text-sm font-medium text-zinc-400 mb-2">
+            <label htmlFor="slug" className="block text-sm font-medium text-slate-400 mb-2">
               URL slug
             </label>
             <div className="flex items-center">
-              <span className="px-4 py-4 bg-zinc-800 border border-zinc-700 border-r-0 rounded-l-xl text-zinc-500 text-sm">
+              <span className="px-4 py-4 bg-slate-800 border border-slate-700 border-r-0 rounded-l-xl text-slate-500 text-sm">
                 queuedrop.com/
               </span>
               <input
@@ -168,10 +168,10 @@ export function OnboardingPage() {
                 onChange={(e) => handleSlugChange(e.target.value)}
                 placeholder="my-awesome-shop"
                 required
-                className="flex-1 px-4 py-4 bg-zinc-900 border border-zinc-800 rounded-r-xl text-white placeholder-zinc-600 focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all"
+                className="flex-1 px-4 py-4 bg-slate-900 border border-slate-800 rounded-r-xl text-white placeholder-slate-600 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition-all"
               />
             </div>
-            <p className="mt-2 text-xs text-zinc-600">
+            <p className="mt-2 text-xs text-slate-600">
               This is how customers will find your queue
             </p>
           </div>
@@ -187,7 +187,7 @@ export function OnboardingPage() {
           <button
             type="submit"
             disabled={isSubmitting || !name.trim() || !slug.trim()}
-            className="w-full py-4 bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white font-semibold rounded-xl hover:from-violet-600 hover:to-fuchsia-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            className="w-full py-4 bg-gradient-to-r from-teal-500 to-teal-500 text-white font-semibold rounded-xl hover:from-teal-600 hover:to-teal-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
           >
             {isSubmitting ? (
               <span className="flex items-center justify-center gap-2">

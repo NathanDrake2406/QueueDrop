@@ -3,12 +3,12 @@ interface SkeletonProps {
 }
 
 export function Skeleton({ className = "" }: SkeletonProps) {
-  return <div className={`animate-pulse bg-zinc-800 rounded-lg ${className}`} />;
+  return <div className={`animate-pulse bg-slate-800 rounded-lg ${className}`} />;
 }
 
 export function CustomerCardSkeleton() {
   return (
-    <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4">
+    <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4">
       <div className="flex items-center gap-4">
         <Skeleton className="w-12 h-12 rounded-xl" />
         <div className="flex-1">
@@ -23,7 +23,7 @@ export function CustomerCardSkeleton() {
 
 export function QueueControlsSkeleton() {
   return (
-    <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-6">
+    <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
         <div>
           <Skeleton className="h-7 w-48 mb-3" />
@@ -51,11 +51,11 @@ export function QueueControlsSkeleton() {
 
 export function QueuePositionSkeleton() {
   return (
-    <div className="min-h-screen bg-zinc-950 text-white">
+    <div className="min-h-screen bg-slate-950 text-white">
       <div className="max-w-md mx-auto px-4 py-8">
         <Skeleton className="h-5 w-32 mb-2" />
         <Skeleton className="h-8 w-48 mb-8" />
-        <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-8 text-center">
+        <div className="bg-slate-900 border border-slate-800 rounded-3xl p-8 text-center">
           <Skeleton className="h-32 w-32 mx-auto rounded-full mb-6" />
           <Skeleton className="h-6 w-40 mx-auto mb-2" />
           <Skeleton className="h-4 w-56 mx-auto" />
@@ -67,7 +67,7 @@ export function QueuePositionSkeleton() {
 
 export function DashboardSkeleton() {
   return (
-    <div className="min-h-screen bg-zinc-950 text-white">
+    <div className="min-h-screen bg-slate-950 text-white">
       <div className="max-w-4xl mx-auto p-4 space-y-6">
         <QueueControlsSkeleton />
         <div>

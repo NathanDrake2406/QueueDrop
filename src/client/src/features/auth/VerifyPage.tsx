@@ -88,11 +88,11 @@ export function VerifyPage() {
 
   if (pageState === 'loading') {
     return (
-      <div className="min-h-screen bg-zinc-950 text-white flex items-center justify-center">
+      <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center">
         <div className="text-center">
           {/* Spinning loader */}
           <div className="inline-flex items-center justify-center w-16 h-16 mb-6">
-            <svg className="w-12 h-12 animate-spin text-violet-500" fill="none" viewBox="0 0 24 24">
+            <svg className="w-12 h-12 animate-spin text-teal-500" fill="none" viewBox="0 0 24 24">
               <circle
                 className="opacity-25"
                 cx="12"
@@ -108,8 +108,8 @@ export function VerifyPage() {
               />
             </svg>
           </div>
-          <p className="text-xl font-medium text-zinc-300">Verifying your link...</p>
-          <p className="text-zinc-500 mt-2">Please wait while we sign you in</p>
+          <p className="text-xl font-medium text-slate-300">Verifying your link...</p>
+          <p className="text-slate-500 mt-2">Please wait while we sign you in</p>
         </div>
       </div>
     );
@@ -117,7 +117,7 @@ export function VerifyPage() {
 
   // Error state
   return (
-    <div className="min-h-screen bg-zinc-950 text-white flex items-center justify-center p-4">
+    <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center p-4">
       <div className="max-w-md w-full text-center">
         {/* Error icon */}
         <div className="inline-flex items-center justify-center w-16 h-16 bg-red-500/10 border border-red-500/20 rounded-full mb-6">
@@ -127,11 +127,11 @@ export function VerifyPage() {
         </div>
 
         <h1 className="text-2xl font-bold mb-3">Verification Failed</h1>
-        <p className="text-zinc-400 mb-8">{error}</p>
+        <p className="text-slate-400 mb-8">{error}</p>
 
         <Link
           to="/login"
-          className="inline-block px-8 py-4 bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white font-semibold rounded-xl hover:from-violet-600 hover:to-fuchsia-600 transition-all"
+          className="inline-block px-8 py-4 bg-gradient-to-r from-teal-500 to-teal-500 text-white font-semibold rounded-xl hover:from-teal-600 hover:to-teal-600 transition-all"
         >
           Try again
         </Link>

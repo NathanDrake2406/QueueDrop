@@ -13,7 +13,7 @@ function ConnectionIndicator({ state }: { state: "connecting" | "connected" | "r
   return (
     <div className="flex items-center gap-2">
       <div className={`w-2 h-2 rounded-full ${colors[state]}`} />
-      <span className="text-xs text-zinc-500 uppercase tracking-wide">
+      <span className="text-xs text-slate-500 uppercase tracking-wide">
         {state === "connected" ? "Live" : state}
       </span>
     </div>
@@ -23,14 +23,14 @@ function ConnectionIndicator({ state }: { state: "connecting" | "connected" | "r
 function PositionDisplay({ position }: { position: number }) {
   return (
     <div className="text-center py-8">
-      <p className="text-zinc-500 text-sm uppercase tracking-wider mb-4">Your position</p>
+      <p className="text-slate-500 text-sm uppercase tracking-wider mb-4">Your position</p>
       <div className="relative inline-block">
-        <div className="text-[140px] font-bold leading-none bg-gradient-to-b from-white to-zinc-400 bg-clip-text text-transparent">
+        <div className="text-[140px] font-bold leading-none bg-gradient-to-b from-white to-slate-400 bg-clip-text text-transparent">
           {position}
         </div>
-        <div className="absolute -inset-4 bg-gradient-to-r from-violet-500/20 to-fuchsia-500/20 blur-3xl -z-10" />
+        <div className="absolute -inset-4 bg-gradient-to-r from-teal-500/20 to-teal-500/20 blur-3xl -z-10" />
       </div>
-      <p className="text-zinc-400 mt-4">
+      <p className="text-slate-400 mt-4">
         {position === 1 ? "You're next!" : `${position - 1} ${position - 1 === 1 ? "person" : "people"} ahead`}
       </p>
     </div>
@@ -102,8 +102,8 @@ function NotificationBanner({
 
   if (permission === "denied") {
     return (
-      <div className="p-4 bg-zinc-800/50 border border-zinc-700 rounded-2xl">
-        <p className="text-zinc-500 text-sm">
+      <div className="p-4 bg-slate-800/50 border border-slate-700 rounded-2xl">
+        <p className="text-slate-500 text-sm">
           Notifications blocked. Enable in browser settings to get alerts.
         </p>
       </div>
@@ -111,19 +111,19 @@ function NotificationBanner({
   }
 
   return (
-    <div className="flex items-center justify-between gap-4 p-4 bg-violet-500/10 border border-violet-500/20 rounded-2xl">
+    <div className="flex items-center justify-between gap-4 p-4 bg-teal-500/10 border border-teal-500/20 rounded-2xl">
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 bg-violet-500/20 rounded-xl flex items-center justify-center flex-shrink-0">
-          <svg className="w-5 h-5 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div className="w-10 h-10 bg-teal-500/20 rounded-xl flex items-center justify-center flex-shrink-0">
+          <svg className="w-5 h-5 text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
           </svg>
         </div>
-        <p className="text-violet-300 text-sm">Get notified when it's your turn</p>
+        <p className="text-teal-300 text-sm">Get notified when it's your turn</p>
       </div>
       <button
         onClick={onEnable}
         disabled={isLoading}
-        className="px-4 py-2 bg-violet-500 text-white text-sm font-medium rounded-xl hover:bg-violet-400 transition-colors disabled:opacity-50 flex-shrink-0"
+        className="px-4 py-2 bg-teal-500 text-white text-sm font-medium rounded-xl hover:bg-teal-400 transition-colors disabled:opacity-50 flex-shrink-0"
       >
         {isLoading ? "..." : "Enable"}
       </button>
@@ -138,15 +138,15 @@ export function QueuePosition() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-zinc-700 border-t-white rounded-full animate-spin" />
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-slate-700 border-t-white rounded-full animate-spin" />
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-zinc-950 text-white flex items-center justify-center p-4">
+      <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center p-4">
         <div className="w-full max-w-md text-center">
           <div className="w-16 h-16 bg-red-500/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
             <svg className="w-8 h-8 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -154,10 +154,10 @@ export function QueuePosition() {
             </svg>
           </div>
           <h1 className="text-xl font-bold mb-2">Something went wrong</h1>
-          <p className="text-zinc-500 mb-6">{error}</p>
+          <p className="text-slate-500 mb-6">{error}</p>
           <button
             onClick={refresh}
-            className="px-6 py-3 bg-white text-zinc-900 font-semibold rounded-xl hover:bg-zinc-100 transition-colors"
+            className="px-6 py-3 bg-white text-slate-900 font-semibold rounded-xl hover:bg-slate-100 transition-colors"
           >
             Try Again
           </button>
@@ -172,13 +172,13 @@ export function QueuePosition() {
   const isWaiting = data.status === "Waiting";
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white">
+    <div className="min-h-screen bg-slate-950 text-white">
       <div className="max-w-md mx-auto px-4 py-8">
         {/* Header */}
         <div className="flex justify-between items-start mb-8">
           <div>
             <h1 className="text-xl font-bold">{data.businessName}</h1>
-            <p className="text-zinc-500">{data.queueName}</p>
+            <p className="text-slate-500">{data.queueName}</p>
           </div>
           <ConnectionIndicator state={connectionState} />
         </div>
@@ -193,12 +193,12 @@ export function QueuePosition() {
           {isCalled ? (
             <CalledCard message={data.calledMessage} />
           ) : isWaiting && data.position ? (
-            <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-6">
+            <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6">
               <PositionDisplay position={data.position} />
             </div>
           ) : (
-            <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-8 text-center">
-              <p className="text-zinc-400">Status: {data.status}</p>
+            <div className="bg-slate-900 border border-slate-800 rounded-3xl p-8 text-center">
+              <p className="text-slate-400">Status: {data.status}</p>
             </div>
           )}
         </div>
@@ -218,8 +218,8 @@ export function QueuePosition() {
 
         {/* Welcome message */}
         {data.welcomeMessage && isWaiting && (
-          <div className="p-4 bg-zinc-900 border border-zinc-800 rounded-2xl">
-            <p className="text-zinc-400 text-sm">{data.welcomeMessage}</p>
+          <div className="p-4 bg-slate-900 border border-slate-800 rounded-2xl">
+            <p className="text-slate-400 text-sm">{data.welcomeMessage}</p>
           </div>
         )}
 
@@ -227,7 +227,7 @@ export function QueuePosition() {
         {connectionState === "disconnected" && (
           <button
             onClick={refresh}
-            className="w-full mt-4 py-4 bg-zinc-800 text-white font-medium rounded-2xl hover:bg-zinc-700 transition-colors"
+            className="w-full mt-4 py-4 bg-slate-800 text-white font-medium rounded-2xl hover:bg-slate-700 transition-colors"
           >
             Refresh Position
           </button>
