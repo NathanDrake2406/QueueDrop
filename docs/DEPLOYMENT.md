@@ -74,29 +74,20 @@ https://queuedrop-api-production.up.railway.app
 
 | Setting          | Value           |
 | ---------------- | --------------- |
-| Framework Preset | Vite            |
+| Framework Preset | Next.js         |
 | Root Directory   | `src/client`    |
 | Build Command    | `npm run build` |
-| Output Directory | `dist`          |
+| Output Directory | _(leave blank)_ |
 
-### 2.3 Update API URL
+### 2.3 Configure Environment Variables
 
-Edit `src/client/vercel.json` and replace the Railway URL:
+In Vercel Project Settings → Environment Variables, add:
 
-```json
-{
-    "rewrites": [
-        {
-            "source": "/api/(.*)",
-            "destination": "https://YOUR-RAILWAY-URL.up.railway.app/api/$1"
-        },
-        {
-            "source": "/hubs/(.*)",
-            "destination": "https://YOUR-RAILWAY-URL.up.railway.app/hubs/$1"
-        }
-    ]
-}
-```
+| Variable      | Value                                         |
+| ------------- | --------------------------------------------- |
+| `BACKEND_URL` | `https://YOUR-RAILWAY-URL.up.railway.app`     |
+
+The `BACKEND_URL` is used by Next.js rewrites to proxy `/api/*` and `/hubs/*` requests to your Railway backend.
 
 ### 2.4 Deploy
 
@@ -129,7 +120,9 @@ After getting your Vercel URL (e.g., `https://queuedrop.vercel.app`):
 
 ### Vercel (Frontend)
 
-No environment variables required - API URL is configured in `vercel.json`.
+| Variable      | Description              | Example                                       |
+| ------------- | ------------------------ | --------------------------------------------- |
+| `BACKEND_URL` | Railway backend URL      | `https://queuedrop-api.up.railway.app`        |
 
 ---
 
