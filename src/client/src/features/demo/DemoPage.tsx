@@ -1,9 +1,11 @@
+"use client";
+
 import { useState, useEffect, useCallback, useRef } from "react";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 import { getApiErrorMessage, safeJsonParse } from "../../shared/utils/api";
 import { useSignalR, type ConnectionState } from "../../shared/hooks/useSignalR";
 
-const API_BASE = import.meta.env.VITE_API_URL || "";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "";
 const SIGNALR_HUB_URL = `${API_BASE}/hubs/queue`;
 
 interface QueueInfo {
@@ -824,7 +826,7 @@ export function DemoPage() {
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Link
-              to="/"
+              href="/"
               className="flex items-center gap-2 text-slate-500 hover:text-white transition-colors"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

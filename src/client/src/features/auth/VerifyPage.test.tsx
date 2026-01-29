@@ -1,25 +1,35 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { MemoryRouter, Routes, Route } from "react-router-dom";
+import { useRouter, useSearchParams } from "next/navigation";
 import { VerifyPage } from "./VerifyPage";
 import { AuthProvider } from "./AuthContext";
+
+// Get mock router
+const mockReplace = vi.fn();
+
+vi.mocked(useRouter).mockReturnValue({
+  push: vi.fn(),
+  replace: mockReplace,
+  back: vi.fn(),
+  forward: vi.fn(),
+  refresh: vi.fn(),
+  prefetch: vi.fn(),
+});
 
 // Mock fetch
 const mockFetch = vi.fn();
 global.fetch = mockFetch;
 
-function renderVerifyPage(token: string = "valid-token") {
+function renderVerifyPage(token: string | null = "valid-token") {
+  // Mock useSearchParams to return the token
+  vi.mocked(useSearchParams).mockReturnValue(
+    new URLSearchParams(token ? `token=${token}` : "")
+  );
+
   return render(
-    <MemoryRouter initialEntries={[`/auth/verify?token=${token}`]}>
-      <AuthProvider>
-        <Routes>
-          <Route path="/auth/verify" element={<VerifyPage />} />
-          <Route path="/login" element={<div>Login Page</div>} />
-          <Route path="/onboarding" element={<div>Onboarding Page</div>} />
-          <Route path="/staff/:businessSlug" element={<div>Staff Dashboard</div>} />
-        </Routes>
-      </AuthProvider>
-    </MemoryRouter>
+    <AuthProvider>
+      <VerifyPage />
+    </AuthProvider>
   );
 }
 
@@ -79,7 +89,7 @@ describe("VerifyPage", () => {
     renderVerifyPage();
 
     await waitFor(() => {
-      expect(screen.getByText("Onboarding Page")).toBeInTheDocument();
+      expect(mockReplace).toHaveBeenCalledWith("/onboarding");
     });
   });
 
@@ -116,7 +126,7 @@ describe("VerifyPage", () => {
     renderVerifyPage();
 
     await waitFor(() => {
-      expect(screen.getByText("Staff Dashboard")).toBeInTheDocument();
+      expect(mockReplace).toHaveBeenCalledWith("/staff/my-shop");
     });
   });
 
@@ -154,15 +164,7 @@ describe("VerifyPage", () => {
       return Promise.resolve({ ok: false, status: 404, text: () => Promise.resolve("") });
     });
 
-    render(
-      <MemoryRouter initialEntries={["/auth/verify"]}>
-        <AuthProvider>
-          <Routes>
-            <Route path="/auth/verify" element={<VerifyPage />} />
-          </Routes>
-        </AuthProvider>
-      </MemoryRouter>
-    );
+    renderVerifyPage(null);
 
     await waitFor(() => {
       expect(screen.getByText(/verification failed/i)).toBeInTheDocument();

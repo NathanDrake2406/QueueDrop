@@ -1,6 +1,8 @@
+"use client";
+
 import { useState, useEffect } from 'react';
 import type { FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import { useAuth } from './hooks/useAuth';
 import { getApiErrorMessage } from '../../shared/utils/api';
 
@@ -15,7 +17,7 @@ function generateSlug(name: string): string {
 }
 
 export function OnboardingPage() {
-  const navigate = useNavigate();
+  const router = useRouter();
   const { token, isAuthenticated, isLoading, businesses, addBusiness } = useAuth();
   const [name, setName] = useState('');
   const [slug, setSlug] = useState('');
@@ -26,16 +28,16 @@ export function OnboardingPage() {
   // Redirect if not authenticated (after loading completes)
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      navigate('/login', { replace: true });
+      router.replace('/login');
     }
-  }, [isLoading, isAuthenticated, navigate]);
+  }, [isLoading, isAuthenticated, router]);
 
   // Redirect if user already has businesses
   useEffect(() => {
     if (!isLoading && isAuthenticated && businesses.length > 0) {
-      navigate(`/staff/${businesses[0].slug}`, { replace: true });
+      router.replace(`/staff/${businesses[0].slug}`);
     }
-  }, [isLoading, isAuthenticated, businesses, navigate]);
+  }, [isLoading, isAuthenticated, businesses, router]);
 
   // Auto-generate slug from name (unless manually edited)
   useEffect(() => {
@@ -82,7 +84,7 @@ export function OnboardingPage() {
       });
 
       // Navigate to staff dashboard
-      navigate(`/staff/${data.slug}`, { replace: true });
+      router.replace(`/staff/${data.slug}`);
     } catch {
       setError('Something went wrong. Please try again.');
       setIsSubmitting(false);

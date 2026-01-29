@@ -1,9 +1,11 @@
+"use client";
+
 import { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/navigation";
 import { Html5Qrcode } from "html5-qrcode";
 
 export function QRScanner() {
-  const navigate = useNavigate();
+  const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [isScanning, setIsScanning] = useState(false);
   const scannerRef = useRef<Html5Qrcode | null>(null);
@@ -70,16 +72,16 @@ export function QRScanner() {
 
       // Check if it's a valid QueueDrop URL
       if (path.startsWith("/join/")) {
-        navigate(path);
+        router.push(path);
       } else if (path.startsWith("/q/")) {
-        navigate(path);
+        router.push(path);
       } else {
         setError("Invalid QR code. Please scan a QueueDrop queue code.");
       }
     } catch {
       // Not a valid URL, try treating it as a business slug
       if (/^[a-z0-9-]+$/i.test(url)) {
-        navigate(`/join/${url}`);
+        router.push(`/join/${url}`);
       } else {
         setError("Invalid QR code format.");
       }
@@ -92,7 +94,7 @@ export function QRScanner() {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <button
-            onClick={() => navigate("/")}
+            onClick={() => router.push("/")}
             className="p-2 -ml-2 text-slate-400 hover:text-white transition-colors"
           >
             <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -149,7 +151,7 @@ export function QRScanner() {
           <p className="text-slate-500 text-sm">
             Or enter the queue code manually on the{" "}
             <button
-              onClick={() => navigate("/")}
+              onClick={() => router.push("/")}
               className="text-white underline hover:no-underline"
             >
               home page

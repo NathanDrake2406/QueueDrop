@@ -1,4 +1,3 @@
-import { useParams } from "react-router-dom";
 import { useQueuePosition } from "./hooks/useQueuePosition";
 import { usePushNotifications } from "./hooks/usePushNotifications";
 
@@ -131,10 +130,13 @@ function NotificationBanner({
   );
 }
 
-export function QueuePosition() {
-  const { token } = useParams<{ token: string }>();
-  const { data, isLoading, error, connectionState, refresh } = useQueuePosition(token || "");
-  const pushNotifications = usePushNotifications(token || null);
+interface QueuePositionProps {
+  token: string;
+}
+
+export function QueuePosition({ token }: QueuePositionProps) {
+  const { data, isLoading, error, connectionState, refresh } = useQueuePosition(token);
+  const pushNotifications = usePushNotifications(token);
 
   if (isLoading) {
     return (

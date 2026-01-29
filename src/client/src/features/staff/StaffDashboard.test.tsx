@@ -1,9 +1,21 @@
 import { render, screen, waitFor, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { MemoryRouter, Route, Routes } from "react-router-dom";
+import { useRouter } from "next/navigation";
 import { StaffDashboard } from "./StaffDashboard";
 import { AuthProvider } from "../auth/AuthContext";
+
+// Get mock router
+const mockReplace = vi.fn();
+
+vi.mocked(useRouter).mockReturnValue({
+  push: vi.fn(),
+  replace: mockReplace,
+  back: vi.fn(),
+  forward: vi.fn(),
+  refresh: vi.fn(),
+  prefetch: vi.fn(),
+});
 
 // Mock useSignalR
 const mockInvoke = vi.fn();
@@ -64,22 +76,21 @@ const mockQueue2Customers = {
   queueInfo: { name: "Queue 2", isActive: true, isPaused: false, waitingCount: 1, calledCount: 0 },
 };
 
-function renderDashboard() {
+function renderDashboard(businessSlug: string = "test-business") {
+  // Set auth token for authenticated state
+  localStorage.setItem("auth_token", "test-token");
+
   return render(
-    <MemoryRouter initialEntries={["/staff/test-business"]}>
-      <AuthProvider>
-        <Routes>
-          <Route path="/staff/:businessSlug" element={<StaffDashboard />} />
-          <Route path="/404" element={<div>404</div>} />
-        </Routes>
-      </AuthProvider>
-    </MemoryRouter>,
+    <AuthProvider>
+      <StaffDashboard businessSlug={businessSlug} />
+    </AuthProvider>
   );
 }
 
 describe("StaffDashboard", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    localStorage.clear();
     mockInvoke.mockResolvedValue(undefined);
     mockOn.mockReturnValue(() => {});
 

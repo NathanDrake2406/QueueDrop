@@ -1,7 +1,5 @@
 # QueueDrop
 
-[![CI](https://github.com/NathanDrake2406/QueueDrop/actions/workflows/ci.yml/badge.svg)](https://github.com/NathanDrake2406/QueueDrop/actions/workflows/ci.yml)
-[![codecov](https://codecov.io/gh/NathanDrake2406/QueueDrop/graph/badge.svg)](https://codecov.io/gh/NathanDrake2406/QueueDrop)
 ![.NET](https://img.shields.io/badge/.NET-8.0-512BD4?logo=dotnet)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.0-3178C6?logo=typescript)
 ![React](https://img.shields.io/badge/React-19-61DAFB?logo=react)
@@ -49,7 +47,7 @@ QueueDrop lets customers scan a QR code, join remotely, and track their position
 | **Database**  | PostgreSQL 16 with EF Core                      |
 | **Real-time** | SignalR (WebSockets with fallback)              |
 | **Email**     | Resend (transactional emails for magic links)   |
-| **Frontend**  | React 19, TypeScript (strict), Tailwind CSS v4  |
+| **Frontend**  | Next.js 16 (App Router), React 19, TypeScript (strict), Tailwind CSS v4  |
 | **Testing**   | xUnit, Vitest, Testing Library, Playwright E2E  |
 | **CI/CD**     | GitHub Actions, Playwright E2E, Codecov         |
 
@@ -87,15 +85,15 @@ cd src/QueueDrop.Api && dotnet run
 cd src/client && npm install && npm run dev
 ```
 
-Open http://localhost:5173
+Open http://localhost:3000
 
 ### Demo
 
 | URL                                  | Description                               |
 | ------------------------------------ | ----------------------------------------- |
-| http://localhost:5173/demo           | **Interactive demo** (staff + customer)   |
-| http://localhost:5173/staff/demo-shop| Staff dashboard                           |
-| http://localhost:5173/join/demo-shop | Customer queue join                       |
+| http://localhost:3000/demo           | **Interactive demo** (staff + customer)   |
+| http://localhost:3000/staff/demo-shop| Staff dashboard                           |
+| http://localhost:3000/join/demo-shop | Customer queue join                       |
 
 ## API
 

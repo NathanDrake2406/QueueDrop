@@ -1,12 +1,14 @@
+"use client";
+
 import { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '../hooks/useAuth';
 
 export function UserMenu() {
   const { user, logout, businesses } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
-  const navigate = useNavigate();
+  const router = useRouter();
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -21,12 +23,12 @@ export function UserMenu() {
 
   function handleLogout() {
     logout();
-    navigate('/login');
+    router.push('/login');
   }
 
   function handleSwitchBusiness(slug: string) {
     setIsOpen(false);
-    navigate(`/staff/${slug}`);
+    router.push(`/staff/${slug}`);
   }
 
   if (!user) return null;

@@ -2,7 +2,7 @@ import { defineConfig, devices } from "@playwright/test";
 
 /**
  * E2E test configuration for QueueDrop.
- * Tests run against both frontend (Vite dev server) and backend (.NET API).
+ * Tests run against both frontend (Next.js dev server) and backend (.NET API).
  */
 export default defineConfig({
   testDir: "./e2e",
@@ -13,7 +13,7 @@ export default defineConfig({
   reporter: [["html", { open: "never" }], ["list"]],
 
   use: {
-    baseURL: "http://localhost:5173",
+    baseURL: "http://localhost:3000",
     trace: "on-first-retry",
     screenshot: "only-on-failure",
     video: "on-first-retry",
@@ -44,9 +44,9 @@ export default defineConfig({
     },
     {
       command: "npm run dev",
-      url: "http://localhost:5173",
+      url: "http://localhost:3000",
       reuseExistingServer: !process.env.CI,
-      timeout: 30000,
+      timeout: 60000,
     },
   ],
 });

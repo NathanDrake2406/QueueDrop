@@ -1,9 +1,10 @@
 import { type FormEvent, useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useRouter } from "next/navigation";
+import { notFound } from "next/navigation";
 import { getApiErrorMessage, safeJsonParse } from "../../shared/utils/api";
 import { QueueSelector } from "./components/QueueSelector";
 
-const API_BASE = import.meta.env.VITE_API_URL || "";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "";
 
 interface Queue {
   queueId: string;
@@ -28,9 +29,13 @@ interface JoinResponse {
 
 type PageState = "loading" | "select-queue" | "join-form" | "already-joined" | "error";
 
-export function JoinQueue() {
-  const { businessSlug, queueSlug: urlQueueSlug } = useParams<{ businessSlug: string; queueSlug?: string }>();
-  const navigate = useNavigate();
+interface JoinQueueProps {
+  businessSlug: string;
+  queueSlug?: string;
+}
+
+export function JoinQueue({ businessSlug, queueSlug: urlQueueSlug }: JoinQueueProps) {
+  const router = useRouter();
 
   const [pageState, setPageState] = useState<PageState>("loading");
   const [businessName, setBusinessName] = useState<string>("");
@@ -53,7 +58,7 @@ export function JoinQueue() {
         const response = await fetch(`${API_BASE}/api/business/${businessSlug}/queues`);
         if (!response.ok) {
           if (response.status === 404) {
-            navigate("/404");
+            notFound();
             return;
           }
           throw new Error("Failed to load queues");
@@ -71,7 +76,7 @@ export function JoinQueue() {
         if (urlQueueSlug) {
           const targetQueue = data.queues.find((q) => q.slug === urlQueueSlug);
           if (!targetQueue) {
-            navigate("/404");
+            notFound();
             return;
           }
           setSelectedQueueSlug(urlQueueSlug);
@@ -110,7 +115,7 @@ export function JoinQueue() {
     }
 
     fetchQueues();
-  }, [businessSlug, urlQueueSlug, navigate]);
+  }, [businessSlug, urlQueueSlug, router]);
 
   const handleQueueSelect = (queueSlug: string) => {
     const selected = queues.find((q) => q.slug === queueSlug);
@@ -157,7 +162,7 @@ export function JoinQueue() {
       localStorage.setItem(`queue_token_${businessSlug}_${selectedQueueSlug}`, data.token);
 
       // Navigate to position page
-      navigate(`/q/${data.token}`);
+      router.push(`/q/${data.token}`);
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
@@ -203,7 +208,7 @@ export function JoinQueue() {
           <p className="text-xl font-semibold text-red-400 mb-2">Something went wrong</p>
           <p className="text-slate-500 mb-6">{loadError}</p>
           <button
-            onClick={() => navigate("/")}
+            onClick={() => router.push("/")}
             className="px-6 py-3 bg-slate-800 text-white rounded-xl hover:bg-slate-700 transition-colors"
           >
             Go Home
@@ -220,7 +225,7 @@ export function JoinQueue() {
         <div className="w-full max-w-md">
           {/* Back button */}
           <button
-            onClick={() => (queues.length > 1 ? handleBackToQueueSelection() : navigate("/"))}
+            onClick={() => (queues.length > 1 ? handleBackToQueueSelection() : router.push("/"))}
             className="flex items-center gap-2 text-slate-500 hover:text-white mb-8 transition-colors"
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -240,7 +245,7 @@ export function JoinQueue() {
             <p className="text-slate-600 text-sm mb-8">Check your position or start fresh</p>
             <div className="space-y-3">
               <button
-                onClick={() => navigate(`/q/${existingToken}`)}
+                onClick={() => router.push(`/q/${existingToken}`)}
                 className="w-full py-4 bg-white text-slate-900 font-semibold rounded-2xl hover:bg-slate-100 transition-colors"
               >
                 Check My Position
@@ -265,7 +270,7 @@ export function JoinQueue() {
         <div className="max-w-md mx-auto px-4 py-8">
           {/* Back button */}
           <button
-            onClick={() => navigate("/")}
+            onClick={() => router.push("/")}
             className="flex items-center gap-2 text-slate-500 hover:text-white mb-8 transition-colors"
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -295,7 +300,7 @@ export function JoinQueue() {
       <div className="max-w-md mx-auto px-4 py-8">
         {/* Back button */}
         <button
-          onClick={() => (queues.length > 1 ? handleBackToQueueSelection() : navigate("/"))}
+          onClick={() => (queues.length > 1 ? handleBackToQueueSelection() : router.push("/"))}
           className="flex items-center gap-2 text-slate-500 hover:text-white mb-8 transition-colors"
         >
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useEffect, useCallback } from 'react';
 import type { ReactNode } from 'react';
 import { AuthContext, TOKEN_KEY } from './authTypes';
@@ -7,12 +9,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<AuthState>({
     user: null,
     businesses: [],
-    token: localStorage.getItem(TOKEN_KEY),
+    token: null, // Don't access localStorage during SSR
     isLoading: true,
     isAuthenticated: false,
   });
 
   const fetchMe = useCallback(async () => {
+    // Only access localStorage on client
+    if (typeof window === 'undefined') return;
+
     const token = localStorage.getItem(TOKEN_KEY);
     if (!token) {
       setState(s => ({ ...s, isLoading: false, isAuthenticated: false }));

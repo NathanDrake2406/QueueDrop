@@ -1,7 +1,6 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { MemoryRouter } from "react-router-dom";
 import { LoginPage } from "./LoginPage";
 import { AuthProvider } from "./AuthContext";
 
@@ -11,11 +10,9 @@ global.fetch = mockFetch;
 
 function renderLoginPage() {
   return render(
-    <MemoryRouter initialEntries={["/login"]}>
-      <AuthProvider>
-        <LoginPage />
-      </AuthProvider>
-    </MemoryRouter>
+    <AuthProvider>
+      <LoginPage />
+    </AuthProvider>
   );
 }
 

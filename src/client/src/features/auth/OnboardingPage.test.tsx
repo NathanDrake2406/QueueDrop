@@ -1,9 +1,21 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { MemoryRouter, Routes, Route } from "react-router-dom";
+import { useRouter } from "next/navigation";
 import { OnboardingPage } from "./OnboardingPage";
 import { AuthProvider } from "./AuthContext";
+
+// Get mock router
+const mockReplace = vi.fn();
+
+vi.mocked(useRouter).mockReturnValue({
+  push: vi.fn(),
+  replace: mockReplace,
+  back: vi.fn(),
+  forward: vi.fn(),
+  refresh: vi.fn(),
+  prefetch: vi.fn(),
+});
 
 // Mock fetch
 const mockFetch = vi.fn();
@@ -16,15 +28,9 @@ function renderOnboardingPage(authenticated: boolean = true) {
   }
 
   return render(
-    <MemoryRouter initialEntries={["/onboarding"]}>
-      <AuthProvider>
-        <Routes>
-          <Route path="/onboarding" element={<OnboardingPage />} />
-          <Route path="/login" element={<div>Login Page</div>} />
-          <Route path="/staff/:businessSlug" element={<div>Staff Dashboard: {window.location.pathname}</div>} />
-        </Routes>
-      </AuthProvider>
-    </MemoryRouter>
+    <AuthProvider>
+      <OnboardingPage />
+    </AuthProvider>
   );
 }
 
@@ -45,7 +51,7 @@ describe("OnboardingPage", () => {
     renderOnboardingPage(false);
 
     await waitFor(() => {
-      expect(screen.getByText("Login Page")).toBeInTheDocument();
+      expect(mockReplace).toHaveBeenCalledWith("/login");
     });
   });
 
@@ -69,7 +75,7 @@ describe("OnboardingPage", () => {
     renderOnboardingPage();
 
     await waitFor(() => {
-      expect(screen.getByText(/staff dashboard/i)).toBeInTheDocument();
+      expect(mockReplace).toHaveBeenCalledWith("/staff/existing-shop");
     });
   });
 
@@ -178,7 +184,7 @@ describe("OnboardingPage", () => {
     await user.click(submitButton);
 
     await waitFor(() => {
-      expect(screen.getByText(/staff dashboard/i)).toBeInTheDocument();
+      expect(mockReplace).toHaveBeenCalledWith("/staff/new-shop");
     });
   });
 

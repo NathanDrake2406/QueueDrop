@@ -1,5 +1,8 @@
-import { Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
+"use client";
+
+import { useRouter, usePathname } from "next/navigation";
+import { useEffect } from "react";
+import { useAuth } from "../hooks/useAuth";
 
 interface Props {
   children: React.ReactNode;
@@ -8,7 +11,23 @@ interface Props {
 
 export function ProtectedRoute({ children, requireBusiness }: Props) {
   const { isAuthenticated, isLoading, businesses } = useAuth();
-  const location = useLocation();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  useEffect(() => {
+    if (isLoading) return;
+
+    if (!isAuthenticated) {
+      // Store the intended destination for redirect after login
+      const returnUrl = encodeURIComponent(pathname);
+      router.replace(`/login?returnUrl=${returnUrl}`);
+      return;
+    }
+
+    if (requireBusiness && !businesses.some((b) => b.slug === requireBusiness)) {
+      router.replace("/404");
+    }
+  }, [isAuthenticated, isLoading, businesses, requireBusiness, router, pathname]);
 
   if (isLoading) {
     return (
@@ -19,11 +38,19 @@ export function ProtectedRoute({ children, requireBusiness }: Props) {
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
+    return (
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+        <div className="text-slate-400">Redirecting...</div>
+      </div>
+    );
   }
 
-  if (requireBusiness && !businesses.some(b => b.slug === requireBusiness)) {
-    return <Navigate to="/404" replace />;
+  if (requireBusiness && !businesses.some((b) => b.slug === requireBusiness)) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+        <div className="text-slate-400">Redirecting...</div>
+      </div>
+    );
   }
 
   return <>{children}</>;

@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import { getApiErrorMessage } from '../../shared/utils/api';
 import { useDarkMode } from '../../shared/hooks/useDarkMode';
 
 type PageState = 'form' | 'sent';
 
 export function LoginPage() {
-  const navigate = useNavigate();
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [pageState, setPageState] = useState<PageState>('form');
   const [isLoading, setIsLoading] = useState(false);
@@ -46,7 +46,7 @@ export function LoginPage() {
       <div className="max-w-md mx-auto px-4 py-12">
         {/* Back button */}
         <button
-          onClick={() => navigate('/')}
+          onClick={() => router.push('/')}
           className={`flex items-center gap-2 mb-8 transition-colors ${isDark ? "text-slate-500 hover:text-white" : "text-slate-500 hover:text-slate-900"}`}
         >
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

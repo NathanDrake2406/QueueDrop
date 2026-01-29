@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo, memo, useRef } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useRouter } from "next/navigation";
+import { notFound } from "next/navigation";
 import { safeJsonParse } from "../../shared/utils/api";
 import { type Customer, type QueueInfo as HookQueueInfo, useStaffQueue } from "./hooks/useStaffQueue";
 import { CustomerCard } from "./components/CustomerCard";
@@ -11,7 +12,7 @@ import { QueueTabs } from "./components/QueueTabs";
 import { DashboardSkeleton } from "../../shared/components/Skeleton";
 import { UserMenu } from "../auth/components/UserMenu";
 
-const API_BASE = import.meta.env.VITE_API_URL || "";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "";
 
 interface QueueInfo {
   queueId: string;
@@ -72,9 +73,12 @@ function EmptyQueueState({ onSeedDemo, queueId }: { onSeedDemo: () => void; queu
   );
 }
 
-export function StaffDashboard() {
-  const { businessSlug } = useParams<{ businessSlug: string }>();
-  const navigate = useNavigate();
+interface StaffDashboardProps {
+  businessSlug: string;
+}
+
+export function StaffDashboard({ businessSlug }: StaffDashboardProps) {
+  const router = useRouter();
   const [queues, setQueues] = useState<QueueInfo[]>([]);
   const [businessName, setBusinessName] = useState<string>("");
   const [loadingQueues, setLoadingQueues] = useState(true);
@@ -90,7 +94,7 @@ export function StaffDashboard() {
 
         if (!response.ok) {
           if (response.status === 404) {
-            navigate("/404");
+            notFound();
             return;
           }
           throw new Error("Failed to load queues");
@@ -110,14 +114,14 @@ export function StaffDashboard() {
         }
       } catch (error) {
         console.error("Failed to fetch queues:", error);
-        navigate("/404");
+        notFound();
       } finally {
         setLoadingQueues(false);
       }
     }
 
     fetchQueues();
-  }, [businessSlug, navigate]);
+  }, [businessSlug, router]);
 
   if (loadingQueues) {
     return <DashboardSkeleton />;

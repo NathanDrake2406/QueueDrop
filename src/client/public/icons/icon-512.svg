@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="dropGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2dd4bf"/>
+      <stop offset="100%" style="stop-color:#0d9488"/>
+    </linearGradient>
+  </defs>
+  <!-- Background -->
+  <rect width="512" height="512" rx="102" fill="#0f172a"/>
+  <!-- Drop shape -->
+  <path d="M256 64 C256 64 416 218 416 298 C416 378 346 448 256 448 C166 448 96 378 96 298 C96 218 256 64 256 64Z" fill="url(#dropGrad)"/>
+  <!-- Queue dots representing people in line -->
+  <circle cx="256" cy="374" r="26" fill="white" opacity="1"/>
+  <circle cx="256" cy="298" r="22" fill="white" opacity="0.85"/>
+  <circle cx="256" cy="234" r="17" fill="white" opacity="0.6"/>
+  <circle cx="256" cy="182" r="12" fill="white" opacity="0.35"/>
+</svg>

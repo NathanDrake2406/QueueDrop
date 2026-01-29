@@ -1,8 +1,23 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { MemoryRouter, Routes, Route } from "react-router-dom";
+import { useRouter, usePathname } from "next/navigation";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { AuthProvider } from "../AuthContext";
+
+// Get mock router
+const mockReplace = vi.fn();
+
+vi.mocked(useRouter).mockReturnValue({
+  push: vi.fn(),
+  replace: mockReplace,
+  back: vi.fn(),
+  forward: vi.fn(),
+  refresh: vi.fn(),
+  prefetch: vi.fn(),
+});
+
+// Mock usePathname to return /protected for returnUrl calculation
+vi.mocked(usePathname).mockReturnValue("/protected");
 
 // Mock fetch
 const mockFetch = vi.fn();
@@ -12,9 +27,8 @@ function renderProtectedRoute(options: {
   authenticated?: boolean;
   businesses?: Array<{ id: string; name: string; slug: string }>;
   requireBusiness?: string;
-  initialPath?: string;
 }) {
-  const { authenticated = false, businesses = [], requireBusiness, initialPath = "/protected" } = options;
+  const { authenticated = false, businesses = [], requireBusiness } = options;
 
   if (authenticated) {
     localStorage.setItem("auth_token", "test-token");
@@ -40,22 +54,11 @@ function renderProtectedRoute(options: {
   });
 
   return render(
-    <MemoryRouter initialEntries={[initialPath]}>
-      <AuthProvider>
-        <Routes>
-          <Route
-            path="/protected"
-            element={
-              <ProtectedRoute requireBusiness={requireBusiness}>
-                <div>Protected Content</div>
-              </ProtectedRoute>
-            }
-          />
-          <Route path="/login" element={<div>Login Page</div>} />
-          <Route path="/404" element={<div>Not Found</div>} />
-        </Routes>
-      </AuthProvider>
-    </MemoryRouter>
+    <AuthProvider>
+      <ProtectedRoute requireBusiness={requireBusiness}>
+        <div>Protected Content</div>
+      </ProtectedRoute>
+    </AuthProvider>
   );
 }
 
@@ -72,21 +75,11 @@ describe("ProtectedRoute", () => {
     mockFetch.mockImplementation(() => new Promise(() => {}));
 
     render(
-      <MemoryRouter initialEntries={["/protected"]}>
-        <AuthProvider>
-          <Routes>
-            <Route
-              path="/protected"
-              element={
-                <ProtectedRoute>
-                  <div>Protected Content</div>
-                </ProtectedRoute>
-              }
-            />
-            <Route path="/login" element={<div>Login Page</div>} />
-          </Routes>
-        </AuthProvider>
-      </MemoryRouter>
+      <AuthProvider>
+        <ProtectedRoute>
+          <div>Protected Content</div>
+        </ProtectedRoute>
+      </AuthProvider>
     );
 
     expect(screen.getByText("Loading...")).toBeInTheDocument();
@@ -96,7 +89,8 @@ describe("ProtectedRoute", () => {
     renderProtectedRoute({ authenticated: false });
 
     await waitFor(() => {
-      expect(screen.getByText("Login Page")).toBeInTheDocument();
+      // Includes returnUrl for redirect after login
+      expect(mockReplace).toHaveBeenCalledWith("/login?returnUrl=%2Fprotected");
     });
   });
 
@@ -116,7 +110,7 @@ describe("ProtectedRoute", () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByText("Not Found")).toBeInTheDocument();
+      expect(mockReplace).toHaveBeenCalledWith("/404");
     });
   });
 

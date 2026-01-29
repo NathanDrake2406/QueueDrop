@@ -1,9 +1,22 @@
 import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { MemoryRouter, Routes, Route } from "react-router-dom";
+import { useRouter } from "next/navigation";
 import { UserMenu } from "./UserMenu";
 import { AuthProvider } from "../AuthContext";
+
+// Get mock router
+const mockPush = vi.fn();
+const mockReplace = vi.fn();
+
+vi.mocked(useRouter).mockReturnValue({
+  push: mockPush,
+  replace: mockReplace,
+  back: vi.fn(),
+  forward: vi.fn(),
+  refresh: vi.fn(),
+  prefetch: vi.fn(),
+});
 
 // Mock fetch
 const mockFetch = vi.fn();
@@ -39,15 +52,9 @@ function renderUserMenu(options: {
   });
 
   return render(
-    <MemoryRouter initialEntries={["/"]}>
-      <AuthProvider>
-        <Routes>
-          <Route path="/" element={<UserMenu />} />
-          <Route path="/login" element={<div>Login Page</div>} />
-          <Route path="/staff/:slug" element={<div>Staff Dashboard</div>} />
-        </Routes>
-      </AuthProvider>
-    </MemoryRouter>
+    <AuthProvider>
+      <UserMenu />
+    </AuthProvider>
   );
 }
 
@@ -136,7 +143,8 @@ describe("UserMenu", () => {
     await user.click(screen.getByText("Sign out"));
 
     await waitFor(() => {
-      expect(screen.getByText("Login Page")).toBeInTheDocument();
+      // UserMenu uses router.push (adds to history) for logout
+      expect(mockPush).toHaveBeenCalledWith("/login");
     });
 
     expect(localStorage.getItem("auth_token")).toBeNull();
@@ -200,7 +208,7 @@ describe("UserMenu", () => {
     await user.click(screen.getByText("Test Shop"));
 
     await waitFor(() => {
-      expect(screen.getByText("Staff Dashboard")).toBeInTheDocument();
+      expect(mockPush).toHaveBeenCalledWith("/staff/test-shop");
     });
   });
 
