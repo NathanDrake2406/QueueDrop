@@ -114,6 +114,7 @@ After getting your Vercel URL (e.g., `https://queuedrop.vercel.app`):
 | `ASPNETCORE_ENVIRONMENT`               | Environment name      | `Production`                   |
 | `ConnectionStrings__DefaultConnection` | PostgreSQL connection | `${{Postgres.DATABASE_URL}}`   |
 | `Cors__AllowedOrigins__0`              | Frontend URL          | `https://queuedrop.vercel.app` |
+| `Cors__AllowedOrigins__1`              | Custom domain (if any)| `https://queuedrop.me`         |
 | `Vapid__PublicKey`                     | Web Push public key   | `BEl62i...`                    |
 | `Vapid__PrivateKey`                    | Web Push private key  | `UGXsNQ...`                    |
 | `Vapid__Subject`                       | Contact email         | `mailto:you@example.com`       |
