@@ -915,12 +915,14 @@ export function DemoPage() {
   }, [queueData, selectedCustomerToken]);
 
   // Get the display count for a queue - use live data for selected queue
+  // Prefer live data only when it belongs to the currently selected queue to avoid brief mismatches
+  // when the user switches queues and the previous queue's data is still in state.
   const getQueueWaitingCount = useCallback((queueId: string): number => {
-    if (queueId === selectedQueueId && queueData) {
+    if (queueData && queueData.queueId === queueId) {
       return queueData.waitingCount;
     }
-    return queues.find(q => q.queueId === queueId)?.waitingCount ?? 0;
-  }, [selectedQueueId, queueData, queues]);
+    return queues.find((q) => q.queueId === queueId)?.waitingCount ?? 0;
+  }, [queueData, queues]);
 
   // Staff room SignalR: join room and listen for QueueUpdated
   useEffect(() => {
