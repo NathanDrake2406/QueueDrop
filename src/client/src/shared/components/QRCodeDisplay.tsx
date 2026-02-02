@@ -1,4 +1,21 @@
-import { QRCodeSVG } from "qrcode.react";
+"use client";
+
+import dynamic from "next/dynamic";
+
+// Dynamic import - QRCodeSVG is only loaded when this component renders
+const QRCodeSVG = dynamic(
+  () => import("qrcode.react").then((mod) => mod.QRCodeSVG),
+  {
+    loading: () => (
+      <div
+        data-testid="qr-loading-skeleton"
+        className="animate-pulse bg-slate-200 rounded"
+        style={{ width: 200, height: 200 }}
+      />
+    ),
+    ssr: false,
+  }
+);
 
 interface QRCodeDisplayProps {
   url: string;

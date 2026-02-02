@@ -14,7 +14,7 @@ interface Queue {
   estimatedWaitMinutes: number;
 }
 
-interface QueuesResponse {
+export interface QueuesResponse {
   businessId: string;
   businessName: string;
   queues: Queue[];
@@ -32,25 +32,79 @@ type PageState = "loading" | "select-queue" | "join-form" | "already-joined" | "
 interface JoinQueueProps {
   businessSlug: string;
   queueSlug?: string;
+  /** Server-fetched queue data - when provided, skips client-side fetch */
+  serverData?: QueuesResponse;
 }
 
-export function JoinQueue({ businessSlug, queueSlug: urlQueueSlug }: JoinQueueProps) {
+// Helper to determine initial page state from data
+function determineInitialState(
+  data: QueuesResponse,
+  urlQueueSlug: string | undefined,
+  businessSlug: string
+): { pageState: PageState; selectedQueueSlug: string | null; selectedQueueName: string; existingToken: string | null } {
+  // If queueSlug was in URL, validate it exists
+  if (urlQueueSlug) {
+    const targetQueue = data.queues.find((q) => q.slug === urlQueueSlug);
+    if (!targetQueue) {
+      // Will trigger notFound in useEffect
+      return { pageState: "loading", selectedQueueSlug: null, selectedQueueName: "", existingToken: null };
+    }
+
+    // Check for existing token for this specific queue (client-side only)
+    const token = typeof window !== "undefined"
+      ? localStorage.getItem(`queue_token_${businessSlug}_${urlQueueSlug}`)
+      : null;
+
+    if (token) {
+      return { pageState: "already-joined", selectedQueueSlug: urlQueueSlug, selectedQueueName: targetQueue.name, existingToken: token };
+    }
+    return { pageState: "join-form", selectedQueueSlug: urlQueueSlug, selectedQueueName: targetQueue.name, existingToken: null };
+  }
+
+  if (data.queues.length === 1) {
+    // Single queue - go directly to form
+    const singleQueue = data.queues[0];
+
+    // Check for existing token (client-side only)
+    const token = typeof window !== "undefined"
+      ? localStorage.getItem(`queue_token_${businessSlug}_${singleQueue.slug}`)
+      : null;
+
+    if (token) {
+      return { pageState: "already-joined", selectedQueueSlug: singleQueue.slug, selectedQueueName: singleQueue.name, existingToken: token };
+    }
+    return { pageState: "join-form", selectedQueueSlug: singleQueue.slug, selectedQueueName: singleQueue.name, existingToken: null };
+  }
+
+  // Multiple queues - show selector
+  return { pageState: "select-queue", selectedQueueSlug: null, selectedQueueName: "", existingToken: null };
+}
+
+export function JoinQueue({ businessSlug, queueSlug: urlQueueSlug, serverData }: JoinQueueProps) {
   const router = useRouter();
 
-  const [pageState, setPageState] = useState<PageState>("loading");
-  const [businessName, setBusinessName] = useState<string>("");
-  const [queues, setQueues] = useState<Queue[]>([]);
-  const [selectedQueueSlug, setSelectedQueueSlug] = useState<string | null>(urlQueueSlug || null);
-  const [selectedQueueName, setSelectedQueueName] = useState<string>("");
-  const [existingToken, setExistingToken] = useState<string | null>(null);
+  // Initialize state from serverData if available (for SSR)
+  const initialState = serverData
+    ? determineInitialState(serverData, urlQueueSlug, businessSlug)
+    : { pageState: "loading" as PageState, selectedQueueSlug: urlQueueSlug || null, selectedQueueName: "", existingToken: null };
+
+  const [pageState, setPageState] = useState<PageState>(initialState.pageState);
+  const [businessName, setBusinessName] = useState<string>(serverData?.businessName || "");
+  const [queues, setQueues] = useState<Queue[]>(serverData?.queues || []);
+  const [selectedQueueSlug, setSelectedQueueSlug] = useState<string | null>(initialState.selectedQueueSlug);
+  const [selectedQueueName, setSelectedQueueName] = useState<string>(initialState.selectedQueueName);
+  const [existingToken, setExistingToken] = useState<string | null>(initialState.existingToken);
   const [loadError, setLoadError] = useState<string | null>(null);
 
   const [name, setName] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
-  // Fetch queues and determine initial state
+  // Fetch queues and determine initial state (skip if serverData provided)
   useEffect(() => {
+    // Skip fetch if serverData was provided
+    if (serverData) return;
+
     async function fetchQueues() {
       if (!businessSlug) return;
 
@@ -72,42 +126,18 @@ export function JoinQueue({ businessSlug, queueSlug: urlQueueSlug }: JoinQueuePr
         setBusinessName(data.businessName);
         setQueues(data.queues);
 
-        // If queueSlug was in URL, validate it exists
-        if (urlQueueSlug) {
-          const targetQueue = data.queues.find((q) => q.slug === urlQueueSlug);
-          if (!targetQueue) {
-            notFound();
-            return;
-          }
-          setSelectedQueueSlug(urlQueueSlug);
-          setSelectedQueueName(targetQueue.name);
-          
-          // Check for existing token for this specific queue
-          const token = localStorage.getItem(`queue_token_${businessSlug}_${urlQueueSlug}`);
-          if (token) {
-            setExistingToken(token);
-            setPageState("already-joined");
-          } else {
-            setPageState("join-form");
-          }
-        } else if (data.queues.length === 1) {
-          // Single queue - go directly to form
-          const singleQueue = data.queues[0];
-          setSelectedQueueSlug(singleQueue.slug);
-          setSelectedQueueName(singleQueue.name);
-          
-          // Check for existing token
-          const token = localStorage.getItem(`queue_token_${businessSlug}_${singleQueue.slug}`);
-          if (token) {
-            setExistingToken(token);
-            setPageState("already-joined");
-          } else {
-            setPageState("join-form");
-          }
-        } else {
-          // Multiple queues - show selector
-          setPageState("select-queue");
+        const state = determineInitialState(data, urlQueueSlug, businessSlug);
+
+        // Handle notFound case
+        if (urlQueueSlug && !data.queues.find((q) => q.slug === urlQueueSlug)) {
+          notFound();
+          return;
         }
+
+        setSelectedQueueSlug(state.selectedQueueSlug);
+        setSelectedQueueName(state.selectedQueueName);
+        setExistingToken(state.existingToken);
+        setPageState(state.pageState);
       } catch (err) {
         setLoadError(err instanceof Error ? err.message : "Failed to load queues");
         setPageState("error");
@@ -115,7 +145,7 @@ export function JoinQueue({ businessSlug, queueSlug: urlQueueSlug }: JoinQueuePr
     }
 
     fetchQueues();
-  }, [businessSlug, urlQueueSlug, router]);
+  }, [businessSlug, urlQueueSlug, router, serverData]);
 
   const handleQueueSelect = (queueSlug: string) => {
     const selected = queues.find((q) => q.slug === queueSlug);

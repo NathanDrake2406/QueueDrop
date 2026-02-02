@@ -5,6 +5,32 @@ import { test, expect } from "@playwright/test";
  * Tests the full flow from joining a queue to being called.
  */
 
+test.describe("Performance: Font Loading", () => {
+  test("fonts should load without external requests to Google Fonts", async ({ page }) => {
+    // Monitor network requests for external font loading
+    const externalFontRequests: string[] = [];
+    page.on("request", (request) => {
+      const url = request.url();
+      if (url.includes("fonts.googleapis.com") || url.includes("fonts.gstatic.com")) {
+        externalFontRequests.push(url);
+      }
+    });
+
+    await page.goto("/");
+    await page.waitForLoadState("networkidle");
+
+    // Verify no external Google Font requests were made
+    expect(externalFontRequests).toHaveLength(0);
+
+    // Verify fonts are loaded and applied
+    await page.waitForFunction(() => document.fonts.ready);
+    const fontFamily = await page.evaluate(() =>
+      getComputedStyle(document.body).fontFamily
+    );
+    expect(fontFamily).toContain("DM Sans");
+  });
+});
+
 test.describe("Customer Queue Journey", () => {
   test.beforeEach(async ({ page }) => {
     // Clear localStorage before each test

@@ -1,7 +1,22 @@
 import type { Metadata, Viewport } from "next";
+import { DM_Sans, Bricolage_Grotesque } from "next/font/google";
 import { Providers } from "@/components/providers/Providers";
 import { ServiceWorkerRegistration } from "@/components/ServiceWorkerRegistration";
 import "@/index.css";
+
+const dmSans = DM_Sans({
+  subsets: ["latin"],
+  variable: "--font-dm-sans",
+  display: "swap",
+  weight: ["400", "500", "600"],
+});
+
+const bricolage = Bricolage_Grotesque({
+  subsets: ["latin"],
+  variable: "--font-bricolage",
+  display: "swap",
+  weight: ["400", "500", "600", "700"],
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"),
@@ -41,20 +56,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <head>
-        {/* Fonts: DM Sans (body) + Bricolage Grotesque (display) */}
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link
-          rel="preconnect"
-          href="https://fonts.gstatic.com"
-          crossOrigin="anonymous"
-        />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap"
-          rel="stylesheet"
-        />
-      </head>
+    <html lang="en" suppressHydrationWarning className={`${dmSans.variable} ${bricolage.variable}`}>
       <body suppressHydrationWarning>
         <Providers>{children}</Providers>
         <ServiceWorkerRegistration />
