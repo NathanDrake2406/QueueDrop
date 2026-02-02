@@ -1,5 +1,18 @@
+"use client";
+
 import { useRef } from "react";
-import { QRCodeSVG } from "qrcode.react";
+import dynamic from "next/dynamic";
+
+// Dynamic import - QRCodeSVG is only loaded when modal opens
+const QRCodeSVG = dynamic(
+  () => import("qrcode.react").then((mod) => mod.QRCodeSVG),
+  {
+    loading: () => (
+      <div className="animate-pulse bg-slate-200 rounded w-full aspect-square" />
+    ),
+    ssr: false,
+  }
+);
 
 interface QRCodeModalProps {
   businessSlug: string;

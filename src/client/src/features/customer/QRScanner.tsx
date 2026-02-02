@@ -2,13 +2,13 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Html5Qrcode } from "html5-qrcode";
+import type { Html5Qrcode as Html5QrcodeType } from "html5-qrcode";
 
 export function QRScanner() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [isScanning, setIsScanning] = useState(false);
-  const scannerRef = useRef<Html5Qrcode | null>(null);
+  const scannerRef = useRef<Html5QrcodeType | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -27,6 +27,8 @@ export function QRScanner() {
     setIsScanning(true);
 
     try {
+      // Dynamic import - only loads when camera starts
+      const { Html5Qrcode } = await import("html5-qrcode");
       scannerRef.current = new Html5Qrcode("qr-reader");
 
       await scannerRef.current.start(
