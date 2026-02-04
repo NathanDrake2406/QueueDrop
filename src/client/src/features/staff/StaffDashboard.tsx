@@ -31,8 +31,8 @@ interface QueuesResponse {
 
 function EmptyQueueState({ onShowQRCode }: { onShowQRCode: () => void }) {
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center">
-      <div className="w-16 h-16 bg-slate-800 rounded-2xl flex items-center justify-center mx-auto mb-4">
+    <div className="bg-slate-900 border border-slate-800 rounded-none p-8 text-center">
+      <div className="w-16 h-16 bg-slate-800 rounded-none flex items-center justify-center mx-auto mb-4">
         <svg className="w-8 h-8 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path
             strokeLinecap="round"
@@ -46,7 +46,7 @@ function EmptyQueueState({ onShowQRCode }: { onShowQRCode: () => void }) {
       <p className="text-slate-400 mb-6">Share your QR code to let customers join</p>
       <button
         onClick={onShowQRCode}
-        className="px-6 py-3 bg-teal-600 text-white font-medium rounded-xl hover:bg-teal-500 transition-colors inline-flex items-center gap-2"
+        className="px-6 py-3 bg-gradient-to-r from-teal-500 via-emerald-500 to-teal-400 text-slate-950 font-semibold rounded-none hover:brightness-110 transition-all shadow-[0_14px_30px_rgba(16,185,129,0.28)] inline-flex items-center gap-2"
       >
         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
@@ -107,7 +107,7 @@ function AddQueueModal({ businessSlug, token, onClose, onQueueCreated }: AddQueu
 
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 w-full max-w-md">
+      <div className="bg-slate-900 border border-slate-800 rounded-none p-6 w-full max-w-md">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-bold text-white">Add New Queue</h2>
           <button
@@ -129,12 +129,12 @@ function AddQueueModal({ businessSlug, token, onClose, onQueueCreated }: AddQueu
           value={queueName}
           onChange={(e) => setQueueName(e.target.value)}
           placeholder="e.g., Takeout, Bar, VIP"
-          className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition-all mb-4"
+          className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-none text-white placeholder-slate-500 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition-all mb-4"
           autoFocus
         />
 
         {error && (
-          <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-sm">
+          <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-none text-red-400 text-sm">
             {error}
           </div>
         )}
@@ -142,14 +142,14 @@ function AddQueueModal({ businessSlug, token, onClose, onQueueCreated }: AddQueu
         <div className="flex gap-3">
           <button
             onClick={onClose}
-            className="flex-1 py-3 text-slate-400 font-medium rounded-xl border border-slate-700 hover:border-slate-600 hover:text-white transition-all"
+            className="flex-1 py-3 text-slate-400 font-medium rounded-none border border-slate-700 hover:border-slate-600 hover:text-white transition-all"
           >
             Cancel
           </button>
           <button
             onClick={handleCreate}
             disabled={isCreating || !queueName.trim()}
-            className="flex-1 py-3 bg-teal-600 text-white font-semibold rounded-xl hover:bg-teal-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
+            className="flex-1 py-3 bg-gradient-to-r from-teal-500 via-emerald-500 to-teal-400 text-slate-950 font-semibold rounded-none hover:brightness-110 disabled:opacity-60 disabled:cursor-not-allowed transition-all shadow-[0_14px_30px_rgba(16,185,129,0.28)] flex items-center justify-center gap-2"
           >
             {isCreating ? (
               <>
@@ -237,7 +237,7 @@ function NoQueuesState({ businessSlug, businessName, isOwner, onQueueCreated }: 
       <div className="min-h-screen bg-slate-950 text-white">
         <div className="max-w-md mx-auto px-4 py-12">
           <div className="text-center mb-8">
-            <div className="w-16 h-16 bg-slate-800 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <div className="w-16 h-16 bg-slate-800 rounded-none flex items-center justify-center mx-auto mb-4">
               <svg className="w-8 h-8 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path
                   strokeLinecap="round"
@@ -251,7 +251,7 @@ function NoQueuesState({ businessSlug, businessName, isOwner, onQueueCreated }: 
             <p className="text-slate-400 mt-2">Contact your business owner to create a queue</p>
           </div>
 
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 text-center">
+          <div className="bg-slate-900 border border-slate-800 rounded-none p-6 text-center">
             <p className="text-slate-400">
               No queues have been set up yet. As a staff member, you&apos;ll be able to manage customers once a queue is created.
             </p>
@@ -265,7 +265,7 @@ function NoQueuesState({ businessSlug, businessName, isOwner, onQueueCreated }: 
     <div className="min-h-screen bg-slate-950 text-white">
       <div className="max-w-md mx-auto px-4 py-12">
         <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-slate-800 rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <div className="w-16 h-16 bg-slate-800 rounded-none flex items-center justify-center mx-auto mb-4">
             <svg className="w-8 h-8 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
             </svg>
@@ -274,7 +274,7 @@ function NoQueuesState({ businessSlug, businessName, isOwner, onQueueCreated }: 
           <p className="text-slate-400 mt-2">Create your first queue to get started</p>
         </div>
 
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+        <div className="bg-slate-900 border border-slate-800 rounded-none p-6">
           <label htmlFor="queueName" className="block text-sm font-medium text-slate-400 mb-2">
             Queue name
           </label>
@@ -284,11 +284,11 @@ function NoQueuesState({ businessSlug, businessName, isOwner, onQueueCreated }: 
             value={queueName}
             onChange={(e) => setQueueName(e.target.value)}
             placeholder="e.g., Main Queue, Takeout, Bar"
-            className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition-all mb-4"
+            className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-none text-white placeholder-slate-500 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition-all mb-4"
           />
 
           {error && (
-            <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-sm">
+            <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-none text-red-400 text-sm">
               {error}
             </div>
           )}
@@ -296,7 +296,7 @@ function NoQueuesState({ businessSlug, businessName, isOwner, onQueueCreated }: 
           <button
             onClick={handleCreate}
             disabled={isCreating || !queueName.trim()}
-            className="w-full py-3 bg-teal-600 text-white font-semibold rounded-xl hover:bg-teal-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
+            className="w-full py-3 bg-gradient-to-r from-teal-500 via-emerald-500 to-teal-400 text-slate-950 font-semibold rounded-none hover:brightness-110 disabled:opacity-60 disabled:cursor-not-allowed transition-all shadow-[0_14px_30px_rgba(16,185,129,0.28)] flex items-center justify-center gap-2"
           >
             {isCreating ? (
               <>
@@ -649,7 +649,7 @@ function MultiQueueDashboard({
             {isOwner && (
               <button
                 onClick={() => setShowAddQueue(true)}
-                className="flex items-center gap-2 px-4 py-2 text-sm text-teal-400 hover:text-teal-300 border border-teal-700 rounded-xl hover:border-teal-600 transition-colors"
+                className="flex items-center gap-2 px-4 py-2 text-sm text-teal-400 hover:text-teal-300 border border-teal-700 rounded-none hover:border-teal-600 transition-colors"
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -659,7 +659,7 @@ function MultiQueueDashboard({
             )}
             <button
               onClick={() => setShowQR(!showQR)}
-              className="flex items-center gap-2 px-4 py-2 text-sm text-slate-400 hover:text-white border border-slate-700 rounded-xl hover:border-slate-600 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 text-sm text-slate-400 hover:text-white border border-slate-700 rounded-none hover:border-slate-600 transition-colors"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h2M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
@@ -677,7 +677,7 @@ function MultiQueueDashboard({
 
         {/* Inline QR Code Display */}
         {showQR && (
-          <div className="mb-6 p-6 bg-slate-900 border border-slate-800 rounded-2xl">
+          <div className="mb-6 p-6 bg-slate-900 border border-slate-800 rounded-none">
             <h3 className="text-lg font-semibold mb-4 text-center">Queue Join Link</h3>
             <QRCodeDisplay
               url={`${window.location.origin}/join/${businessSlug}`}
@@ -701,7 +701,7 @@ function MultiQueueDashboard({
 
         {/* Error banner */}
         {error && (
-          <div className="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-2xl">{error}</div>
+          <div className="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-none">{error}</div>
         )}
 
         {/* Called customers section */}
@@ -730,7 +730,7 @@ function MultiQueueDashboard({
           {waitingCustomers.length === 0 && calledCustomers.length === 0 ? (
             <EmptyQueueState onShowQRCode={() => setShowQRCode(true)} />
           ) : waitingCustomers.length === 0 ? (
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center text-slate-500">
+            <div className="bg-slate-900 border border-slate-800 rounded-none p-8 text-center text-slate-500">
               No customers waiting.
             </div>
           ) : (
