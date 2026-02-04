@@ -25,7 +25,7 @@ export function QueueSelector({ businessName, queues, onSelect }: QueueSelectorP
           <button
             key={queue.slug}
             onClick={() => onSelect(queue.slug)}
-            className="w-full p-5 bg-slate-900 border border-slate-800 rounded-2xl hover:bg-slate-800 hover:border-slate-700 transition-all text-left group"
+            className="w-full p-5 bg-slate-900 border border-slate-800 rounded-none hover:bg-slate-800 hover:border-slate-700 transition-all text-left group"
           >
             <div className="flex items-center justify-between">
               <div className="flex-1">
