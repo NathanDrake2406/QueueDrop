@@ -239,7 +239,7 @@ export function JoinQueue({ businessSlug, queueSlug: urlQueueSlug, serverData }:
           <p className="text-slate-500 mb-6">{loadError}</p>
           <button
             onClick={() => router.push("/")}
-            className="px-6 py-3 bg-slate-800 text-white rounded-xl hover:bg-slate-700 transition-colors"
+            className="px-6 py-3 bg-slate-800 text-white rounded-none hover:bg-slate-700 transition-colors"
           >
             Go Home
           </button>
@@ -264,8 +264,8 @@ export function JoinQueue({ businessSlug, queueSlug: urlQueueSlug, serverData }:
             {queues.length > 1 ? "Back to queues" : "Back"}
           </button>
 
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-8 text-center">
-            <div className="w-16 h-16 bg-teal-500/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
+          <div className="bg-slate-900 border border-slate-800 rounded-none p-8 text-center">
+            <div className="w-16 h-16 bg-teal-500/20 rounded-none flex items-center justify-center mx-auto mb-6">
               <svg className="w-8 h-8 text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
@@ -276,13 +276,13 @@ export function JoinQueue({ businessSlug, queueSlug: urlQueueSlug, serverData }:
             <div className="space-y-3">
               <button
                 onClick={() => router.push(`/q/${existingToken}`)}
-                className="w-full py-4 bg-white text-slate-900 font-semibold rounded-2xl hover:bg-slate-100 transition-colors"
+                className="w-full py-4 bg-white text-slate-900 font-semibold rounded-none hover:bg-slate-100 transition-colors"
               >
                 Check My Position
               </button>
               <button
                 onClick={handleJoinAgain}
-                className="w-full py-4 bg-slate-800 text-white font-semibold rounded-2xl hover:bg-slate-700 transition-colors"
+                className="w-full py-4 bg-slate-800 text-white font-semibold rounded-none hover:bg-slate-700 transition-colors"
               >
                 Join Again
               </button>
@@ -358,7 +358,7 @@ export function JoinQueue({ businessSlug, queueSlug: urlQueueSlug, serverData }:
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Enter your name"
-              className="w-full px-5 py-4 bg-slate-900 border border-slate-800 rounded-2xl text-white placeholder-slate-600 focus:outline-none focus:border-slate-600 focus:ring-1 focus:ring-slate-600 transition-all"
+              className="w-full px-5 py-4 bg-slate-900 border border-slate-800 rounded-none text-white placeholder-slate-600 focus:outline-none focus:border-slate-600 focus:ring-1 focus:ring-slate-600 transition-all"
               maxLength={100}
               required
               autoFocus
@@ -367,7 +367,7 @@ export function JoinQueue({ businessSlug, queueSlug: urlQueueSlug, serverData }:
           </div>
 
           {submitError && (
-            <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-2xl mb-6">
+            <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-none mb-6">
               <p className="text-red-400 text-sm">{submitError}</p>
             </div>
           )}
@@ -375,7 +375,7 @@ export function JoinQueue({ businessSlug, queueSlug: urlQueueSlug, serverData }:
           <button
             type="submit"
             disabled={isSubmitting || !name.trim()}
-            className="w-full py-4 bg-white text-slate-900 font-semibold rounded-2xl hover:bg-slate-100 disabled:bg-slate-800 disabled:text-slate-600 disabled:cursor-not-allowed transition-colors"
+            className="w-full py-4 bg-gradient-to-r from-teal-500 via-emerald-500 to-teal-400 text-slate-950 font-semibold rounded-none hover:brightness-110 disabled:opacity-60 disabled:cursor-not-allowed transition-all shadow-[0_14px_30px_rgba(16,185,129,0.28)]"
           >
             {isSubmitting ? (
               <span className="flex items-center justify-center gap-2">
