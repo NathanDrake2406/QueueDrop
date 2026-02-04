@@ -7,7 +7,7 @@ interface QueueTab {
 
 interface QueueTabsProps {
   queues: QueueTab[];
-  activeQueueId: string | null; // null means "All"
+  activeQueueId: string | null;
   onSelectQueue: (queueId: string | null) => void;
 }
 
@@ -19,17 +19,19 @@ export function QueueTabs({ queues, activeQueueId, onSelectQueue }: QueueTabsPro
       {/* All queues tab */}
       <button
         onClick={() => onSelectQueue(null)}
-        className={`px-4 py-2 rounded-xl font-medium text-sm transition-colors flex items-center gap-2 ${
+        className={`px-4 py-2 rounded-none font-medium text-sm transition-all border ${
           activeQueueId === null
-            ? "bg-teal-600 text-white"
-            : "bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white"
+            ? "bg-emerald-500/20 border-emerald-400/40 text-white shadow-[0_14px_30px_rgba(16,185,129,0.25)]"
+            : "bg-slate-900/60 border-slate-800 text-slate-400 hover:border-emerald-400/30 hover:text-white"
         }`}
       >
         All
         {totalWaiting > 0 && (
           <span
-            className={`min-w-[20px] h-5 px-1.5 rounded-full text-xs font-semibold flex items-center justify-center ${
-              activeQueueId === null ? "bg-teal-500 text-white" : "bg-slate-700 text-slate-300"
+            className={`ml-2 px-2 py-0.5 rounded-full text-xs tabular-nums border ${
+              activeQueueId === null
+                ? "bg-emerald-500/25 text-emerald-50 border-transparent"
+                : "bg-slate-800 text-slate-400 border-slate-700"
             }`}
           >
             {totalWaiting}
@@ -42,17 +44,19 @@ export function QueueTabs({ queues, activeQueueId, onSelectQueue }: QueueTabsPro
         <button
           key={queue.queueId}
           onClick={() => onSelectQueue(queue.queueId)}
-          className={`px-4 py-2 rounded-xl font-medium text-sm transition-colors flex items-center gap-2 ${
+          className={`px-4 py-2 rounded-none font-medium text-sm transition-all border ${
             activeQueueId === queue.queueId
-              ? "bg-teal-600 text-white"
-              : "bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white"
+              ? "bg-emerald-500/20 border-emerald-400/40 text-white shadow-[0_14px_30px_rgba(16,185,129,0.25)]"
+              : "bg-slate-900/60 border-slate-800 text-slate-400 hover:border-emerald-400/30 hover:text-white"
           }`}
         >
           {queue.name}
           {queue.waitingCount > 0 && (
             <span
-              className={`min-w-[20px] h-5 px-1.5 rounded-full text-xs font-semibold flex items-center justify-center ${
-                activeQueueId === queue.queueId ? "bg-teal-500 text-white" : "bg-slate-700 text-slate-300"
+              className={`ml-2 px-2 py-0.5 rounded-full text-xs tabular-nums border ${
+                activeQueueId === queue.queueId
+                  ? "bg-emerald-500/25 text-emerald-50 border-transparent"
+                  : "bg-slate-800 text-slate-400 border-slate-700"
               }`}
             >
               {queue.waitingCount}
