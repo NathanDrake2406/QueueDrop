@@ -50,13 +50,13 @@ export function QueueSettings({ queueId, onClose }: QueueSettingsProps) {
   }
 
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto">
+    <div className="bg-slate-900 border border-slate-800 rounded-none p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-bold text-white">Settings</h2>
         {onClose && (
           <button
             onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center text-slate-500 hover:text-white rounded-lg hover:bg-slate-800 transition-colors"
+            className="w-8 h-8 flex items-center justify-center text-slate-500 hover:text-white rounded-none hover:bg-slate-800 transition-colors"
             aria-label="Close"
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -67,11 +67,11 @@ export function QueueSettings({ queueId, onClose }: QueueSettingsProps) {
       </div>
 
       {error && (
-        <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 text-red-400 rounded-xl text-sm">{error}</div>
+        <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 text-red-400 rounded-none text-sm">{error}</div>
       )}
 
       {successMessage && (
-        <div className="mb-4 p-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-xl text-sm">
+        <div className="mb-4 p-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-none text-sm">
           {successMessage}
         </div>
       )}
@@ -86,7 +86,7 @@ export function QueueSettings({ queueId, onClose }: QueueSettingsProps) {
             value={formData.maxQueueSize ?? ""}
             onChange={(e) => handleChange("maxQueueSize", e.target.value ? parseInt(e.target.value, 10) : null)}
             placeholder="Unlimited"
-            className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:border-slate-500"
+            className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-none text-white placeholder-slate-600 focus:outline-none focus:border-slate-500"
           />
           <p className="mt-1 text-xs text-slate-600">Leave empty for no limit</p>
         </div>
@@ -100,7 +100,7 @@ export function QueueSettings({ queueId, onClose }: QueueSettingsProps) {
             required
             value={formData.noShowTimeoutMinutes}
             onChange={(e) => handleChange("noShowTimeoutMinutes", parseInt(e.target.value, 10) || 1)}
-            className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:border-slate-500"
+            className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-none text-white placeholder-slate-600 focus:outline-none focus:border-slate-500"
           />
           <p className="mt-1 text-xs text-slate-600">Auto-mark called customers as no-show after this time</p>
         </div>
@@ -118,13 +118,13 @@ export function QueueSettings({ queueId, onClose }: QueueSettingsProps) {
             min={1}
             max={10}
             placeholder="Disabled"
-            className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-teal-500"
+            className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-none text-white placeholder-slate-500 focus:outline-none focus:border-teal-500"
           />
           <p className="text-xs text-slate-500 mt-1">Notify customers when they reach this position (1-10)</p>
         </div>
 
         {/* Allow Join When Paused */}
-        <div className="flex items-center justify-between p-4 bg-slate-800 rounded-xl">
+        <div className="flex items-center justify-between p-4 bg-slate-800 rounded-none">
           <div>
             <p className="text-sm font-medium text-white">Allow joining when paused</p>
             <p className="text-xs text-slate-500 mt-0.5">Customers can join even when queue is paused</p>
@@ -152,7 +152,7 @@ export function QueueSettings({ queueId, onClose }: QueueSettingsProps) {
             onChange={(e) => handleChange("welcomeMessage", e.target.value || null)}
             placeholder="Shown when customers join..."
             rows={2}
-            className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:border-slate-500 resize-none"
+            className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-none text-white placeholder-slate-600 focus:outline-none focus:border-slate-500 resize-none"
           />
         </div>
 
@@ -164,7 +164,7 @@ export function QueueSettings({ queueId, onClose }: QueueSettingsProps) {
             onChange={(e) => handleChange("calledMessage", e.target.value || null)}
             placeholder="Shown when it's their turn..."
             rows={2}
-            className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:border-slate-500 resize-none"
+            className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-none text-white placeholder-slate-600 focus:outline-none focus:border-slate-500 resize-none"
           />
         </div>
 
@@ -174,7 +174,7 @@ export function QueueSettings({ queueId, onClose }: QueueSettingsProps) {
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-3 bg-slate-800 text-slate-300 rounded-xl font-medium hover:bg-slate-700 transition-colors"
+              className="flex-1 py-3 bg-slate-800 text-slate-300 rounded-none font-medium hover:bg-slate-700 transition-colors"
             >
               Cancel
             </button>
@@ -182,7 +182,7 @@ export function QueueSettings({ queueId, onClose }: QueueSettingsProps) {
           <button
             type="submit"
             disabled={isSaving}
-            className="flex-1 py-3 bg-white text-slate-900 rounded-xl font-semibold hover:bg-slate-100 disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
+            className="flex-1 py-3 bg-white text-slate-900 rounded-none font-semibold hover:bg-slate-100 disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
           >
             {isSaving && <div className="w-4 h-4 border-2 border-slate-400 border-t-slate-900 rounded-full animate-spin" />}
             {isSaving ? "Saving..." : "Save"}

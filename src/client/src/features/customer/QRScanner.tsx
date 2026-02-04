@@ -108,7 +108,7 @@ export function QRScanner() {
         </div>
 
         {/* Scanner area */}
-        <div className="relative aspect-square bg-slate-900 rounded-3xl overflow-hidden mb-6">
+        <div className="relative aspect-square bg-slate-900 rounded-none overflow-hidden mb-6">
           <div id="qr-reader" ref={containerRef} className="w-full h-full" />
           
           {!isScanning && (
@@ -123,7 +123,7 @@ export function QRScanner() {
               </p>
               <button
                 onClick={startScanning}
-                className="px-8 py-4 bg-white text-slate-900 font-semibold rounded-2xl hover:bg-slate-100 transition-colors"
+                className="px-8 py-4 bg-gradient-to-r from-teal-500 via-emerald-500 to-teal-400 text-slate-950 font-semibold rounded-none hover:brightness-110 transition-all shadow-[0_14px_30px_rgba(16,185,129,0.28)]"
               >
                 Start Camera
               </button>
@@ -133,7 +133,7 @@ export function QRScanner() {
 
         {/* Error message */}
         {error && (
-          <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-2xl mb-6">
+          <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-none mb-6">
             <p className="text-red-400 text-sm text-center">{error}</p>
           </div>
         )}
@@ -142,7 +142,7 @@ export function QRScanner() {
         {isScanning && (
           <button
             onClick={stopScanning}
-            className="w-full py-4 bg-slate-800 text-white font-semibold rounded-2xl hover:bg-slate-700 transition-colors"
+            className="w-full py-4 bg-slate-800 text-white font-semibold rounded-none hover:bg-slate-700 transition-colors"
           >
             Stop Scanning
           </button>

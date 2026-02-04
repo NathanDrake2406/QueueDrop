@@ -57,7 +57,7 @@ export function LoginPage() {
 
         {/* Logo */}
         <div className="text-center mb-12">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-teal-600 rounded-lg mb-4 shadow-lg shadow-teal-600/20">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-teal-500 to-emerald-600 rounded-none mb-4 shadow-[0_14px_30px_rgba(16,185,129,0.28)]">
             <svg className="w-8 h-8 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
               <circle cx="9" cy="7" r="4" />
@@ -87,7 +87,7 @@ export function LoginPage() {
                 required
                 autoFocus
                 autoComplete="email"
-                className={`w-full px-4 py-3.5 border rounded-lg transition-all focus:outline-none focus:ring-2 focus:ring-teal-500/20 ${
+                className={`w-full px-4 py-3.5 border rounded-none transition-all focus:outline-none focus:ring-2 focus:ring-teal-500/20 ${
                   isDark
                     ? "bg-slate-900 border-slate-700 text-white placeholder-slate-500 focus:border-teal-500"
                     : "bg-white border-slate-300 text-slate-900 placeholder-slate-400 focus:border-teal-500"
@@ -97,7 +97,7 @@ export function LoginPage() {
 
             {/* Error message */}
             {error && (
-              <div className={`mb-4 p-4 border rounded-lg text-sm ${isDark ? "bg-red-500/10 border-red-500/20 text-red-400" : "bg-red-50 border-red-200 text-red-600"}`}>
+              <div className={`mb-4 p-4 border rounded-none text-sm ${isDark ? "bg-red-500/10 border-red-500/20 text-red-400" : "bg-red-50 border-red-200 text-red-600"}`}>
                 {error}
               </div>
             )}
@@ -106,7 +106,7 @@ export function LoginPage() {
             <button
               type="submit"
               disabled={isLoading || !email.trim()}
-              className="w-full py-3.5 bg-teal-600 text-white font-semibold rounded-lg hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-teal-600/20"
+              className="w-full py-3.5 bg-gradient-to-r from-teal-500 via-emerald-500 to-teal-400 text-slate-950 font-semibold rounded-none hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-[0_14px_30px_rgba(16,185,129,0.28)]"
             >
               {isLoading ? (
                 <span className="flex items-center justify-center gap-2">
@@ -124,7 +124,7 @@ export function LoginPage() {
         ) : (
           <div className="text-center">
             {/* Success icon */}
-            <div className={`inline-flex items-center justify-center w-16 h-16 rounded-lg mb-6 ${isDark ? "bg-teal-500/10 border border-teal-500/20" : "bg-teal-50 border border-teal-200"}`}>
+            <div className={`inline-flex items-center justify-center w-16 h-16 rounded-none mb-6 ${isDark ? "bg-teal-500/10 border border-teal-500/20" : "bg-teal-50 border border-teal-200"}`}>
               <svg className="w-8 h-8 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
               </svg>

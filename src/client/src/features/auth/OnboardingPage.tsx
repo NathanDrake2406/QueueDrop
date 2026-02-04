@@ -125,7 +125,7 @@ export function OnboardingPage() {
       <div className="max-w-md mx-auto px-4 py-12">
         {/* Logo */}
         <div className="text-center mb-12">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-teal-500 to-teal-500 rounded-2xl mb-4">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-teal-500 to-emerald-600 rounded-none mb-4 shadow-[0_14px_30px_rgba(16,185,129,0.28)]">
             <svg className="w-8 h-8 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
               <circle cx="9" cy="7" r="4" />
@@ -151,7 +151,7 @@ export function OnboardingPage() {
               placeholder="My Awesome Shop"
               required
               autoFocus
-              className="w-full px-5 py-4 bg-slate-900 border border-slate-800 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition-all"
+              className="w-full px-5 py-4 bg-slate-900 border border-slate-800 rounded-none text-white placeholder-slate-600 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition-all"
             />
           </div>
 
@@ -161,7 +161,7 @@ export function OnboardingPage() {
               URL slug
             </label>
             <div className="flex items-center">
-              <span className="px-4 py-4 bg-slate-800 border border-slate-700 border-r-0 rounded-l-xl text-slate-500 text-sm">
+              <span className="px-4 py-4 bg-slate-800 border border-slate-700 border-r-0 rounded-none text-slate-500 text-sm">
                 queuedrop.com/
               </span>
               <input
@@ -171,7 +171,7 @@ export function OnboardingPage() {
                 onChange={(e) => handleSlugChange(e.target.value)}
                 placeholder="my-awesome-shop"
                 required
-                className="flex-1 px-4 py-4 bg-slate-900 border border-slate-800 rounded-r-xl text-white placeholder-slate-600 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition-all"
+                className="flex-1 px-4 py-4 bg-slate-900 border border-slate-800 rounded-none text-white placeholder-slate-600 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition-all"
               />
             </div>
             <p className="mt-2 text-xs text-slate-600">
@@ -181,7 +181,7 @@ export function OnboardingPage() {
 
           {/* Error message */}
           {error && (
-            <div className="mb-4 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-sm">
+            <div className="mb-4 p-4 bg-red-500/10 border border-red-500/20 rounded-none text-red-400 text-sm">
               {error}
             </div>
           )}
@@ -190,7 +190,7 @@ export function OnboardingPage() {
           <button
             type="submit"
             disabled={isSubmitting || !name.trim() || !slug.trim()}
-            className="w-full py-4 bg-gradient-to-r from-teal-500 to-teal-500 text-white font-semibold rounded-xl hover:from-teal-600 hover:to-teal-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            className="w-full py-4 bg-gradient-to-r from-teal-500 via-emerald-500 to-teal-400 text-slate-950 font-semibold rounded-none hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-[0_14px_30px_rgba(16,185,129,0.28)]"
           >
             {isSubmitting ? (
               <span className="flex items-center justify-center gap-2">

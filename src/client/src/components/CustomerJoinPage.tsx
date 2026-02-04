@@ -44,7 +44,7 @@ export function CustomerJoinPage() {
 
         {/* Logo */}
         <div className="text-center mb-12">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-teal-600 rounded-lg mb-4 shadow-lg shadow-teal-600/20">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-teal-500 to-emerald-600 rounded-none mb-4 shadow-[0_14px_30px_rgba(16,185,129,0.28)]">
             <svg
               className="w-8 h-8 text-white"
               viewBox="0 0 24 24"
@@ -69,11 +69,11 @@ export function CustomerJoinPage() {
         {/* QR Scan Button */}
         <button
           onClick={() => router.push("/scan")}
-          className={`w-full p-6 border rounded-xl mb-4 transition-all group ${isDark ? "bg-slate-900 border-slate-800 hover:bg-slate-800 hover:border-slate-700" : "bg-white border-slate-200 hover:bg-slate-50 hover:border-slate-300 hover:shadow-lg hover:shadow-slate-200/50"}`}
+          className={`w-full p-6 border rounded-none mb-4 transition-all group ${isDark ? "bg-slate-900 border-slate-800 hover:bg-slate-800 hover:border-slate-700" : "bg-white border-slate-200 hover:bg-slate-50 hover:border-slate-300 hover:shadow-lg hover:shadow-slate-200/50"}`}
         >
           <div className="flex items-center gap-4">
             <div
-              className={`w-14 h-14 rounded-lg flex items-center justify-center group-hover:bg-teal-600 transition-colors ${isDark ? "bg-teal-900/50 text-teal-400 group-hover:text-white" : "bg-teal-100 text-teal-600 group-hover:text-white"}`}
+              className={`w-14 h-14 rounded-none flex items-center justify-center group-hover:bg-teal-600 transition-colors ${isDark ? "bg-teal-900/50 text-teal-400 group-hover:text-white" : "bg-teal-100 text-teal-600 group-hover:text-white"}`}
             >
               <svg className="w-7 h-7" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M3 11h8V3H3v8zm2-6h4v4H5V5zm8-2v8h8V3h-8zm6 6h-4V5h4v4zM3 21h8v-8H3v8zm2-6h4v4H5v-4zm13 2h-2v2h2v2h-2v-2h-2v2h-2v-2h2v-2h-2v-2h2v2h2v-2h2v2zm0 2v2h2v-2h-2zm2-2h2v-2h-2v2z" />
@@ -126,13 +126,13 @@ export function CustomerJoinPage() {
               value={code}
               onChange={(e) => setCode(e.target.value)}
               placeholder="Enter queue code (e.g., demo-shop)"
-              className={`w-full px-4 py-3.5 border rounded-lg transition-all focus:outline-none focus:ring-2 focus:ring-teal-500/20 ${isDark ? "bg-slate-900 border-slate-700 text-white placeholder-slate-500 focus:border-teal-500" : "bg-white border-slate-300 text-slate-900 placeholder-slate-400 focus:border-teal-500"}`}
+              className={`w-full px-4 py-3.5 border rounded-none transition-all focus:outline-none focus:ring-2 focus:ring-teal-500/20 ${isDark ? "bg-slate-900 border-slate-700 text-white placeholder-slate-500 focus:border-teal-500" : "bg-white border-slate-300 text-slate-900 placeholder-slate-400 focus:border-teal-500"}`}
             />
           </div>
           <button
             type="submit"
             disabled={!code.trim()}
-            className={`w-full py-3.5 bg-teal-600 text-white font-semibold rounded-lg hover:bg-teal-700 disabled:cursor-not-allowed transition-colors shadow-lg shadow-teal-600/20 disabled:shadow-none ${isDark ? "disabled:bg-slate-800 disabled:text-slate-500" : "disabled:bg-slate-200 disabled:text-slate-400"}`}
+            className={`w-full py-3.5 bg-gradient-to-r from-teal-500 via-emerald-500 to-teal-400 text-slate-950 font-semibold rounded-none hover:brightness-110 disabled:cursor-not-allowed transition-all shadow-[0_14px_30px_rgba(16,185,129,0.28)] disabled:shadow-none ${isDark ? "disabled:bg-slate-800 disabled:text-slate-500" : "disabled:bg-slate-200 disabled:text-slate-400"}`}
           >
             Join Queue
           </button>

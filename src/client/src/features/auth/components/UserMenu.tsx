@@ -41,7 +41,7 @@ export function UserMenu() {
       {/* Trigger button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-slate-800/50 transition-colors"
+        className="flex items-center gap-3 px-3 py-2 rounded-none hover:bg-slate-800/50 transition-colors"
         aria-expanded={isOpen}
         aria-haspopup="true"
       >
@@ -66,7 +66,7 @@ export function UserMenu() {
 
       {/* Dropdown menu */}
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-64 bg-slate-900 border border-slate-800 rounded-xl shadow-xl py-2 z-50">
+        <div className="absolute right-0 mt-2 w-64 bg-slate-900 border border-slate-800 rounded-none shadow-xl py-2 z-50">
           {/* Signed in as header */}
           <div className="px-4 py-3 border-b border-slate-800">
             <p className="text-xs text-slate-500 uppercase tracking-wide mb-1">Signed in as</p>

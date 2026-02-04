@@ -135,7 +135,7 @@ export function VerifyPage() {
     <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center p-4">
       <div className="max-w-md w-full text-center">
         {/* Error icon */}
-        <div className="inline-flex items-center justify-center w-16 h-16 bg-red-500/10 border border-red-500/20 rounded-full mb-6">
+        <div className="inline-flex items-center justify-center w-16 h-16 bg-red-500/10 border border-red-500/20 rounded-none mb-6">
           <svg
             className="w-8 h-8 text-red-400"
             fill="none"
@@ -156,7 +156,7 @@ export function VerifyPage() {
 
         <Link
           href="/login"
-          className="inline-block px-8 py-4 bg-gradient-to-r from-teal-500 to-teal-500 text-white font-semibold rounded-xl hover:from-teal-600 hover:to-teal-600 transition-all"
+          className="inline-block px-8 py-4 bg-gradient-to-r from-teal-500 via-emerald-500 to-teal-400 text-slate-950 font-semibold rounded-none hover:brightness-110 transition-all shadow-[0_14px_30px_rgba(16,185,129,0.28)]"
         >
           Try again
         </Link>

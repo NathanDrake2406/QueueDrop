@@ -21,7 +21,7 @@ export function NotFoundPage() {
         </p>
         <Link
           href="/"
-          className="inline-block px-6 py-3 bg-teal-600 text-white font-semibold rounded-lg hover:bg-teal-700 transition-colors shadow-lg shadow-teal-600/20"
+          className="inline-block px-6 py-3 bg-gradient-to-r from-teal-500 via-emerald-500 to-teal-400 text-slate-950 font-semibold rounded-none hover:brightness-110 transition-all shadow-[0_14px_30px_rgba(16,185,129,0.28)]"
         >
           Go Home
         </Link>
