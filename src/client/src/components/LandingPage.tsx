@@ -69,7 +69,7 @@ export function LandingPage() {
           <div className="flex items-center gap-4">
             <button
               onClick={() => setIsDark(!isDark)}
-              className={`p-2 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 ${isDark ? "hover:bg-slate-800 text-slate-400 focus-visible:ring-offset-slate-950" : "hover:bg-slate-100 text-slate-500 focus-visible:ring-offset-white"}`}
+              className={`p-2 rounded-none transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 ${isDark ? "hover:bg-slate-800 text-slate-400 focus-visible:ring-offset-slate-950" : "hover:bg-slate-100 text-slate-500 focus-visible:ring-offset-white"}`}
               aria-label="Toggle dark mode"
             >
               {isDark ? (
@@ -85,14 +85,14 @@ export function LandingPage() {
             {isAuthenticated ? (
               <Link
                 href={businesses.length > 0 ? `/staff/${businesses[0].slug}` : "/onboarding"}
-                className="px-4 py-2 bg-teal-600 text-white text-sm font-medium rounded-lg hover:bg-teal-700 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2"
+                className="px-4 py-2 bg-gradient-to-r from-teal-500 via-emerald-500 to-teal-400 text-slate-950 text-sm font-medium rounded-none hover:brightness-110 transition-all shadow-[0_8px_20px_rgba(16,185,129,0.25)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2"
               >
                 Dashboard
               </Link>
             ) : (
               <Link
                 href="/login"
-                className="px-4 py-2 bg-teal-600 text-white text-sm font-medium rounded-lg hover:bg-teal-700 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2"
+                className="px-4 py-2 bg-gradient-to-r from-teal-500 via-emerald-500 to-teal-400 text-slate-950 text-sm font-medium rounded-none hover:brightness-110 transition-all shadow-[0_8px_20px_rgba(16,185,129,0.25)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2"
               >
                 Get Started
               </Link>
@@ -126,13 +126,13 @@ export function LandingPage() {
           <div className={`${styles.animateFadeUp} ${styles.delay4} flex flex-col sm:flex-row items-center justify-center gap-3`}>
             <Link
               href="/demo"
-              className="w-full sm:w-auto px-6 py-3 bg-teal-600 text-white font-medium rounded-lg text-center hover:bg-teal-500 transition-[background-color,transform] hover:scale-[1.02] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2"
+              className="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-teal-500 via-emerald-500 to-teal-400 text-slate-950 font-medium rounded-none text-center hover:brightness-110 transition-all hover:scale-[1.02] active:scale-[0.98] shadow-[0_14px_30px_rgba(16,185,129,0.28)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2"
             >
               Try the Demo
             </Link>
             <Link
               href="/staff/demo-shop"
-              className={`w-full sm:w-auto px-6 py-3 font-medium rounded-lg text-center transition-[background-color,transform] hover:scale-[1.02] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 ${isDark ? "bg-slate-800 text-white hover:bg-slate-700" : "bg-slate-100 text-slate-700 hover:bg-slate-200"}`}
+              className={`w-full sm:w-auto px-6 py-3 font-medium rounded-none text-center transition-all hover:scale-[1.02] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 ${isDark ? "bg-slate-800 text-white hover:bg-slate-700 border border-slate-700" : "bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200"}`}
             >
               Staff Dashboard
             </Link>
@@ -168,7 +168,7 @@ export function LandingPage() {
             {FEATURES.map((feature) => (
               <div
                 key={feature.title}
-                className={`p-5 rounded-xl transition-[background-color,transform] hover:-translate-y-1 ${isDark ? "bg-slate-900/50 hover:bg-slate-900" : "bg-slate-50 hover:bg-slate-100"}`}
+                className={`p-5 rounded-none transition-all hover:-translate-y-1 border ${isDark ? "bg-slate-900/50 hover:bg-slate-900 border-slate-800 hover:border-slate-700" : "bg-slate-50 hover:bg-slate-100 border-slate-200"}`}
               >
                 <span className="text-2xl mb-3 block">{feature.icon}</span>
                 <h3 className="font-medium mb-2">{feature.title}</h3>
@@ -210,7 +210,7 @@ export function LandingPage() {
       {/* CTA */}
       <section className="py-20 px-6">
         <div className="max-w-2xl mx-auto text-center">
-          <div className="p-10 sm:p-12 bg-gradient-to-br from-teal-600 to-teal-700 rounded-2xl relative overflow-hidden">
+          <div className="p-10 sm:p-12 bg-gradient-to-br from-teal-600 to-teal-700 rounded-none relative overflow-hidden shadow-[0_14px_40px_rgba(0,0,0,0.35)]">
             {/* Subtle pattern overlay - will-change hints GPU compositing for blur */}
             <div className="absolute inset-0 opacity-10">
               <div className="absolute top-0 right-0 w-32 h-32 bg-white rounded-full blur-3xl will-change-transform" />
@@ -227,13 +227,13 @@ export function LandingPage() {
               <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
                 <Link
                   href="/join/demo-shop"
-                  className="w-full sm:w-auto px-6 py-3 bg-white text-teal-700 font-medium rounded-lg text-center hover:bg-teal-50 transition-[background-color,transform] hover:scale-[1.02] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-teal-600"
+                  className="w-full sm:w-auto px-6 py-3 bg-white text-teal-700 font-medium rounded-none text-center hover:bg-teal-50 transition-all hover:scale-[1.02] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-teal-600"
                 >
                   Join as Customer
                 </Link>
                 <Link
                   href="/staff/demo-shop"
-                  className="w-full sm:w-auto px-6 py-3 bg-teal-500/80 text-white font-medium rounded-lg text-center hover:bg-teal-500 transition-[background-color,transform] hover:scale-[1.02] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-teal-600"
+                  className="w-full sm:w-auto px-6 py-3 bg-teal-500/80 text-white font-medium rounded-none text-center hover:bg-teal-500 transition-all hover:scale-[1.02] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-teal-600"
                 >
                   Staff Dashboard
                 </Link>
