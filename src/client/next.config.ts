@@ -8,6 +8,11 @@ const withBundleAnalyzer = bundleAnalyzer({
 const backendUrl = process.env.BACKEND_URL || "http://localhost:5001";
 
 const nextConfig: NextConfig = {
+  // Fix turbopack root to prevent lockfile detection issues
+  turbopack: {
+    root: __dirname,
+  },
+
   // Allow cross-origin requests from local network during development
   allowedDevOrigins: ["192.168.0.0/16", "10.0.0.0/8", "172.16.0.0/12"],
 

@@ -39,7 +39,7 @@ export default defineConfig({
         // Use env var if set (CI), otherwise default to local Docker postgres
         ConnectionStrings__DefaultConnection:
           process.env.ConnectionStrings__DefaultConnection ||
-          "Host=localhost;Port=5432;Database=queuedrop_dev;Username=postgres;Password=postgres",
+          "Host=localhost;Port=5433;Database=queuedrop;Username=queuedrop;Password=dev_password",
       },
     },
     {

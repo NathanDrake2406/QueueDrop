@@ -183,8 +183,8 @@ test.describe("Position Display", () => {
     await expect(page.getByText("Your position")).toBeVisible();
 
     // Should show position number (the large gradient text)
-    // Position displays in a div with text-[140px] class containing a number
-    await expect(page.locator("div.text-\\[140px\\]")).toBeVisible();
+    // Position displays in a div with text-8xl class containing a number
+    await expect(page.locator("div.text-8xl")).toBeVisible();
   });
 
   test("should show connection status indicator", async ({ page }) => {
@@ -194,8 +194,8 @@ test.describe("Position Display", () => {
 
     await expect(page).toHaveURL(/\/q\/.+/);
 
-    // Should show connection indicator (Live when connected, lowercase states otherwise)
-    await expect(page.getByText(/Live|connecting|reconnecting|disconnected/i)).toBeVisible();
+    // Should show connection indicator (Live updates active when connected)
+    await expect(page.getByText("Live updates active")).toBeVisible();
   });
 
   test("should show queue info on position page", async ({ page }) => {
@@ -232,9 +232,9 @@ test.describe("Multiple Customers", () => {
       await page2.getByRole("button", { name: "Join Queue" }).click();
       await expect(page2).toHaveURL(/\/q\/.+/);
 
-      // Get positions using the actual CSS class (text-[140px] Tailwind JIT)
-      const position1Text = await page1.locator("div.text-\\[140px\\]").textContent();
-      const position2Text = await page2.locator("div.text-\\[140px\\]").textContent();
+      // Get positions using the actual CSS class (text-8xl)
+      const position1Text = await page1.locator("div.text-8xl").textContent();
+      const position2Text = await page2.locator("div.text-8xl").textContent();
 
       const position1 = parseInt(position1Text || "0");
       const position2 = parseInt(position2Text || "0");
